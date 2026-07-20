@@ -1,12 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+
+export const metadata = {
+  title: "CoolGuide | CoolGuide World",
+  description: "CoolGuide World - la marque mère et les pages publiques CoolGuide.",
+};
 
 export default function Home() {
-  const [isHeaderSolid, setIsHeaderSolid] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const heroSlides = [
     {
       image: "/hero/hero-01-extraordinary.jpg",
@@ -114,115 +115,9 @@ export default function Home() {
     },
   ];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsHeaderSolid(window.scrollY > 24);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const navLinks = [
-    { href: "#discover", label: "Découvrir" },
-    { href: "#experience", label: "Expérience" },
-    { href: "#destinations", label: "Destinations" },
-    { href: "#about", label: "À propos" },
-  ];
-
-  const handleNavClick = () => {
-    setIsMenuOpen(false);
-  };
-
   return (
     <>
-      <header className={`siteHeader${isHeaderSolid || isMenuOpen ? " isSolid" : ""}`}>
-        <div className="siteHeaderInner">
-          <a href="#top" className="siteLogo" onClick={handleNavClick}>
-            <Image
-              src="/logo/coolguide-logo.png"
-              alt="CoolGuide"
-              width={170}
-              height={42}
-              priority
-              className="siteLogoImage"
-            />
-          </a>
-
-          <nav className="siteNav" aria-label="Navigation principale">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="siteNavLink">
-                {link.label}
-              </a>
-            ))}
-
-            <a href="#download" className="siteNavButton">
-              Télécharger
-            </a>
-          </nav>
-
-          <button
-            type="button"
-            className="siteMenuButton"
-            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setIsMenuOpen((open) => !open)}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
-
-        <div
-          id="mobile-navigation"
-          className={`mobileMenu${isMenuOpen ? " isOpen" : ""}`}
-        >
-          <nav className="mobileMenuNav" aria-label="Navigation mobile">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="mobileMenuLink"
-                onClick={handleNavClick}
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <a
-            href="#download"
-            className="mobileMenuButton"
-            onClick={handleNavClick}
-          >
-            Télécharger
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="hero" id="top">
         {heroSlides.map((slide, index) => (
@@ -412,50 +307,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="siteFooter" id="about">
-        <div className="siteFooterInner">
-          <div className="siteFooterBrand">
-            <a href="#top" className="siteFooterLogo" aria-label="Retour en haut de page">
-              <Image
-                src="/logo/coolguide-logo.png"
-                alt="CoolGuide"
-                width={170}
-                height={42}
-                className="siteFooterLogoImage"
-              />
-            </a>
-
-            <p className="siteFooterStatement">
-              Le monde est déjà extraordinaire.
-              <br />
-              Il suffit d'apprendre à le regarder.
-            </p>
-          </div>
-
-          <nav className="siteFooterNav" aria-label="Footer">
-            <a href="#about">À propos</a>
-            <a href="#">Contact</a>
-            <a href="#">Confidentialité</a>
-            <a href="#">Conditions Générales d'Utilisation</a>
-            <a href="#">Conditions Générales de Vente</a>
-            <a href="#">Partenaires</a>
-          </nav>
-
-          <div className="siteFooterSocials" aria-label="Réseaux sociaux">
-            <a href="#" aria-label="Instagram">
-              <span aria-hidden="true">IG</span>
-            </a>
-            <a href="#" aria-label="Facebook">
-              <span aria-hidden="true">FB</span>
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              <span aria-hidden="true">IN</span>
-            </a>
-          </div>
-
-          <p className="siteFooterCopyright">© 2026 CoolGuide. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
