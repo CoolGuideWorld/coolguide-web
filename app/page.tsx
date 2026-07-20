@@ -80,12 +80,12 @@ export default function Home() {
       text: "CoolGuide détecte les lieux autour de vous.",
     },
     {
-      image: "/how-it-works/step-02-detect.jpg",
+      image: "/how-it-works/step-03-detect.jpg",
       title: "Vous approchez.",
       text: "Lorsqu'un lieu mérite votre attention, son récit apparaît naturellement.",
     },
     {
-      image: "/how-it-works/step-03-listen.jpg",
+      image: "/how-it-works/step-02-listen.jpg",
       title: "Vous écoutez.",
       text: "Découvrez le patrimoine dans votre langue, à votre rythme.",
     },
