@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import GuardiansNarrativeTrail from "@/components/GuardiansNarrativeTrail";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -14,24 +15,27 @@ export default function GardiensDuPatrimoinePage() {
       <SiteHeader initialSolid />
 
       <main
+        className="guardiansPage"
         style={{
           background: "#f4ede2",
           color: "#1f1a17",
-          padding: "clamp(4.8rem, 9vw, 7.8rem) clamp(1.1rem, 4vw, 2.25rem) clamp(3.8rem, 7vw, 6rem)",
+          padding: "calc(clamp(7.2rem, 10vw, 9.4rem) + 34px) clamp(1.1rem, 4vw, 2.25rem) clamp(2.8rem, 5.6vw, 4.2rem)",
         }}
       >
         <section
+          className="guardiansSection"
           style={{
             width: "100%",
-            maxWidth: "920px",
+            maxWidth: "1120px",
             margin: "0 auto",
           }}
         >
           <h1
+            className="guardiansTitle"
             style={{
               margin: 0,
               textAlign: "center",
-              fontSize: "clamp(2.2rem, 5vw, 4.9rem)",
+              fontSize: "clamp(1.95rem, 4.4vw, 4.2rem)",
               fontWeight: 300,
               lineHeight: 1.04,
               letterSpacing: "-0.05em",
@@ -41,39 +45,50 @@ export default function GardiensDuPatrimoinePage() {
           </h1>
 
           <div
+            className="guardiansGrid"
             style={{
               marginTop: "clamp(2.1rem, 5vw, 3rem)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              alignItems: "center",
-              gap: "4rem",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              alignItems: "start",
+              gap: "3rem",
             }}
           >
             <div
+              className="guardiansVisualCol"
               aria-hidden="true"
               style={{
                 display: "flex",
                 justifyContent: "center",
-                alignItems: "center",
+                alignItems: "flex-start",
               }}
             >
               <Image
+                className="guardiansEmblem"
                 src="/guardians/guardians-emblem.png"
                 alt="Embleme des Gardiens du Patrimoine"
-                width={430}
-                height={430}
+                width={650}
+                height={650}
                 style={{
                   width: "100%",
-                  maxWidth: "430px",
+                  maxWidth: "clamp(280px, 56vw, 650px)",
                   height: "auto",
                   display: "block",
                   marginInline: "auto",
                 }}
               />
+
+              <blockquote className="guardiansQuote">
+                <p>
+                  « Le véritable trésor n'est pas le lieu que vous découvrez. C'est le regard que vous portez désormais sur le monde. »
+                </p>
+              </blockquote>
             </div>
 
             <div
+              className="guardiansTextCol"
               style={{
+                maxWidth: "34rem",
                 color: "#3f362f",
                 fontSize: "clamp(1.02rem, 1.6vw, 1.16rem)",
                 lineHeight: 1.82,
@@ -88,29 +103,11 @@ export default function GardiensDuPatrimoinePage() {
               <p>Au fil de vos découvertes, la curiosité devient connaissance, la connaissance devient compréhension, puis la compréhension laisse place à la sagesse.</p>
               <p>Chaque titre représente une étape de ce voyage.</p>
               <p>Non pas vers une destination, mais vers une nouvelle manière de voir le monde.</p>
-
-              <blockquote
-                style={{
-                  margin: "2.25rem auto 0",
-                  maxWidth: "34ch",
-                  textAlign: "center",
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "clamp(1.1rem, 1.8vw, 1.36rem)",
-                    lineHeight: 1.72,
-                    color: "#2a241f",
-                    fontStyle: "italic",
-                  }}
-                >
-                  « Le véritable trésor n'est pas le lieu que vous découvrez. C'est le regard que vous portez désormais sur le monde. »
-                </p>
-              </blockquote>
             </div>
           </div>
         </section>
+
+        <GuardiansNarrativeTrail />
       </main>
 
       <SiteFooter />

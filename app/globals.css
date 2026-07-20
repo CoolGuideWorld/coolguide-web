@@ -1492,3 +1492,268 @@ html {
     padding-right: 0.85rem;
   }
 }
+
+.guardiansTitle + .guardiansGrid {
+  margin-top: 2rem !important;
+}
+
+.guardiansGrid {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) !important;
+  gap: 2.6rem !important;
+}
+
+.guardiansVisualCol {
+  flex-direction: column;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
+.guardiansEmblem {
+  transform: translate(12px, -34px);
+}
+
+.guardiansTextCol {
+  max-width: 42rem !important;
+}
+
+.guardiansTextCol p {
+  margin: 0;
+}
+
+.guardiansTextCol p + p {
+  margin-top: 0.72rem;
+}
+
+.guardiansQuote {
+  margin: 1.85rem auto 0 !important;
+  width: min(100%, clamp(380px, 23vw, 450px)) !important;
+  max-width: 450px !important;
+  text-align: center !important;
+}
+
+.guardiansQuote p {
+  margin: 0;
+  color: #2a241f;
+  font-style: italic;
+  font-size: clamp(1.04rem, 1.45vw, 1.2rem) !important;
+  line-height: 1.72 !important;
+}
+
+@media (max-width: 900px) {
+  .guardiansGrid {
+    grid-template-columns: 1fr !important;
+    gap: 2.2rem !important;
+  }
+
+  .guardiansVisualCol {
+    justify-content: center !important;
+  }
+
+  .guardiansEmblem {
+    transform: none;
+  }
+
+  .guardiansTextCol {
+    max-width: 34rem !important;
+  }
+
+  .guardiansQuote {
+    margin: 1.3rem auto 0 !important;
+    max-width: 42ch !important;
+    text-align: center !important;
+  }
+}
+
+.guardiansNarrative {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(4rem, 8vw, 7rem) 0 clamp(3.5rem, 7vw, 5.5rem);
+}
+
+.guardianTrailRow {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3vw, 3rem);
+}
+
+.guardianTrailRow + .guardianTrailRow {
+  margin-top: clamp(4.2rem, 9vw, 7rem);
+}
+
+.guardianTrailRow.isReversed {
+  flex-direction: row-reverse;
+}
+
+.guardianTrailMedia {
+  flex: 0 1 58%;
+  min-width: 0;
+}
+
+.guardianTrailPlaceholder {
+  width: 100%;
+  height: clamp(360px, 42vw, 520px);
+  background: #ddd7cf;
+  border-radius: 20px;
+}
+
+.guardianTrailContent {
+  flex: 0 1 42%;
+  min-width: 0;
+  padding-top: clamp(0.2rem, 1vw, 0.8rem);
+}
+
+.guardianTrailTitle {
+  margin: 0;
+  color: #1f1a17;
+  font-size: clamp(1.8rem, 3.2vw, 3.1rem);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.guardianTrailPoints {
+  margin: 0.9rem 0 0;
+  color: #7d6f60;
+  font-size: 0.88rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.guardianTrailPhrase {
+  margin: 1rem 0 0;
+  color: #3f362f;
+  font-size: clamp(1rem, 1.25vw, 1.12rem);
+  line-height: 1.82;
+  max-width: 34ch;
+}
+
+.guardianFinalSection {
+  margin-top: clamp(5rem, 10vw, 7.5rem);
+  display: grid;
+  gap: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.guardianFinalContent {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.guardianFinalContent h2 {
+  margin: 0;
+  color: #1f1a17;
+  font-size: clamp(1.9rem, 3.8vw, 3.8rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.guardianFinalContent p {
+  margin: 1rem 0 0;
+  color: #3f362f;
+  font-size: clamp(1.02rem, 1.45vw, 1.2rem);
+  line-height: 1.75;
+}
+
+.guardianFinalContent .storeButton {
+  margin-top: 1.55rem;
+}
+
+.guardianTrailReveal .guardianTrailMedia,
+.guardianTrailReveal .guardianTrailTitle,
+.guardianTrailReveal .guardianTrailPoints,
+.guardianTrailReveal .guardianTrailPhrase,
+.guardianTrailReveal .guardianFinalContent h2,
+.guardianTrailReveal .guardianFinalContent p,
+.guardianTrailReveal .guardianFinalContent .storeButton {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.guardianTrailReveal .guardianTrailMedia {
+  transform: translateY(20px) scale(1.02);
+  transition:
+    opacity 900ms ease-out,
+    transform 900ms ease-out;
+}
+
+.guardianTrailReveal .guardianTrailTitle,
+.guardianTrailReveal .guardianFinalContent h2 {
+  transition:
+    opacity 820ms ease-out 120ms,
+    transform 820ms ease-out 120ms;
+}
+
+.guardianTrailReveal .guardianTrailPoints,
+.guardianTrailReveal .guardianFinalContent p {
+  transition:
+    opacity 820ms ease-out 240ms,
+    transform 820ms ease-out 240ms;
+}
+
+.guardianTrailReveal .guardianTrailPhrase,
+.guardianTrailReveal .guardianFinalContent .storeButton {
+  transition:
+    opacity 820ms ease-out 360ms,
+    transform 820ms ease-out 360ms;
+}
+
+.guardianTrailReveal.isVisible .guardianTrailMedia,
+.guardianTrailReveal.isVisible .guardianTrailTitle,
+.guardianTrailReveal.isVisible .guardianTrailPoints,
+.guardianTrailReveal.isVisible .guardianTrailPhrase,
+.guardianTrailReveal.isVisible .guardianFinalContent h2,
+.guardianTrailReveal.isVisible .guardianFinalContent p,
+.guardianTrailReveal.isVisible .guardianFinalContent .storeButton {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 900px) {
+  .guardiansNarrative {
+    padding-top: clamp(3.2rem, 8vw, 4.2rem);
+  }
+
+  .guardianTrailRow,
+  .guardianTrailRow.isReversed {
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .guardianTrailRow + .guardianTrailRow {
+    margin-top: clamp(3rem, 8vw, 4.2rem);
+  }
+
+  .guardianTrailMedia,
+  .guardianTrailContent {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .guardianTrailPlaceholder {
+    height: clamp(260px, 66vw, 420px);
+  }
+
+  .guardianTrailContent {
+    padding-top: 0.2rem;
+  }
+
+  .guardianTrailPhrase {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guardianTrailReveal .guardianTrailMedia,
+  .guardianTrailReveal .guardianTrailTitle,
+  .guardianTrailReveal .guardianTrailPoints,
+  .guardianTrailReveal .guardianTrailPhrase,
+  .guardianTrailReveal .guardianFinalContent h2,
+  .guardianTrailReveal .guardianFinalContent p,
+  .guardianTrailReveal .guardianFinalContent .storeButton {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
