@@ -1,0 +1,99 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% -5%, rgba(49, 86, 132, 0.24), transparent 46%),
+    linear-gradient(180deg, #040d19 0%, #030814 52%, #030611 100%);
+  color: #e6edf5;
+  padding: clamp(5.4rem, 10vw, 8rem) clamp(1rem, 4vw, 2.5rem) clamp(3rem, 7vw, 5.2rem);
+}
+
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.kicker {
+  margin: 0 0 0.8rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(216, 227, 242, 0.75);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4.6rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #f7fbff;
+}
+
+.intro {
+  margin: 1.05rem auto 0;
+  max-width: 56ch;
+  font-size: clamp(1rem, 1.45vw, 1.16rem);
+  line-height: 1.72;
+  color: rgba(211, 222, 236, 0.83);
+}
+
+.searchBlock {
+  margin-top: clamp(1.3rem, 2.8vw, 2.1rem);
+}
+
+.searchLabel {
+  display: block;
+  margin: 0 auto 0.58rem;
+  width: min(100%, 760px);
+  text-align: left;
+  color: rgba(211, 223, 238, 0.86);
+  font-size: 0.9rem;
+}
+
+.searchInput {
+  width: min(100%, 760px);
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(197, 216, 240, 0.24);
+  background: rgba(9, 21, 38, 0.72);
+  backdrop-filter: blur(6px);
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  color: #ecf4ff;
+  outline: none;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.searchInput::placeholder {
+  color: rgba(198, 214, 236, 0.64);
+}
+
+.searchInput:focus-visible {
+  border-color: rgba(245, 206, 131, 0.62);
+  box-shadow: 0 0 0 3px rgba(242, 190, 90, 0.18);
+}
+
+.caption {
+  margin: clamp(1.2rem, 2.4vw, 1.7rem) auto 0;
+  max-width: 74ch;
+  color: rgba(205, 218, 236, 0.82);
+  font-size: clamp(0.96rem, 1.3vw, 1.08rem);
+  line-height: 1.72;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-top: clamp(5rem, 18vw, 6rem);
+  }
+
+  .kicker {
+    letter-spacing: 0.12em;
+  }
+
+  .caption {
+    margin-top: 1.55rem;
+  }
+}

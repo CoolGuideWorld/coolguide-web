@@ -14,17 +14,8 @@ export type HeaderDropdownConfig = {
 export const headerLinks = [
   { href: "/#discover", label: "Découvrir" },
   { href: "/#experience", label: "Expérience" },
+  { href: "/destinations", label: "Destinations" },
 ] satisfies HeaderLink[];
-
-export const destinationLinks = [
-  { href: "/nimes", label: "Nîmes" },
-] satisfies HeaderLink[];
-
-export const destinationDropdownConfig = {
-  label: "Destinations",
-  href: "/destinations",
-  allowDirectNavigation: false,
-} satisfies HeaderDropdownConfig;
 
 export const coolGuideWorldLinks = [
   { href: "/le-monde-coolguide", label: "Le Monde CoolGuide" },

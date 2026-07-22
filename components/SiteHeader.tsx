@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FocusEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useState, type FocusEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   coolGuideWorldDropdownConfig,
   coolGuideWorldLinks,
-  destinationDropdownConfig,
-  destinationLinks,
   headerLinks,
 } from "./siteLinks";
 
@@ -18,9 +16,7 @@ type SiteHeaderProps = {
 export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
   const [isHeaderSolid, setIsHeaderSolid] = useState(initialSolid);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openDesktopMenu, setOpenDesktopMenu] = useState<
-    "destinations" | "world" | null
-  >(null);
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<"world" | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,7 +75,7 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
     setOpenDesktopMenu(null);
   };
 
-  const toggleDesktopMenu = (menu: "destinations" | "world") => {
+  const toggleDesktopMenu = (menu: "world") => {
     setOpenDesktopMenu((currentMenu) => (currentMenu === menu ? null : menu));
   };
 
@@ -87,13 +83,13 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
     setOpenDesktopMenu(null);
   };
 
-  const handleDropdownFocus = (menu: "destinations" | "world") => {
+  const handleDropdownFocus = (menu: "world") => {
     setOpenDesktopMenu(menu);
   };
 
   const handleDropdownBlur = (
     event: FocusEvent<HTMLElement>,
-    menu: "destinations" | "world"
+    menu: "world"
   ) => {
     const relatedTarget = event.relatedTarget;
 
@@ -102,20 +98,6 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
     }
 
     setOpenDesktopMenu((currentMenu) => (currentMenu === menu ? null : currentMenu));
-  };
-
-  const handleMainDropdownLinkClick = (
-    event: ReactMouseEvent<HTMLAnchorElement>,
-    menu: "destinations" | "world",
-    allowDirectNavigation: boolean
-  ) => {
-    if (allowDirectNavigation) {
-      handleNavClick();
-      return;
-    }
-
-    event.preventDefault();
-    toggleDesktopMenu(menu);
   };
 
   return (
@@ -150,70 +132,6 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
 
           <div
             className="siteNavDropdown"
-            onMouseEnter={() => setOpenDesktopMenu("destinations")}
-            onMouseOver={() => setOpenDesktopMenu("destinations")}
-            onFocusCapture={() => handleDropdownFocus("destinations")}
-            onBlur={(event) => handleDropdownBlur(event, "destinations")}
-          >
-            <div className="siteNavDropdownHead">
-              <Link
-                href={destinationDropdownConfig.href}
-                className="siteNavDropdownPrimaryLink"
-                onClick={(event) =>
-                  handleMainDropdownLinkClick(
-                    event,
-                    "destinations",
-                    destinationDropdownConfig.allowDirectNavigation
-                  )
-                }
-              >
-                {destinationDropdownConfig.label}
-              </Link>
-
-              <button
-                type="button"
-                className="siteNavDropdownChevronButton"
-                aria-label={`Ouvrir le menu ${destinationDropdownConfig.label}`}
-                aria-haspopup="menu"
-                aria-expanded={openDesktopMenu === "destinations"}
-                aria-controls="desktop-destinations-menu"
-                onClick={() => toggleDesktopMenu("destinations")}
-              >
-                <span
-                  className={`siteNavChevron${
-                    openDesktopMenu === "destinations" ? " isOpen" : ""
-                  }`}
-                  aria-hidden="true"
-                >
-                  ▾
-                </span>
-              </button>
-            </div>
-
-            <div
-              id="desktop-destinations-menu"
-              className={`siteNavDropdownMenu${
-                openDesktopMenu === "destinations" ? " isOpen" : ""
-              }`}
-              role="menu"
-              aria-label="Destinations"
-            >
-              {destinationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="siteNavDropdownLink"
-                  role="menuitem"
-                  onClick={handleNavClick}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="siteNavDropdown"
             onMouseEnter={() => setOpenDesktopMenu("world")}
             onMouseOver={() => setOpenDesktopMenu("world")}
             onFocusCapture={() => handleDropdownFocus("world")}
@@ -223,13 +141,7 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
               <Link
                 href={coolGuideWorldDropdownConfig.href}
                 className="siteNavDropdownPrimaryLink"
-                onClick={(event) =>
-                  handleMainDropdownLinkClick(
-                    event,
-                    "world",
-                    coolGuideWorldDropdownConfig.allowDirectNavigation
-                  )
-                }
+                onClick={handleNavClick}
               >
                 {coolGuideWorldDropdownConfig.label}
               </Link>
@@ -308,22 +220,6 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
               {link.label}
             </Link>
           ))}
-
-          <div className="mobileMenuGroup" aria-label="Destinations">
-            <p className="mobileMenuGroupTitle">Destinations</p>
-            <div className="mobileMenuSubLinks">
-              {destinationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="mobileMenuSubLink"
-                  onClick={handleNavClick}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
 
           <div className="mobileMenuGroup" aria-label="Le Monde CoolGuide">
             <p className="mobileMenuGroupTitle">Le Monde CoolGuide</p>
