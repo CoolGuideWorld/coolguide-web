@@ -3,9 +3,21 @@
 import { Html, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  Suspense,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import {
+  AVAILABLE_DESTINATION_COUNTRIES,
+  type AvailableCountry,
+} from "./availableCountries";
 import styles from "./ImmersiveGlobeExperience.module.css";
 
 const GLOBE_RADIUS = 1.55;
@@ -14,7 +26,7 @@ const PULSE_SECONDS = 8;
 const ROTATION_RAMP_SECONDS = 18;
 const AUTO_ROTATION_RESUME_DELAY_MS = 5000;
 const AUTO_ROTATION_RESUME_BLEND_MS = 1400;
-const FRANCE_CLICK_MAX_DELTA_PX = 6;
+const COUNTRY_CLICK_MAX_DELTA_PX = 6;
 const CAMERA_MOVE_THRESHOLD_SQ = 0.00001;
 const ORBIT_MIN_DISTANCE = 3.95;
 const ORBIT_MAX_DISTANCE = 4.95;
@@ -23,12 +35,38 @@ const ORBIT_MAX_POLAR_ANGLE = Math.PI - 0.02;
 const EARTH_TEXTURE_DESKTOP = "/world/earth-land-ocean-ice-2048.png";
 const EARTH_TEXTURE_MOBILE = "/world/earth-land-ocean-ice-1024.png";
 const NASA_TEXTURE_LONGITUDE_OFFSET_DEG = 0;
-const FRANCE_COORDINATES = {
-  latitude: 46.603354,
-  longitude: 1.888334,
-};
+const FOCUS_DURATION_MS = 1150;
+const FOCUS_PULSE_DURATION_MS = 1200;
+const FOCUS_CENTER_TOLERANCE_RAD = THREE.MathUtils.degToRad(10);
+const FOCUS_CAMERA_POSITION = new THREE.Vector3(0.18, -0.1, 3.92);
+const FOCUS_DIRECTION = new THREE.Vector3(0.03, 0.06, 0.9975).normalize();
 
 type TextureState = "loading" | "ready" | "error";
+
+type FocusAnimation = {
+  country: AvailableCountry;
+  startAtMs: number;
+  durationMs: number;
+  fromQuaternion: THREE.Quaternion;
+  toQuaternion: THREE.Quaternion;
+  fromCameraPosition: THREE.Vector3;
+  toCameraPosition: THREE.Vector3;
+};
+
+type GlobeSceneHandle = {
+  focusCountry: (country: AvailableCountry) => void;
+  isCountryCentered: (country: AvailableCountry) => boolean;
+};
+
+export type ImmersiveGlobeExperienceHandle = {
+  focusCountry: (country: AvailableCountry) => void;
+  isCountryCentered: (country: AvailableCountry) => boolean;
+};
+
+type ImmersiveGlobeExperienceProps = {
+  activeCountry?: AvailableCountry | null;
+  onFocusStateChange?: (isFocusingCountry: boolean) => void;
+};
 
 function smoothstep(edge0: number, edge1: number, value: number) {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -51,6 +89,7 @@ function latLonToVector3(
 
   return new THREE.Vector3(x, y, z);
 }
+
 function StarField({ isMobile }: { isMobile: boolean }) {
   const dimPositions = useMemo(() => {
     const count = isMobile ? 24 : 34;
@@ -131,13 +170,18 @@ function StarField({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-function GlobeScene({
-  texturePath,
-  isMobile,
-}: {
-  texturePath: string;
-  isMobile: boolean;
-}) {
+const GlobeScene = forwardRef<
+  GlobeSceneHandle,
+  {
+    texturePath: string;
+    isMobile: boolean;
+    activeCountry: AvailableCountry;
+    onFocusStateChange?: (isFocusingCountry: boolean) => void;
+  }
+>(function GlobeScene(
+  { texturePath, isMobile, activeCountry, onFocusStateChange },
+  ref
+) {
   const router = useRouter();
   const gl = useThree((state) => state.gl);
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera);
@@ -145,6 +189,8 @@ function GlobeScene({
 
   const [hovered, setHovered] = useState(false);
   const [zooming, setZooming] = useState(false);
+  const [focusLabelCountry, setFocusLabelCountry] = useState<AvailableCountry | null>(null);
+  const [isFocusAnimating, setIsFocusAnimating] = useState(false);
 
   const globeGroupRef = useRef<THREE.Group>(null);
   const earthMaterialRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -153,6 +199,8 @@ function GlobeScene({
   const glowMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const pointLightRef = useRef<THREE.PointLight>(null);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const focusAnimationRef = useRef<FocusAnimation | null>(null);
+  const focusPulseRef = useRef<{ startAtMs: number; durationMs: number } | null>(null);
 
   const introProgressRef = useRef(0);
   const navigatingRef = useRef(false);
@@ -161,27 +209,25 @@ function GlobeScene({
   const isOrbitInteractingRef = useRef(false);
   const lastInteractionAtRef = useRef(0);
   const lastCameraPositionRef = useRef(new THREE.Vector3());
-  const francePointerDownRef = useRef<{ x: number; y: number } | null>(null);
-  const francePointerMovedRef = useRef(false);
-  const controlsMovedSinceFranceDownRef = useRef(false);
+  const countryPointerDownRef = useRef<{ x: number; y: number } | null>(null);
+  const countryPointerMovedRef = useRef(false);
+  const controlsMovedSinceCountryDownRef = useRef(false);
 
-  const zoomCameraPosition = useMemo(() => new THREE.Vector3(0.28, -0.03, 3.62), []);
-
-  const franceDirection = useMemo(
-    () => latLonToVector3(FRANCE_COORDINATES.latitude, FRANCE_COORDINATES.longitude, 1).normalize(),
-    []
+  const activeCountryDirection = useMemo(
+    () => latLonToVector3(activeCountry.latitude, activeCountry.longitude, 1).normalize(),
+    [activeCountry.latitude, activeCountry.longitude]
   );
-  const francePoint = useMemo(
-    () => franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.008),
-    [franceDirection]
+  const activeCountryPoint = useMemo(
+    () => activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.008),
+    [activeCountryDirection]
   );
   const labelPoint = useMemo(
-    () => franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.21),
-    [franceDirection]
+    () => activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.21),
+    [activeCountryDirection]
   );
 
   const beamData = useMemo(() => {
-    const direction = franceDirection.clone();
+    const direction = activeCountryDirection.clone();
     const length = GLOBE_RADIUS * 1.01;
     const midpoint = direction.clone().multiplyScalar(length * 0.5);
     const quaternion = new THREE.Quaternion().setFromUnitVectors(
@@ -190,7 +236,64 @@ function GlobeScene({
     );
 
     return { direction, length, midpoint, quaternion };
-  }, [franceDirection]);
+  }, [activeCountryDirection]);
+
+  const markInteraction = () => {
+    lastInteractionAtRef.current = performance.now();
+  };
+
+  const beginFocusAnimation = (country: AvailableCountry) => {
+    const globeGroup = globeGroupRef.current;
+
+    if (!globeGroup) {
+      return;
+    }
+
+    const countryDirection = latLonToVector3(country.latitude, country.longitude, 1).normalize();
+
+    focusAnimationRef.current = {
+      country,
+      startAtMs: performance.now(),
+      durationMs: FOCUS_DURATION_MS,
+      fromQuaternion: globeGroup.quaternion.clone(),
+      toQuaternion: new THREE.Quaternion().setFromUnitVectors(countryDirection, FOCUS_DIRECTION),
+      fromCameraPosition: camera.position.clone(),
+      toCameraPosition: FOCUS_CAMERA_POSITION.clone(),
+    };
+
+    focusPulseRef.current = {
+      startAtMs: performance.now(),
+      durationMs: FOCUS_PULSE_DURATION_MS,
+    };
+
+    setHovered(false);
+    setFocusLabelCountry(country);
+    setIsFocusAnimating(true);
+    markInteraction();
+    onFocusStateChange?.(true);
+  };
+
+  const isCountryCentered = (country: AvailableCountry) => {
+    const globeGroup = globeGroupRef.current;
+
+    if (!globeGroup) {
+      return false;
+    }
+
+    const countryDirection = latLonToVector3(country.latitude, country.longitude, 1).normalize();
+    const worldDirection = countryDirection.applyQuaternion(globeGroup.quaternion).normalize();
+
+    return worldDirection.angleTo(FOCUS_DIRECTION) <= FOCUS_CENTER_TOLERANCE_RAD;
+  };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusCountry: beginFocusAnimation,
+      isCountryCentered,
+    }),
+    [camera, onFocusStateChange]
+  );
 
   useEffect(() => {
     const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
@@ -225,14 +328,14 @@ function GlobeScene({
   const handleHover = (event: ThreeEvent<PointerEvent>, isHovering: boolean) => {
     event.stopPropagation();
 
-    if (isOrbitInteractingRef.current) {
+    if (isOrbitInteractingRef.current || isFocusAnimating) {
       return;
     }
 
     setHovered(isHovering);
   };
 
-  const triggerFranceNavigation = () => {
+  const triggerCountryNavigation = () => {
     if (navigatingRef.current) {
       return;
     }
@@ -241,15 +344,15 @@ function GlobeScene({
     setZooming(true);
 
     navigationTimerRef.current = window.setTimeout(() => {
-      router.push("/destinations/france");
+      router.push(`/destinations/${activeCountry.slug}`);
     }, 780);
   };
 
-  const markInteraction = () => {
-    lastInteractionAtRef.current = performance.now();
-  };
-
   const handleOrbitStart = () => {
+    if (isFocusAnimating) {
+      return;
+    }
+
     isOrbitInteractingRef.current = true;
     autoRotationFactorRef.current = Math.max(0, autoRotationFactorRef.current - 0.22);
     lastCameraPositionRef.current.copy(camera.position);
@@ -266,8 +369,8 @@ function GlobeScene({
     }
 
     const movedDistance = lastCameraPositionRef.current.distanceToSquared(camera.position);
-    if (movedDistance > CAMERA_MOVE_THRESHOLD_SQ && francePointerDownRef.current) {
-      controlsMovedSinceFranceDownRef.current = true;
+    if (movedDistance > CAMERA_MOVE_THRESHOLD_SQ && countryPointerDownRef.current) {
+      controlsMovedSinceCountryDownRef.current = true;
     }
 
     lastCameraPositionRef.current.copy(camera.position);
@@ -280,55 +383,59 @@ function GlobeScene({
     document.body.style.cursor = "";
   };
 
-  const handleFrancePointerDown = (event: ThreeEvent<PointerEvent>) => {
-    francePointerDownRef.current = {
+  const handleCountryPointerDown = (event: ThreeEvent<PointerEvent>) => {
+    if (isFocusAnimating) {
+      return;
+    }
+
+    countryPointerDownRef.current = {
       x: event.nativeEvent.clientX,
       y: event.nativeEvent.clientY,
     };
-    francePointerMovedRef.current = false;
-    controlsMovedSinceFranceDownRef.current = false;
+    countryPointerMovedRef.current = false;
+    controlsMovedSinceCountryDownRef.current = false;
   };
 
-  const handleFrancePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!francePointerDownRef.current) {
+  const handleCountryPointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!countryPointerDownRef.current) {
       return;
     }
 
-    const dx = event.nativeEvent.clientX - francePointerDownRef.current.x;
-    const dy = event.nativeEvent.clientY - francePointerDownRef.current.y;
-    if (Math.hypot(dx, dy) > FRANCE_CLICK_MAX_DELTA_PX) {
-      francePointerMovedRef.current = true;
+    const dx = event.nativeEvent.clientX - countryPointerDownRef.current.x;
+    const dy = event.nativeEvent.clientY - countryPointerDownRef.current.y;
+    if (Math.hypot(dx, dy) > COUNTRY_CLICK_MAX_DELTA_PX) {
+      countryPointerMovedRef.current = true;
     }
   };
 
-  const resetFrancePointer = () => {
-    francePointerDownRef.current = null;
-    francePointerMovedRef.current = false;
-    controlsMovedSinceFranceDownRef.current = false;
+  const resetCountryPointer = () => {
+    countryPointerDownRef.current = null;
+    countryPointerMovedRef.current = false;
+    controlsMovedSinceCountryDownRef.current = false;
   };
 
-  const handleFrancePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    if (!francePointerDownRef.current) {
+  const handleCountryPointerUp = (event: ThreeEvent<PointerEvent>) => {
+    if (!countryPointerDownRef.current || isFocusAnimating) {
       return;
     }
 
-    const dx = event.nativeEvent.clientX - francePointerDownRef.current.x;
-    const dy = event.nativeEvent.clientY - francePointerDownRef.current.y;
+    const dx = event.nativeEvent.clientX - countryPointerDownRef.current.x;
+    const dy = event.nativeEvent.clientY - countryPointerDownRef.current.y;
     const pointerDelta = Math.hypot(dx, dy);
 
     const shouldNavigate =
-      pointerDelta <= FRANCE_CLICK_MAX_DELTA_PX &&
-      !francePointerMovedRef.current &&
-      !controlsMovedSinceFranceDownRef.current;
+      pointerDelta <= COUNTRY_CLICK_MAX_DELTA_PX &&
+      !countryPointerMovedRef.current &&
+      !controlsMovedSinceCountryDownRef.current;
 
-    resetFrancePointer();
+    resetCountryPointer();
 
     if (!shouldNavigate) {
       return;
     }
 
     event.stopPropagation();
-    triggerFranceNavigation();
+    triggerCountryNavigation();
   };
 
   useFrame((state, delta) => {
@@ -345,7 +452,8 @@ function GlobeScene({
         AUTO_ROTATION_RESUME_BLEND_MS,
         inactiveForMs - AUTO_ROTATION_RESUME_DELAY_MS
       );
-      const targetAutoRotation = isOrbitInteractingRef.current || zooming ? 0 : resumeProgress;
+      const targetAutoRotation =
+        isOrbitInteractingRef.current || zooming || isFocusAnimating ? 0 : resumeProgress;
       const blendAlpha = 1 - Math.exp(-4 * delta);
       autoRotationFactorRef.current = THREE.MathUtils.lerp(
         autoRotationFactorRef.current,
@@ -358,34 +466,83 @@ function GlobeScene({
 
       const scale = 1 + 0.11 * introProgressRef.current;
       globeGroup.scale.setScalar(scale);
+
+      const focusAnimation = focusAnimationRef.current;
+      if (focusAnimation) {
+        const elapsedMs = now - focusAnimation.startAtMs;
+        const progress = Math.max(0, Math.min(1, elapsedMs / focusAnimation.durationMs));
+        const easedProgress = smoothstep(0, 1, progress);
+
+        globeGroup.quaternion.slerpQuaternions(
+          focusAnimation.fromQuaternion,
+          focusAnimation.toQuaternion,
+          easedProgress
+        );
+        camera.position.lerpVectors(
+          focusAnimation.fromCameraPosition,
+          focusAnimation.toCameraPosition,
+          easedProgress
+        );
+        camera.lookAt(0, 0, 0);
+        controlsRef.current?.update();
+
+        if (progress >= 1) {
+          focusAnimationRef.current = null;
+          setIsFocusAnimating(false);
+          onFocusStateChange?.(false);
+          markInteraction();
+        }
+      }
     }
 
     const elapsed = state.clock.getElapsedTime();
     const pulse = 0.9 + 0.1 * Math.sin((elapsed * Math.PI * 2) / PULSE_SECONDS);
     const hoverBoost = hovered ? 1.2 : 1;
 
+    let focusPulseBoost = 1;
+    const focusPulse = focusPulseRef.current;
+    if (focusPulse) {
+      const now = performance.now();
+      const pulseProgress = Math.max(0, Math.min(1, (now - focusPulse.startAtMs) / focusPulse.durationMs));
+
+      focusPulseBoost += Math.sin(pulseProgress * Math.PI) * 0.38;
+
+      if (pulseProgress >= 1) {
+        focusPulseRef.current = null;
+
+        if (!hovered && !isFocusAnimating) {
+          setFocusLabelCountry(null);
+        }
+      }
+    }
+
+    const emphasisBoost = Math.max(hoverBoost, focusPulseBoost);
+
     if (atmosphereRef.current) {
       atmosphereRef.current.opacity = (0.125 + 0.012 * pulse) * introProgressRef.current;
     }
 
     if (beamMaterialRef.current) {
-      beamMaterialRef.current.opacity = (0.09 + 0.022 * pulse) * hoverBoost * introProgressRef.current;
+      beamMaterialRef.current.opacity = (0.09 + 0.022 * pulse) * emphasisBoost * introProgressRef.current;
     }
 
     if (glowMaterialRef.current) {
-      glowMaterialRef.current.opacity = (0.16 + 0.04 * pulse) * hoverBoost * introProgressRef.current;
+      glowMaterialRef.current.opacity = (0.16 + 0.04 * pulse) * emphasisBoost * introProgressRef.current;
     }
 
     if (pointLightRef.current) {
-      pointLightRef.current.intensity = 0.92 * pulse * hoverBoost * introProgressRef.current;
+      pointLightRef.current.intensity = 0.92 * pulse * emphasisBoost * introProgressRef.current;
     }
 
     if (zooming) {
       const alpha = 1 - Math.exp(-3.5 * delta);
-      camera.position.lerp(zoomCameraPosition, alpha);
+      camera.position.lerp(FOCUS_CAMERA_POSITION, alpha);
       camera.lookAt(0, 0, 0);
     }
   });
+
+  const showLabel = hovered || isFocusAnimating || Boolean(focusLabelCountry);
+  const labelName = focusLabelCountry?.name ?? activeCountry.name;
 
   return (
     <>
@@ -401,7 +558,7 @@ function GlobeScene({
       <OrbitControls
         ref={controlsRef}
         makeDefault
-        enabled={!zooming}
+        enabled={!zooming && !isFocusAnimating}
         enableRotate
         enableZoom
         enablePan={false}
@@ -481,7 +638,7 @@ function GlobeScene({
           />
         </mesh>
 
-        <mesh position={francePoint.clone().multiplyScalar(0.6)}>
+        <mesh position={activeCountryPoint.clone().multiplyScalar(0.6)}>
           <sphereGeometry args={[0.5, 24, 24]} />
           <meshBasicMaterial
             color="#f4bf68"
@@ -492,7 +649,7 @@ function GlobeScene({
           />
         </mesh>
 
-        <mesh position={franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.9)}>
+        <mesh position={activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.9)}>
           <sphereGeometry args={[0.28, 24, 24]} />
           <meshBasicMaterial
             ref={glowMaterialRef}
@@ -504,7 +661,7 @@ function GlobeScene({
           />
         </mesh>
 
-        <mesh position={franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.01)}>
+        <mesh position={activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 1.01)}>
           <sphereGeometry args={[0.065, 24, 24]} />
           <meshBasicMaterial
             color="#fff4dd"
@@ -515,10 +672,7 @@ function GlobeScene({
           />
         </mesh>
 
-        <mesh
-          position={francePoint.clone().multiplyScalar(1.16)}
-          quaternion={beamData.quaternion}
-        >
+        <mesh position={activeCountryPoint.clone().multiplyScalar(1.16)} quaternion={beamData.quaternion}>
           <cylinderGeometry args={[0.015, 0.052, 0.48, 18, 1, true]} />
           <meshBasicMaterial
             color="#f8cf86"
@@ -531,7 +685,7 @@ function GlobeScene({
 
         <pointLight
           ref={pointLightRef}
-          position={franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.9)}
+          position={activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.9)}
           color="#ffd28a"
           intensity={0}
           distance={1.9}
@@ -539,7 +693,7 @@ function GlobeScene({
         />
 
         <pointLight
-          position={franceDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.52)}
+          position={activeCountryDirection.clone().multiplyScalar(GLOBE_RADIUS * 0.52)}
           color="#ffdba3"
           intensity={0.34}
           distance={1.45}
@@ -547,32 +701,32 @@ function GlobeScene({
         />
 
         <mesh
-          position={francePoint.clone().multiplyScalar(1.02)}
+          position={activeCountryPoint.clone().multiplyScalar(1.02)}
           onPointerOver={(event) => handleHover(event, true)}
           onPointerOut={(event) => {
             handleHover(event, false);
-            resetFrancePointer();
+            resetCountryPointer();
           }}
-          onPointerDown={handleFrancePointerDown}
-          onPointerMove={handleFrancePointerMove}
-          onPointerUp={handleFrancePointerUp}
-          onPointerCancel={resetFrancePointer}
+          onPointerDown={handleCountryPointerDown}
+          onPointerMove={handleCountryPointerMove}
+          onPointerUp={handleCountryPointerUp}
+          onPointerCancel={resetCountryPointer}
         >
           <sphereGeometry args={[0.22, 24, 24]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
-        {hovered ? (
+        {showLabel ? (
           <Html position={labelPoint} center distanceFactor={8}>
-            <span className={styles.countryLabel}>France</span>
+            <span className={styles.countryLabel}>{labelName}</span>
           </Html>
         ) : null}
       </group>
     </>
   );
-}
+});
 
-function GlobeFallback({ message }: { message: string }) {
+function GlobeFallback({ message, countrySlug }: { message: string; countrySlug: string }) {
   return (
     <div className={styles.fallbackPanel} role="status" aria-live="polite">
       <img
@@ -582,19 +736,41 @@ function GlobeFallback({ message }: { message: string }) {
         loading="lazy"
       />
       <p className={styles.fallbackText}>{message}</p>
-      <a href="/destinations/france" className={styles.fallbackLink}>
+      <a href={`/destinations/${countrySlug}`} className={styles.fallbackLink}>
         Voir les pays disponibles
       </a>
     </div>
   );
 }
 
-export default function ImmersiveGlobeExperience() {
+const ImmersiveGlobeExperience = forwardRef<
+  ImmersiveGlobeExperienceHandle,
+  ImmersiveGlobeExperienceProps
+>(function ImmersiveGlobeExperience(
+  { activeCountry, onFocusStateChange },
+  ref
+) {
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [textureState, setTextureState] = useState<TextureState>("loading");
+  const sceneRef = useRef<GlobeSceneHandle | null>(null);
+  const pendingFocusRef = useRef<AvailableCountry | null>(null);
 
   const isMobile = viewportWidth <= 640;
   const texturePath = isMobile ? EARTH_TEXTURE_MOBILE : EARTH_TEXTURE_DESKTOP;
+  const defaultCountry = AVAILABLE_DESTINATION_COUNTRIES[0];
+  const resolvedActiveCountry = activeCountry ?? defaultCountry;
+
+  useImperativeHandle(ref, () => ({
+    focusCountry: (country) => {
+      if (sceneRef.current) {
+        sceneRef.current.focusCountry(country);
+        return;
+      }
+
+      pendingFocusRef.current = country;
+    },
+    isCountryCentered: (country) => sceneRef.current?.isCountryCentered(country) ?? false,
+  }));
 
   useEffect(() => {
     const updateViewportWidth = () => {
@@ -644,12 +820,28 @@ export default function ImmersiveGlobeExperience() {
     };
   }, [texturePath]);
 
+  useEffect(() => {
+    if (textureState !== "ready") {
+      return;
+    }
+
+    if (!sceneRef.current || !pendingFocusRef.current) {
+      return;
+    }
+
+    sceneRef.current.focusCountry(pendingFocusRef.current);
+    pendingFocusRef.current = null;
+  }, [textureState]);
+
   return (
     <>
       <div className={styles.globeShell} aria-label="Globe interactif des destinations">
         {textureState === "error" ? (
           <div className={styles.textureFallbackOverlay}>
-            <GlobeFallback message="Texture terrestre indisponible. Utilisez la liste des pays." />
+            <GlobeFallback
+              message="Texture terrestre indisponible. Utilisez la liste des pays."
+              countrySlug={defaultCountry.slug}
+            />
           </div>
         ) : textureState === "ready" ? (
           <Canvas
@@ -663,15 +855,29 @@ export default function ImmersiveGlobeExperience() {
               toneMappingExposure: 1.24,
             }}
             camera={{ fov: 31.5, position: [0.18, -0.1, 4.2], near: 0.1, far: 60 }}
-            fallback={<GlobeFallback message="Affichage 3D indisponible sur cet appareil." />}
+            fallback={
+              <GlobeFallback
+                message="Affichage 3D indisponible sur cet appareil."
+                countrySlug={defaultCountry.slug}
+              />
+            }
           >
             <Suspense fallback={null}>
-              <GlobeScene texturePath={texturePath} isMobile={isMobile} />
+              <GlobeScene
+                ref={sceneRef}
+                texturePath={texturePath}
+                isMobile={isMobile}
+                activeCountry={resolvedActiveCountry}
+                onFocusStateChange={onFocusStateChange}
+              />
             </Suspense>
           </Canvas>
         ) : (
           <div className={styles.textureFallbackOverlay}>
-            <GlobeFallback message="Chargement de la texture terrestre..." />
+            <GlobeFallback
+              message="Chargement de la texture terrestre..."
+              countrySlug={defaultCountry.slug}
+            />
           </div>
         )}
       </div>
@@ -679,4 +885,6 @@ export default function ImmersiveGlobeExperience() {
       <p className={styles.helperText}>Faites glisser le globe ou recherchez un pays.</p>
     </>
   );
-}
+});
+
+export default ImmersiveGlobeExperience;

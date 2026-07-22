@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import ImmersiveGlobeExperience from "@/components/destinations/ImmersiveGlobeExperience";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import DestinationsSearchClient from "./DestinationsSearchClient";
 import styles from "./destinations.module.css";
 
 export const metadata: Metadata = {
@@ -29,21 +29,7 @@ export default function DestinationsPage() {
             un pays ou CoolGuide est deja disponible.
           </p>
 
-          <div className={styles.searchBlock}>
-            <label htmlFor="destinations-search" className={styles.searchLabel}>
-              Rechercher une destination
-            </label>
-
-            <input
-              id="destinations-search"
-              type="search"
-              placeholder="Rechercher une destination..."
-              aria-label="Rechercher une destination"
-              className={styles.searchInput}
-            />
-          </div>
-
-          <ImmersiveGlobeExperience />
+          <DestinationsSearchClient />
 
           <p className={styles.caption}>
             Chaque lumiere represente un pays ou CoolGuide est disponible. La lumiere

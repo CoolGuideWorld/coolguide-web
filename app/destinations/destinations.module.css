@@ -76,6 +76,15 @@
   box-shadow: 0 0 0 3px rgba(242, 190, 90, 0.18);
 }
 
+.searchError {
+  width: min(100%, 760px);
+  min-height: 1.3rem;
+  margin: 0.45rem auto 0;
+  text-align: left;
+  color: rgba(255, 198, 184, 0.9);
+  font-size: 0.9rem;
+}
+
 .caption {
   margin: clamp(1.2rem, 2.4vw, 1.7rem) auto 0;
   max-width: 74ch;
