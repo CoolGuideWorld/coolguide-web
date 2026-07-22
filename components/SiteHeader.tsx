@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FocusEvent, type MouseEvent as ReactMouseEvent } from "react";
 import Image from "next/image";
-import { headerLinks } from "./siteLinks";
+import Link from "next/link";
+import {
+  coolGuideWorldDropdownConfig,
+  coolGuideWorldLinks,
+  destinationDropdownConfig,
+  destinationLinks,
+  headerLinks,
+} from "./siteLinks";
 
 type SiteHeaderProps = {
   initialSolid?: boolean;
@@ -11,6 +18,9 @@ type SiteHeaderProps = {
 export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
   const [isHeaderSolid, setIsHeaderSolid] = useState(initialSolid);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<
+    "destinations" | "world" | null
+  >(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,9 +42,30 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!target.closest(".siteNavDropdown")) {
+        setOpenDesktopMenu(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsMenuOpen(false);
+        setOpenDesktopMenu(null);
       }
     };
 
@@ -45,12 +76,52 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
 
   const handleNavClick = () => {
     setIsMenuOpen(false);
+    setOpenDesktopMenu(null);
+  };
+
+  const toggleDesktopMenu = (menu: "destinations" | "world") => {
+    setOpenDesktopMenu((currentMenu) => (currentMenu === menu ? null : menu));
+  };
+
+  const closeDesktopMenu = () => {
+    setOpenDesktopMenu(null);
+  };
+
+  const handleDropdownFocus = (menu: "destinations" | "world") => {
+    setOpenDesktopMenu(menu);
+  };
+
+  const handleDropdownBlur = (
+    event: FocusEvent<HTMLElement>,
+    menu: "destinations" | "world"
+  ) => {
+    const relatedTarget = event.relatedTarget;
+
+    if (relatedTarget instanceof Node && event.currentTarget.contains(relatedTarget)) {
+      return;
+    }
+
+    setOpenDesktopMenu((currentMenu) => (currentMenu === menu ? null : currentMenu));
+  };
+
+  const handleMainDropdownLinkClick = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    menu: "destinations" | "world",
+    allowDirectNavigation: boolean
+  ) => {
+    if (allowDirectNavigation) {
+      handleNavClick();
+      return;
+    }
+
+    event.preventDefault();
+    toggleDesktopMenu(menu);
   };
 
   return (
     <header className={`siteHeader${isHeaderSolid || isMenuOpen ? " isSolid" : ""}`}>
       <div className="siteHeaderInner">
-        <a href="/#top" className="siteLogo" onClick={handleNavClick}>
+        <Link href="/#top" className="siteLogo" onClick={handleNavClick}>
           <Image
             src="/logo/coolguide-logo.png"
             alt="CoolGuide"
@@ -59,18 +130,153 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
             priority
             className="siteLogoImage"
           />
-        </a>
+        </Link>
 
-        <nav className="siteNav" aria-label="Navigation principale">
+        <nav
+          className="siteNav"
+          aria-label="Navigation principale"
+          onMouseLeave={closeDesktopMenu}
+        >
           {headerLinks.map((link) => (
-            <a key={link.href} href={link.href} className="siteNavLink">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="siteNavLink"
+              onClick={handleNavClick}
+            >
               {link.label}
-            </a>
+            </Link>
           ))}
 
-          <a href="/#download" className="siteNavButton">
+          <div
+            className="siteNavDropdown"
+            onMouseEnter={() => setOpenDesktopMenu("destinations")}
+            onMouseOver={() => setOpenDesktopMenu("destinations")}
+            onFocusCapture={() => handleDropdownFocus("destinations")}
+            onBlur={(event) => handleDropdownBlur(event, "destinations")}
+          >
+            <div className="siteNavDropdownHead">
+              <Link
+                href={destinationDropdownConfig.href}
+                className="siteNavDropdownPrimaryLink"
+                onClick={(event) =>
+                  handleMainDropdownLinkClick(
+                    event,
+                    "destinations",
+                    destinationDropdownConfig.allowDirectNavigation
+                  )
+                }
+              >
+                {destinationDropdownConfig.label}
+              </Link>
+
+              <button
+                type="button"
+                className="siteNavDropdownChevronButton"
+                aria-label={`Ouvrir le menu ${destinationDropdownConfig.label}`}
+                aria-haspopup="menu"
+                aria-expanded={openDesktopMenu === "destinations"}
+                aria-controls="desktop-destinations-menu"
+                onClick={() => toggleDesktopMenu("destinations")}
+              >
+                <span
+                  className={`siteNavChevron${
+                    openDesktopMenu === "destinations" ? " isOpen" : ""
+                  }`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+            </div>
+
+            <div
+              id="desktop-destinations-menu"
+              className={`siteNavDropdownMenu${
+                openDesktopMenu === "destinations" ? " isOpen" : ""
+              }`}
+              role="menu"
+              aria-label="Destinations"
+            >
+              {destinationLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="siteNavDropdownLink"
+                  role="menuitem"
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="siteNavDropdown"
+            onMouseEnter={() => setOpenDesktopMenu("world")}
+            onMouseOver={() => setOpenDesktopMenu("world")}
+            onFocusCapture={() => handleDropdownFocus("world")}
+            onBlur={(event) => handleDropdownBlur(event, "world")}
+          >
+            <div className="siteNavDropdownHead">
+              <Link
+                href={coolGuideWorldDropdownConfig.href}
+                className="siteNavDropdownPrimaryLink"
+                onClick={(event) =>
+                  handleMainDropdownLinkClick(
+                    event,
+                    "world",
+                    coolGuideWorldDropdownConfig.allowDirectNavigation
+                  )
+                }
+              >
+                {coolGuideWorldDropdownConfig.label}
+              </Link>
+
+              <button
+                type="button"
+                className="siteNavDropdownChevronButton"
+                aria-label={`Ouvrir le menu ${coolGuideWorldDropdownConfig.label}`}
+                aria-haspopup="menu"
+                aria-expanded={openDesktopMenu === "world"}
+                aria-controls="desktop-world-menu"
+                onClick={() => toggleDesktopMenu("world")}
+              >
+                <span
+                  className={`siteNavChevron${openDesktopMenu === "world" ? " isOpen" : ""}`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+            </div>
+
+            <div
+              id="desktop-world-menu"
+              className={`siteNavDropdownMenu siteNavDropdownMenuWide${
+                openDesktopMenu === "world" ? " isOpen" : ""
+              }`}
+              role="menu"
+              aria-label="Le Monde CoolGuide"
+            >
+              {coolGuideWorldLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="siteNavDropdownLink"
+                  role="menuitem"
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <Link href="/#download" className="siteNavButton" onClick={handleNavClick}>
             Télécharger
-          </a>
+          </Link>
         </nav>
 
         <button
@@ -93,20 +299,52 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
       >
         <nav className="mobileMenuNav" aria-label="Navigation mobile">
           {headerLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="mobileMenuLink"
               onClick={handleNavClick}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
+
+          <div className="mobileMenuGroup" aria-label="Destinations">
+            <p className="mobileMenuGroupTitle">Destinations</p>
+            <div className="mobileMenuSubLinks">
+              {destinationLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="mobileMenuSubLink"
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="mobileMenuGroup" aria-label="Le Monde CoolGuide">
+            <p className="mobileMenuGroupTitle">Le Monde CoolGuide</p>
+            <div className="mobileMenuSubLinks">
+              {coolGuideWorldLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="mobileMenuSubLink"
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </nav>
 
-        <a href="/#download" className="mobileMenuButton" onClick={handleNavClick}>
+        <Link href="/#download" className="mobileMenuButton" onClick={handleNavClick}>
           Télécharger
-        </a>
+        </Link>
       </div>
     </header>
   );

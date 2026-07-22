@@ -1,11 +1,44 @@
 export const STUDIO_URL = "https://studio.coolguideworld.com";
 
+export type HeaderLink = {
+  href: string;
+  label: string;
+};
+
+export type HeaderDropdownConfig = {
+  label: string;
+  href: string;
+  allowDirectNavigation: boolean;
+};
+
 export const headerLinks = [
   { href: "/#discover", label: "Découvrir" },
   { href: "/#experience", label: "Expérience" },
-  { href: "/#destinations", label: "Destinations" },
+] satisfies HeaderLink[];
+
+export const destinationLinks = [
+  { href: "/nimes", label: "Nîmes" },
+] satisfies HeaderLink[];
+
+export const destinationDropdownConfig = {
+  label: "Destinations",
+  href: "/destinations",
+  allowDirectNavigation: false,
+} satisfies HeaderDropdownConfig;
+
+export const coolGuideWorldLinks = [
   { href: "/le-monde-coolguide", label: "Le Monde CoolGuide" },
-];
+  {
+    href: "/le-monde-coolguide/gardiens-du-patrimoine",
+    label: "Les Gardiens du Patrimoine",
+  },
+] satisfies HeaderLink[];
+
+export const coolGuideWorldDropdownConfig = {
+  label: "Le Monde CoolGuide",
+  href: "/le-monde-coolguide",
+  allowDirectNavigation: true,
+} satisfies HeaderDropdownConfig;
 
 export const footerLinks = [
   { href: "/le-monde-coolguide", label: "Le Monde CoolGuide" },

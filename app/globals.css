@@ -120,6 +120,111 @@ html {
   font-size: 0.95rem;
 }
 
+.siteNavDropdown {
+  position: relative;
+  padding-bottom: 0.8rem;
+  margin-bottom: -0.8rem;
+}
+
+.siteNavDropdownHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.siteNavDropdownPrimaryLink,
+.siteNavDropdownChevronButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(248, 246, 242, 0.92);
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.siteNavDropdownChevronButton {
+  cursor: pointer;
+}
+
+.siteHeader.isSolid .siteNavDropdownPrimaryLink,
+.siteHeader.isSolid .siteNavDropdownChevronButton {
+  color: #1f1a17;
+}
+
+.siteNavChevron {
+  display: inline-block;
+  font-size: 0.68rem;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.siteNavChevron.isOpen {
+  transform: rotate(180deg);
+}
+
+.siteNavDropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: -0.9rem;
+  min-width: 180px;
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.2rem;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 26, 23, 0.12);
+  background: rgba(248, 243, 234, 0.98);
+  box-shadow: 0 14px 30px rgba(31, 26, 23, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+  z-index: 60;
+}
+
+.siteNavDropdownMenuWide {
+  min-width: 270px;
+}
+
+.siteNavDropdownMenu.isOpen {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.siteNavDropdownLink {
+  display: block;
+  padding: 0.58rem 0.72rem;
+  border-radius: 10px;
+  color: #1f1a17;
+  text-decoration: none;
+  font-size: 0.94rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.siteNavDropdownLink:hover,
+.siteNavDropdownLink:focus-visible {
+  background: rgba(31, 26, 23, 0.08);
+}
+
+.siteNavLink:focus-visible,
+.siteNavDropdownPrimaryLink:focus-visible,
+.siteNavDropdownChevronButton:focus-visible,
+.siteNavButton:focus-visible,
+.mobileMenuLink:focus-visible,
+.mobileMenuSubLink:focus-visible,
+.mobileMenuButton:focus-visible {
+  outline: 2px solid rgba(31, 26, 23, 0.55);
+  outline-offset: 2px;
+}
+
 .siteNavButton,
 .mobileMenuButton {
   display: inline-flex;
@@ -856,6 +961,34 @@ html {
     font-size: clamp(1.15rem, 6.2vw, 1.6rem);
     line-height: 1.1;
     padding: 0.6rem 0;
+  }
+
+  .mobileMenuGroup {
+    margin-top: 0.65rem;
+    border-top: 1px solid rgba(31, 26, 23, 0.1);
+    padding-top: 0.85rem;
+  }
+
+  .mobileMenuGroupTitle {
+    margin: 0;
+    color: #7d6f60;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mobileMenuSubLinks {
+    display: grid;
+    gap: 0.15rem;
+    margin-top: 0.3rem;
+  }
+
+  .mobileMenuSubLink {
+    color: #1f1a17;
+    text-decoration: none;
+    font-size: clamp(1rem, 5vw, 1.3rem);
+    line-height: 1.2;
+    padding: 0.58rem 0 0.58rem 0.55rem;
   }
 
   .mobileMenuButton {
