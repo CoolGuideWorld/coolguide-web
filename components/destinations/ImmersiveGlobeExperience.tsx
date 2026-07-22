@@ -40,6 +40,10 @@ const FOCUS_PULSE_DURATION_MS = 1200;
 const FOCUS_CENTER_TOLERANCE_RAD = THREE.MathUtils.degToRad(10);
 const FOCUS_CAMERA_POSITION = new THREE.Vector3(0.18, -0.1, 3.92);
 const FOCUS_DIRECTION = new THREE.Vector3(0.03, 0.06, 0.9975).normalize();
+const EUROPE_INITIAL_VIEW = {
+  latitude: 48,
+  longitude: 8,
+};
 
 type TextureState = "loading" | "ready" | "error";
 
@@ -90,13 +94,80 @@ function latLonToVector3(
   return new THREE.Vector3(x, y, z);
 }
 
+function getInitialGlobeQuaternion(latitudeDeg: number, longitudeDeg: number) {
+  const direction = latLonToVector3(latitudeDeg, longitudeDeg, 1).normalize();
+  return new THREE.Quaternion().setFromUnitVectors(direction, FOCUS_DIRECTION);
+}
+
 function StarField({ isMobile }: { isMobile: boolean }) {
-  const dimPositions = useMemo(() => {
-    const count = isMobile ? 24 : 34;
+  const farPositions = useMemo(() => {
+    const count = isMobile ? 90 : 170;
+    const values = new Float32Array(count * 3);
+    let index = 0;
+    let attempts = 0;
+
+    while (index < count && attempts < count * 10) {
+      attempts += 1;
+
+      const radius = THREE.MathUtils.randFloat(9.8, 14.8);
+      const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
+      const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
+
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.cos(phi);
+      const z = radius * Math.sin(phi) * Math.sin(theta);
+
+      if (Math.abs(x) < 2.4 && Math.abs(y + 0.15) < 1.9 && z > 0) {
+        continue;
+      }
+
+      const base = index * 3;
+      values[base] = x;
+      values[base + 1] = y;
+      values[base + 2] = z;
+      index += 1;
+    }
+
+    return values;
+  }, [isMobile]);
+
+  const midPositions = useMemo(() => {
+    const count = isMobile ? 38 : 72;
+    const values = new Float32Array(count * 3);
+    let index = 0;
+    let attempts = 0;
+
+    while (index < count && attempts < count * 10) {
+      attempts += 1;
+
+      const radius = THREE.MathUtils.randFloat(8.8, 12.6);
+      const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
+      const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
+
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.cos(phi);
+      const z = radius * Math.sin(phi) * Math.sin(theta);
+
+      if (Math.abs(x) < 2.1 && Math.abs(y + 0.12) < 1.6 && z > 0) {
+        continue;
+      }
+
+      const base = index * 3;
+      values[base] = x;
+      values[base + 1] = y;
+      values[base + 2] = z;
+      index += 1;
+    }
+
+    return values;
+  }, [isMobile]);
+
+  const nearPositions = useMemo(() => {
+    const count = isMobile ? 8 : 14;
     const values = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i += 1) {
-      const radius = THREE.MathUtils.randFloat(8.6, 13.2);
+      const radius = THREE.MathUtils.randFloat(8.2, 10.2);
       const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
       const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
 
@@ -109,23 +180,62 @@ function StarField({ isMobile }: { isMobile: boolean }) {
     return values;
   }, [isMobile]);
 
-  const tinyPositions = useMemo(() => {
-    const count = isMobile ? 8 : 12;
+  const milkyWayDustPositions = useMemo(() => {
+    const count = isMobile ? 150 : 340;
     const values = new Float32Array(count * 3);
+    const tangent = new THREE.Vector3(0.86, -0.47, -0.18).normalize();
+    const normal = new THREE.Vector3(0.12, 0.32, -0.94).normalize();
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    const center = new THREE.Vector3(0.15, 0.18, -8.4);
 
     for (let i = 0; i < count; i += 1) {
-      const radius = THREE.MathUtils.randFloat(9.4, 14.2);
-      const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
-      const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
+      const along = THREE.MathUtils.randFloatSpread(17.5);
+      const band = THREE.MathUtils.randFloatSpread(isMobile ? 1.2 : 1.55);
+      const depth = THREE.MathUtils.randFloatSpread(0.95);
+
+      const point = center
+        .clone()
+        .addScaledVector(tangent, along)
+        .addScaledVector(normal, band)
+        .addScaledVector(binormal, depth);
 
       const base = i * 3;
-      values[base] = radius * Math.sin(phi) * Math.cos(theta);
-      values[base + 1] = radius * Math.cos(phi);
-      values[base + 2] = radius * Math.sin(phi) * Math.sin(theta);
+      values[base] = point.x;
+      values[base + 1] = point.y;
+      values[base + 2] = point.z;
     }
 
     return values;
   }, [isMobile]);
+
+  const nearMaterialRef = useRef<THREE.PointsMaterial>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setReducedMotion(mediaQuery.matches);
+    };
+
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => {
+      mediaQuery.removeEventListener("change", update);
+    };
+  }, []);
+
+  useFrame((state) => {
+    if (!nearMaterialRef.current || reducedMotion) {
+      return;
+    }
+
+    const subtlePulse = 0.13 + 0.025 * Math.sin(state.clock.getElapsedTime() * 0.72);
+    nearMaterialRef.current.opacity = subtlePulse;
+  });
 
   return (
     <>
@@ -133,17 +243,18 @@ function StarField({ isMobile }: { isMobile: boolean }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[dimPositions, 3]}
-            count={dimPositions.length / 3}
+            args={[milkyWayDustPositions, 3]}
+            count={milkyWayDustPositions.length / 3}
             itemSize={3}
           />
         </bufferGeometry>
         <pointsMaterial
-          color="#e2ecfb"
-          size={0.013}
+          color="#d5deea"
+          size={isMobile ? 0.009 : 0.011}
           sizeAttenuation
           transparent
-          opacity={0.18}
+          opacity={isMobile ? 0.055 : 0.082}
+          blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </points>
@@ -152,17 +263,56 @@ function StarField({ isMobile }: { isMobile: boolean }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[tinyPositions, 3]}
-            count={tinyPositions.length / 3}
+            args={[farPositions, 3]}
+            count={farPositions.length / 3}
             itemSize={3}
           />
         </bufferGeometry>
         <pointsMaterial
-          color="#f0f5ff"
-          size={0.019}
+          color="#dde5f2"
+          size={0.009}
           sizeAttenuation
           transparent
-          opacity={0.16}
+          opacity={isMobile ? 0.1 : 0.13}
+          depthWrite={false}
+        />
+      </points>
+
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[midPositions, 3]}
+            count={midPositions.length / 3}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          color="#e8eff8"
+          size={isMobile ? 0.011 : 0.014}
+          sizeAttenuation
+          transparent
+          opacity={isMobile ? 0.13 : 0.17}
+          depthWrite={false}
+        />
+      </points>
+
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[nearPositions, 3]}
+            count={nearPositions.length / 3}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          ref={nearMaterialRef}
+          color="#f3f6ff"
+          size={isMobile ? 0.014 : 0.018}
+          sizeAttenuation
+          transparent
+          opacity={0.13}
           depthWrite={false}
         />
       </points>
@@ -242,6 +392,15 @@ const GlobeScene = forwardRef<
     lastInteractionAtRef.current = performance.now();
   };
 
+  const initialGlobeQuaternion = useMemo(
+    () =>
+      getInitialGlobeQuaternion(
+        EUROPE_INITIAL_VIEW.latitude,
+        EUROPE_INITIAL_VIEW.longitude
+      ),
+    []
+  );
+
   const beginFocusAnimation = (country: AvailableCountry) => {
     const globeGroup = globeGroupRef.current;
 
@@ -256,7 +415,7 @@ const GlobeScene = forwardRef<
       startAtMs: performance.now(),
       durationMs: FOCUS_DURATION_MS,
       fromQuaternion: globeGroup.quaternion.clone(),
-      toQuaternion: new THREE.Quaternion().setFromUnitVectors(countryDirection, FOCUS_DIRECTION),
+      toQuaternion: getInitialGlobeQuaternion(country.latitude, country.longitude),
       fromCameraPosition: camera.position.clone(),
       toCameraPosition: FOCUS_CAMERA_POSITION.clone(),
     };
@@ -341,11 +500,13 @@ const GlobeScene = forwardRef<
     }
 
     navigatingRef.current = true;
-    setZooming(true);
-
-    navigationTimerRef.current = window.setTimeout(() => {
-      router.push(`/destinations/${activeCountry.slug}`);
-    }, 780);
+    autoRotationFactorRef.current = 0;
+    focusAnimationRef.current = null;
+    focusPulseRef.current = null;
+    setIsFocusAnimating(false);
+    setZooming(false);
+    onFocusStateChange?.(false);
+    router.push(`/destinations/${activeCountry.slug}`);
   };
 
   const handleOrbitStart = () => {
@@ -453,7 +614,12 @@ const GlobeScene = forwardRef<
         inactiveForMs - AUTO_ROTATION_RESUME_DELAY_MS
       );
       const targetAutoRotation =
-        isOrbitInteractingRef.current || zooming || isFocusAnimating ? 0 : resumeProgress;
+        isOrbitInteractingRef.current ||
+        zooming ||
+        isFocusAnimating ||
+        navigatingRef.current
+          ? 0
+          : resumeProgress;
       const blendAlpha = 1 - Math.exp(-4 * delta);
       autoRotationFactorRef.current = THREE.MathUtils.lerp(
         autoRotationFactorRef.current,
@@ -461,14 +627,15 @@ const GlobeScene = forwardRef<
         blendAlpha
       );
 
-      globeGroup.rotation.y += delta * ROTATION_SPEED * ramp * autoRotationFactorRef.current;
+      globeGroup.rotation.y +=
+        delta * ROTATION_SPEED * ramp * autoRotationFactorRef.current;
       globeGroup.position.set(0, -0.24, 0);
 
       const scale = 1 + 0.11 * introProgressRef.current;
       globeGroup.scale.setScalar(scale);
 
       const focusAnimation = focusAnimationRef.current;
-      if (focusAnimation) {
+      if (focusAnimation && !navigatingRef.current) {
         const elapsedMs = now - focusAnimation.startAtMs;
         const progress = Math.max(0, Math.min(1, elapsedMs / focusAnimation.durationMs));
         const easedProgress = smoothstep(0, 1, progress);
@@ -534,7 +701,7 @@ const GlobeScene = forwardRef<
       pointLightRef.current.intensity = 0.92 * pulse * emphasisBoost * introProgressRef.current;
     }
 
-    if (zooming) {
+    if (zooming && !navigatingRef.current) {
       const alpha = 1 - Math.exp(-3.5 * delta);
       camera.position.lerp(FOCUS_CAMERA_POSITION, alpha);
       camera.lookAt(0, 0, 0);
@@ -585,7 +752,7 @@ const GlobeScene = forwardRef<
         onEnd={handleOrbitEnd}
       />
 
-      <group ref={globeGroupRef}>
+      <group ref={globeGroupRef} quaternion={initialGlobeQuaternion}>
         <mesh>
           <sphereGeometry args={[GLOBE_RADIUS, 96, 96]} />
           <meshStandardMaterial
