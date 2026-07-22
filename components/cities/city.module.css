@@ -1,0 +1,505 @@
+.page {
+  background: #f6efe4;
+  color: #1f1a17;
+}
+
+.main {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: calc(clamp(6.8rem, 9vw, 8.6rem) + 12px) clamp(1rem, 3.4vw, 2.4rem)
+    clamp(3rem, 6vw, 4.6rem);
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+}
+
+.stack {
+  display: grid;
+  gap: clamp(1.2rem, 2.4vw, 1.9rem);
+}
+
+.section {
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+  box-shadow: 0 8px 26px rgba(34, 27, 20, 0.06);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: #1f1a17;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  font-weight: 430;
+  letter-spacing: -0.02em;
+}
+
+.hero {
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  min-height: clamp(320px, 48vh, 500px);
+  background: #d8cec0;
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.heroShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 11, 9, 0.06) 10%,
+    rgba(14, 11, 9, 0.42) 100%
+  );
+}
+
+.heroContent {
+  position: absolute;
+  left: clamp(1rem, 4vw, 2.8rem);
+  right: clamp(1rem, 4vw, 2.8rem);
+  bottom: clamp(1rem, 3.5vw, 2rem);
+  color: #f8f5ef;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.heroName {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.7rem);
+  line-height: 1;
+  font-weight: 350;
+  letter-spacing: -0.04em;
+}
+
+.heroMeta {
+  margin: 0;
+  font-size: clamp(0.9rem, 1.2vw, 1.02rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+
+.heroTagline {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.02rem, 1.55vw, 1.3rem);
+  line-height: 1.45;
+  max-width: 42ch;
+}
+
+.statsGrid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.statCard {
+  border-radius: 14px;
+  background: #fffdf9;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.34rem;
+  border: 1px solid rgba(63, 54, 47, 0.08);
+}
+
+.statLabel {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7d6f60;
+}
+
+.statValue {
+  margin: 0;
+  font-size: clamp(1.06rem, 1.6vw, 1.35rem);
+  color: #1f1a17;
+  font-weight: 450;
+}
+
+.statDetail {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4d433a;
+}
+
+.badgeList {
+  margin-top: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.badgeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(63, 54, 47, 0.1);
+  padding: 0.48rem 0.72rem;
+  color: #3f362f;
+  font-size: 0.93rem;
+}
+
+.badgeEmoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.highlightsGrid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.highlightCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(63, 54, 47, 0.09);
+  box-shadow: 0 4px 18px rgba(35, 27, 20, 0.05);
+}
+
+.highlightVisual {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #d8cec0;
+}
+
+.highlightImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.highlightBody {
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.highlightName {
+  margin: 0;
+  color: #1f1a17;
+  font-size: 1.05rem;
+  font-weight: 470;
+}
+
+.highlightMeta {
+  margin: 0;
+  color: #6e6154;
+  font-size: 0.9rem;
+}
+
+.highlightBottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.highlightDuration {
+  margin: 0;
+  color: #3f362f;
+  font-size: 0.9rem;
+}
+
+.guideBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(125, 111, 96, 0.12);
+  color: #4d433a;
+  padding: 0.25rem 0.56rem;
+  font-size: 0.79rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nearbyGrid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.nearbyCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(63, 54, 47, 0.09);
+  box-shadow: 0 4px 18px rgba(35, 27, 20, 0.05);
+  display: grid;
+  min-height: 100%;
+}
+
+.nearbyCardNoImage {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.72) 0%, transparent 48%),
+    linear-gradient(160deg, #f8f2e7 0%, #f3e9db 58%, #efe2d2 100%);
+}
+
+.nearbyVisual {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #d8cec0;
+}
+
+.nearbyVisualSurface {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.2) 40%, rgba(194, 171, 145, 0.16) 100%),
+    repeating-linear-gradient(
+      -32deg,
+      rgba(153, 122, 89, 0.1) 0,
+      rgba(153, 122, 89, 0.1) 1px,
+      transparent 1px,
+      transparent 14px
+    ),
+    #f2e6d6;
+}
+
+.nearbyImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.nearbyBody {
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.nearbyName {
+  margin: 0;
+  color: #1f1a17;
+  font-size: 1.05rem;
+  font-weight: 470;
+}
+
+.nearbyArea {
+  margin: 0;
+  color: #6e6154;
+  font-size: 0.9rem;
+}
+
+.nearbyDistance {
+  margin: 0;
+  color: #3f362f;
+  font-size: 0.88rem;
+}
+
+.nearbyLink {
+  margin-top: 0.35rem;
+  justify-self: start;
+  color: #1f1a17;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(31, 26, 23, 0.2);
+  font-size: 0.9rem;
+}
+
+.nearbyLink::after {
+  content: " \2192";
+}
+
+.practicalGrid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.practicalCard {
+  border-radius: 14px;
+  border: 1px solid rgba(63, 54, 47, 0.1);
+  background: #fff;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.practicalTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 470;
+  color: #1f1a17;
+}
+
+.practicalText {
+  margin: 0;
+  color: #4d433a;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.itinerariesGrid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.itineraryCard {
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(63, 54, 47, 0.1);
+  padding: 1rem;
+  display: grid;
+  gap: 0.56rem;
+}
+
+.itineraryTitle {
+  margin: 0;
+  color: #1f1a17;
+  font-size: 1.05rem;
+  font-weight: 470;
+}
+
+.itineraryDuration {
+  margin: 0;
+  color: #7d6f60;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.itinerarySummary {
+  margin: 0;
+  color: #4d433a;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.itineraryStops {
+  margin: 0;
+  padding-left: 1rem;
+  color: #3f362f;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.faqList {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.faqItem {
+  border-radius: 14px;
+  border: 1px solid rgba(63, 54, 47, 0.1);
+  background: #fff;
+  padding: 0.18rem 0.78rem;
+}
+
+.faqItem summary {
+  list-style: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0.7rem 0;
+  color: #1f1a17;
+  font-size: 0.98rem;
+  font-weight: 450;
+}
+
+.faqItem summary::-webkit-details-marker {
+  display: none;
+}
+
+.faqAnswer {
+  margin: 0;
+  padding: 0 0 0.82rem;
+  color: #4d433a;
+  font-size: 0.92rem;
+  line-height: 1.58;
+}
+
+.appBlock {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fdf9f2 0%, #f8f0e4 100%);
+  border: 1px solid rgba(63, 54, 47, 0.1);
+  padding: clamp(1rem, 2.4vw, 1.4rem);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.appTitle {
+  margin: 0;
+  color: #1f1a17;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 450;
+}
+
+.appText {
+  margin: 0;
+  color: #4d433a;
+  font-size: 0.95rem;
+  line-height: 1.58;
+  max-width: 70ch;
+}
+
+.appLink {
+  justify-self: start;
+  color: #1f1a17;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(31, 26, 23, 0.2);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 1100px) {
+  .statsGrid,
+  .practicalGrid,
+  .itinerariesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .highlightsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nearbyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .main {
+    padding: calc(clamp(6.2rem, 10vw, 7.4rem) + 10px) 1rem clamp(2.6rem, 9vw, 3.3rem);
+  }
+
+  .section {
+    padding: 0.92rem;
+    border-radius: 15px;
+  }
+
+  .hero {
+    min-height: clamp(260px, 44vh, 370px);
+    border-radius: 18px;
+  }
+
+  .heroTagline {
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .statsGrid,
+  .practicalGrid,
+  .itinerariesGrid,
+  .highlightsGrid,
+  .nearbyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .badgeList {
+    gap: 0.48rem;
+  }
+
+  .badgeItem {
+    font-size: 0.9rem;
+  }
+}
