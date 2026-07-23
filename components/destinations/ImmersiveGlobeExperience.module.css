@@ -42,16 +42,52 @@
 }
 
 .countryLabel {
-  border-radius: 999px;
-  border: 1px solid rgba(250, 216, 145, 0.68);
-  background: rgba(19, 15, 8, 0.82);
-  color: #f3dcaf;
-  padding: 0.32rem 0.72rem;
-  font-size: 0.82rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(238, 209, 147, 0.5);
+  background: rgba(9, 17, 31, 0.82);
+  color: #f4f8ff;
+  padding: 3px 6px;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: none;
   white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(255, 199, 87, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 6, 16, 0.28);
+  animation: countryLabelReveal 150ms ease-out;
+}
+
+.countryLabel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 5px;
+  height: 5px;
+  transform: translateX(-50%) rotate(45deg);
+  background: rgba(9, 17, 31, 0.82);
+  border-right: 1px solid rgba(238, 209, 147, 0.44);
+  border-bottom: 1px solid rgba(238, 209, 147, 0.44);
+}
+
+.countryLabelFocused {
+  border-color: rgba(244, 214, 146, 0.68);
+  color: #fbfdff;
+}
+
+@keyframes countryLabelReveal {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .textureFallbackOverlay {
@@ -125,6 +161,19 @@
     border-radius: 22px;
   }
 
+  .countryLabel {
+    border-radius: 5px;
+    padding: 2px 5px;
+    font-size: 10px;
+    letter-spacing: 0.01em;
+  }
+
+  .countryLabel::after {
+    width: 4px;
+    height: 4px;
+    bottom: -2px;
+  }
+
   .fallbackPanel {
     width: min(92%, 360px);
   }
@@ -132,5 +181,11 @@
   .helperText {
     margin-top: 0.72rem;
     font-size: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countryLabel {
+    animation: none;
   }
 }
