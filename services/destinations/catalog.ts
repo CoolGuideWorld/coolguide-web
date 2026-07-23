@@ -20,6 +20,12 @@ type ImageRow = {
   alt_text: string | null;
 };
 
+type SearchableCityImageRow = {
+  image_url: string | null;
+  image_type: string | null;
+  is_active: boolean | null;
+};
+
 type CatalogCityRow = {
   slug: string;
   name: string;
@@ -34,7 +40,7 @@ type SearchableCityCountryRow = {
   latitude: number | null;
   longitude: number | null;
   countries: CountryRow | CountryRow[] | null;
-  city_images: ImageRow | ImageRow[] | null;
+  city_images: SearchableCityImageRow | SearchableCityImageRow[] | null;
 };
 
 export type CountryDestinationCard = {
