@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { getPublishedDestinationCountries } from "@/services/destinations";
 import DestinationsSearchClient from "./DestinationsSearchClient";
 import styles from "./destinations.module.css";
 
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
   description: "Explorez les pays et les destinations où CoolGuide est disponible.",
 };
 
-export default function DestinationsPage() {
+export default async function DestinationsPage() {
+  const countries = await getPublishedDestinationCountries();
+
   return (
     <>
       <SiteHeader initialSolid />
@@ -29,7 +32,7 @@ export default function DestinationsPage() {
             un pays ou CoolGuide est deja disponible.
           </p>
 
-          <DestinationsSearchClient />
+          <DestinationsSearchClient countries={countries} />
 
           <p className={styles.caption}>
             Chaque lumiere represente un pays ou CoolGuide est disponible. La lumiere

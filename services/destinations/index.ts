@@ -4,6 +4,7 @@ export {
   getCountryBySlug,
   getCountryCatalogData,
   getCountryDestinations,
+  getPublishedDestinationCountries,
   getPublishedAdministrativeAreas,
   parseCatalogPage,
   parseCatalogSort,
@@ -11,4 +12,5 @@ export {
   type CountryCatalogData,
   type CountryDestinationCard,
   type CountryDestinationsResult,
+  type SearchableDestinationCountry,
 } from "./catalog";

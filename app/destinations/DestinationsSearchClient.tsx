@@ -6,29 +6,51 @@ import ImmersiveGlobeExperience, {
   type ImmersiveGlobeExperienceHandle,
 } from "@/components/destinations/ImmersiveGlobeExperience";
 import {
-  findAvailableCountryByQuery,
   type AvailableCountry,
+  normalizeCountryQuery,
 } from "@/components/destinations/availableCountries";
+import type { SearchableDestinationCountry } from "@/services/destinations";
 import styles from "./destinations.module.css";
 
 const SEARCH_ERROR_MESSAGE = "Cette destination n'est pas encore disponible.";
 
-export default function DestinationsSearchClient() {
+type DestinationsSearchClientProps = {
+  countries: SearchableDestinationCountry[];
+};
+
+function findPublishedCountryByQuery(
+  countries: SearchableDestinationCountry[],
+  query: string
+): SearchableDestinationCountry | null {
+  const normalizedQuery = normalizeCountryQuery(query);
+
+  if (!normalizedQuery) {
+    return null;
+  }
+
+  return (
+    countries.find((country) =>
+      country.searchTerms.some((term) => normalizeCountryQuery(term) === normalizedQuery)
+    ) ?? null
+  );
+}
+
+export default function DestinationsSearchClient({ countries }: DestinationsSearchClientProps) {
   const router = useRouter();
   const globeRef = useRef<ImmersiveGlobeExperienceHandle | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<AvailableCountry | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<SearchableDestinationCountry | null>(null);
   const [isFocusingCountry, setIsFocusingCountry] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [lastValidatedCountry, setLastValidatedCountry] = useState<AvailableCountry | null>(null);
+  const [lastValidatedCountry, setLastValidatedCountry] = useState<SearchableDestinationCountry | null>(null);
 
   const searchErrorId = "destinations-search-error";
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const matchedCountry = findAvailableCountryByQuery(searchQuery);
+    const matchedCountry = findPublishedCountryByQuery(countries, searchQuery);
 
     if (!matchedCountry) {
       setSearchError(SEARCH_ERROR_MESSAGE);

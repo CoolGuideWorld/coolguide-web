@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { AVAILABLE_DESTINATION_COUNTRIES } from "@/components/destinations/availableCountries";
 
 export const COUNTRY_DESTINATIONS_PAGE_SIZE = 24;
 
@@ -23,6 +24,16 @@ type CatalogCityRow = {
   slug: string;
   name: string;
   administrative_areas: RelationRow | RelationRow[] | null;
+  city_images: ImageRow | ImageRow[] | null;
+};
+
+type SearchableCityCountryRow = {
+  country_id: string;
+  slug: string;
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+  countries: CountryRow | CountryRow[] | null;
   city_images: ImageRow | ImageRow[] | null;
 };
 
@@ -63,6 +74,14 @@ export type CountryCatalogData = {
   page: number;
 };
 
+export type SearchableDestinationCountry = {
+  name: string;
+  slug: string;
+  latitude: number;
+  longitude: number;
+  searchTerms: string[];
+};
+
 function readRelationName(relation: RelationRow | RelationRow[] | null): string | null {
   if (!relation) {
     return null;
@@ -76,6 +95,18 @@ function readRelationName(relation: RelationRow | RelationRow[] | null): string 
 }
 
 function readFirstImage(relation: ImageRow | ImageRow[] | null): ImageRow | null {
+  if (!relation) {
+    return null;
+  }
+
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+
+  return relation;
+}
+
+function readCountryRelation(relation: CountryRow | CountryRow[] | null): CountryRow | null {
   if (!relation) {
     return null;
   }
@@ -116,6 +147,140 @@ function applyCatalogPublicationFilters<T>(query: T, relationPrefix = ""): T {
     .eq(field("city_images.image_type"), "hero")
     .eq(field("city_images.is_active"), true)
     .not(field("city_images.image_url"), "is", null);
+}
+
+function collectUniqueTerms(...groups: Array<Array<string | null | undefined>>): string[] {
+  const seen = new Set<string>();
+  const terms: string[] = [];
+
+  for (const group of groups) {
+    for (const value of group) {
+      if (typeof value !== "string") {
+        continue;
+      }
+
+      const trimmed = value.trim();
+
+      if (!trimmed) {
+        continue;
+      }
+
+      if (seen.has(trimmed)) {
+        continue;
+      }
+
+      seen.add(trimmed);
+      terms.push(trimmed);
+    }
+  }
+
+  return terms;
+}
+
+export async function getPublishedDestinationCountries(): Promise<SearchableDestinationCountry[]> {
+  try {
+    const supabase = createServerSupabaseClient();
+
+    let query = supabase
+      .from("cities")
+      .select(
+        `
+          country_id,
+          slug,
+          name,
+          latitude,
+          longitude,
+          countries!cities_country_id_fkey(id, name),
+          city_images!inner(image_url, image_type, is_active)
+        `
+      )
+      .order("name", { ascending: true })
+      .order("slug", { ascending: true });
+
+    query = applyCatalogPublicationFilters(query);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(`Supabase published destination countries query failed: ${error.message}`);
+      return [];
+    }
+
+    const rows = (data ?? []) as SearchableCityCountryRow[];
+    const countryLookup = new Map(
+      AVAILABLE_DESTINATION_COUNTRIES.map((country) => [country.slug, country])
+    );
+    const grouped = new Map<
+      string,
+      {
+        name: string;
+        slug: string;
+        latitude: number | null;
+        longitude: number | null;
+        cityNames: string[];
+        citySlugs: string[];
+      }
+    >();
+
+    for (const row of rows) {
+      const country = readCountryRelation(row.countries);
+      const countryName = country?.name?.trim() ?? "";
+
+      if (!countryName) {
+        continue;
+      }
+
+      const countrySlug = countryNameToSlug(countryName);
+      const staticCountry = countryLookup.get(countrySlug);
+      const existing = grouped.get(countrySlug);
+
+      if (existing) {
+        existing.cityNames.push(row.name);
+        existing.citySlugs.push(row.slug);
+
+        if (existing.latitude === null && typeof row.latitude === "number") {
+          existing.latitude = row.latitude;
+        }
+
+        if (existing.longitude === null && typeof row.longitude === "number") {
+          existing.longitude = row.longitude;
+        }
+
+        continue;
+      }
+
+      grouped.set(countrySlug, {
+        name: countryName,
+        slug: countrySlug,
+        latitude: staticCountry?.latitude ?? row.latitude,
+        longitude: staticCountry?.longitude ?? row.longitude,
+        cityNames: [row.name],
+        citySlugs: [row.slug],
+      });
+    }
+
+    return Array.from(grouped.values())
+      .filter(
+        (country): country is typeof country & { latitude: number; longitude: number } =>
+          typeof country.latitude === "number" && typeof country.longitude === "number"
+      )
+      .map((country) => ({
+        name: country.name,
+        slug: country.slug,
+        latitude: country.latitude,
+        longitude: country.longitude,
+        searchTerms: collectUniqueTerms(
+          [country.name, country.slug],
+          country.cityNames,
+          country.citySlugs
+        ),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Published destination countries setup failed: ${message}`);
+    return [];
+  }
 }
 
 export function parseCatalogSort(value: string): CatalogSortValue {
