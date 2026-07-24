@@ -12,7 +12,7 @@ export type HeaderDropdownConfig = {
 };
 
 export const headerLinks = [
-  { href: "/#discover", label: "Découvrir" },
+  { href: "/#top", label: "Découvrir" },
   { href: "/experience", label: "Expérience" },
   { href: "/destinations", label: "Destinations" },
 ] satisfies HeaderLink[];

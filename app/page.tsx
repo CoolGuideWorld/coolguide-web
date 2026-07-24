@@ -1,14 +1,7 @@
 import Image from "next/image";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import AppRevealSection from "@/components/experience/AppRevealSection";
 import DownloadSection from "@/components/experience/DownloadSection";
-import ExperienceIntroSection from "@/components/experience/ExperienceIntroSection";
-import ExperienceSequenceSection from "@/components/experience/ExperienceSequenceSection";
-import HowItWorksSection from "@/components/experience/HowItWorksSection";
-import JourneyPauseSection from "@/components/experience/JourneyPauseSection";
-import LanguagesSection from "@/components/experience/LanguagesSection";
-import TranslationSection from "@/components/experience/TranslationSection";
 import WorldJourneySection from "@/components/experience/WorldJourneySection";
 
 export const metadata = {
@@ -94,21 +87,67 @@ export default function Home() {
         ))}
       </main>
 
-      <ExperienceIntroSection />
+      <section className="whyCoolGuide">
+        <div className="whyCoolGuideInner">
+          <p className="whyCoolGuideKicker">Pourquoi CoolGuide</p>
+          <h2>Nous traversons souvent des lieux sans vraiment les voir.</h2>
+          <p>
+            Derrière une façade, une pierre ou un paysage se cachent des histoires que rien ne révèle au premier regard. CoolGuide redonne une voix aux lieux pour transformer une simple visite en véritable découverte.
+          </p>
+        </div>
+      </section>
 
-      <LanguagesSection />
+      <section className="journeyPause respirationSection">
+        <div className="journeyPauseImageLayer">
+          <Image
+            src="/hero/hero-06-bridge.jpg"
+            alt=""
+            fill
+            className="journeyPauseImage"
+          />
+        </div>
 
-      <TranslationSection />
+        <div className="journeyPauseContent">
+          <p>{"Prenez le temps.\nLe monde vous le rendra."}</p>
+        </div>
+      </section>
 
-      <JourneyPauseSection />
+      <section className="experienceSequence" aria-label="L'experience CoolGuide">
+        <div className="experienceBeat">
+          <p>Vous marchez.</p>
+        </div>
 
-      <ExperienceSequenceSection />
+        <div className="experienceBeat">
+          <p>Vous levez les yeux.</p>
+        </div>
+
+        <div className="experienceBeat">
+          <p>Vous écoutez.</p>
+        </div>
+
+        <div className="experienceBeat">
+          <p>Une histoire commence.</p>
+        </div>
+      </section>
+
+      <section className="howItWorksSection" aria-labelledby="home-experience-bridge-title">
+        <div className="howItWorksInner" style={{ textAlign: "center" }}>
+          <div
+            className="howItWorksHeader"
+            style={{ textAlign: "center", margin: "0 auto clamp(1rem, 2vw, 1.4rem)" }}
+          >
+            <h2 id="home-experience-bridge-title">Découvrez comment CoolGuide vous accompagne.</h2>
+          </div>
+
+          <div className="storeButtons" style={{ marginTop: 0 }}>
+            <a href="/experience" className="storeButton">
+              Voir l&apos;expérience
+            </a>
+          </div>
+        </div>
+      </section>
 
       <WorldJourneySection />
-
-      <AppRevealSection />
-
-      <HowItWorksSection />
 
       <section className="benefitsSection" id="destinations">
         <div className="benefitsInner">

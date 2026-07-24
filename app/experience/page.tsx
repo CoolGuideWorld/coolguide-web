@@ -1,41 +1,48 @@
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import AppRevealSection from "@/components/experience/AppRevealSection";
 import DownloadSection from "@/components/experience/DownloadSection";
+import ExperienceFaqSection from "@/components/experience/ExperienceFaqSection";
 import ExperienceIntroSection from "@/components/experience/ExperienceIntroSection";
-import ExperienceSequenceSection from "@/components/experience/ExperienceSequenceSection";
+import ExperienceLanguagesStats from "@/components/experience/ExperienceLanguagesStats";
 import HowItWorksSection from "@/components/experience/HowItWorksSection";
-import JourneyPauseSection from "@/components/experience/JourneyPauseSection";
 import LanguagesSection from "@/components/experience/LanguagesSection";
 import OnboardingJourneySection from "@/components/experience/OnboardingJourneySection";
 import TranslationSection from "@/components/experience/TranslationSection";
-import WorldJourneySection from "@/components/experience/WorldJourneySection";
+import { getExperienceStats } from "@/services/experience";
 
-export default function ExperiencePage() {
+export const revalidate = 3600;
+
+export default async function ExperiencePage() {
+  const stats = await getExperienceStats();
+
   return (
     <>
       <SiteHeader compact />
 
-      <main>
+      <main className="experiencePageMain">
         <ExperienceIntroSection />
 
         <LanguagesSection />
 
-        <TranslationSection />
+        <div className="experienceCreamBand">
+          <TranslationSection />
+        </div>
 
         <OnboardingJourneySection />
 
-        <HowItWorksSection />
+        <div className="experienceCreamBand">
+          <HowItWorksSection />
+        </div>
 
-        <JourneyPauseSection />
+        <ExperienceFaqSection />
 
-        <ExperienceSequenceSection />
+        <div className="experienceCreamBand">
+          <ExperienceLanguagesStats availableAudioCount={stats.availableAudioCount} />
+        </div>
 
-        <AppRevealSection />
-
-        <DownloadSection />
-
-        <WorldJourneySection />
+        <div className="experienceCreamBand">
+          <DownloadSection />
+        </div>
       </main>
 
       <SiteFooter />
