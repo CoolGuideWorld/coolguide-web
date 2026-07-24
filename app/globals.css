@@ -1202,6 +1202,45 @@ html {
     padding: 0.4rem 1rem 2.2rem;
   }
 
+  .storyLead {
+    margin-bottom: 1rem;
+    max-width: none;
+    font-size: clamp(1rem, 3.9vw, 1.06rem);
+  }
+
+  .languageRail {
+    padding-inline: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .languageRail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .languageList {
+    justify-content: flex-start;
+    width: max-content;
+    min-width: 100%;
+    padding-inline: 0.24rem;
+    gap: 0.9rem;
+  }
+
+  .languageItem {
+    width: clamp(68px, 18vw, 88px);
+  }
+
+  .languageMedallionWrap {
+    width: clamp(60px, 16vw, 70px);
+    height: clamp(60px, 16vw, 70px);
+  }
+
+  .languageName {
+    font-size: clamp(0.85rem, 3.6vw, 0.95rem);
+  }
+
   .benefitItem {
     padding: clamp(1rem, 4vw, 1.35rem);
   }
@@ -1353,6 +1392,246 @@ html {
 .benefitsHeader {
   max-width: 760px;
   margin-bottom: clamp(1rem, 2.2vw, 1.5rem);
+}
+
+.storyLead {
+  margin: 0 0 clamp(1.05rem, 2.1vw, 1.45rem);
+  max-width: 64ch;
+  color: #4d433a;
+  font-size: clamp(1rem, 1.45vw, 1.14rem);
+  line-height: 1.62;
+}
+
+.languageRail {
+  width: 100%;
+  padding-inline: clamp(0.2rem, 1.2vw, 0.9rem);
+}
+
+.languageList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(0.95rem, 1.9vw, 1.75rem);
+}
+
+.languageItem {
+  margin: 0;
+  flex: 0 0 auto;
+  width: clamp(72px, 8.2vw, 96px);
+  display: grid;
+  justify-items: center;
+  gap: 0.58rem;
+  scroll-snap-align: center;
+}
+
+.languageMedallionWrap {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+  width: clamp(68px, 5.3vw, 76px);
+  height: clamp(68px, 5.3vw, 76px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 999px;
+  cursor: default;
+  transform: translateY(0);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.languageMedallion {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid #e7c46a;
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.06) 34%, rgba(15, 13, 11, 0.03) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 241, 191, 0.34) inset,
+    0 8px 18px rgba(31, 26, 23, 0.16);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  transition:
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.languageFlagImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.languageName {
+  margin: 0;
+  color: #b98a35;
+  font-size: clamp(0.9rem, 1.12vw, 1rem);
+  line-height: 1.28;
+  text-align: center;
+  letter-spacing: 0.005em;
+  transition: color 280ms ease;
+}
+
+.languageDust {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--dust-size, 1.5px);
+  height: var(--dust-size, 1.5px);
+  z-index: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) translate(var(--x0, 0px), var(--y0, 0px));
+  animation: languageDustDrift var(--dust-duration, 6.1s) ease-out infinite;
+  animation-delay: var(--dust-delay, 0s);
+}
+
+.languageMedallionWrap .languageDust:nth-of-type(3n + 1) {
+  background: #fff1bf;
+}
+
+.languageMedallionWrap .languageDust:nth-of-type(3n + 2) {
+  background: #e7c46a;
+}
+
+.languageMedallionWrap .languageDust:nth-of-type(3n) {
+  background: #c79a49;
+}
+
+.languageMedallionWrap .languageDust:nth-of-type(5n) {
+  background: #b98a35;
+}
+
+.languageMedallionWrap .languageDust {
+  --dust-boost: 1;
+  --dust-amp: 1;
+}
+
+.languageMedallionWrap:hover .languageDust,
+.languageMedallionWrap:focus-visible .languageDust {
+  --dust-boost: 1.12;
+  --dust-amp: 1.08;
+}
+
+.languageMedallionWrap .languageDust:nth-of-type(1) { --x0: -37px; --y0: -2px; --dust-size: 1.3px; --dust-duration: 5.1s; --dust-delay: -0.8s; --dust-peak: 0.9; --dust-mid: 0.58; --dx: -15px; --dy: -1px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(2) { --x0: -36px; --y0: -7px; --dust-size: 1.6px; --dust-duration: 6.6s; --dust-delay: -3.4s; --dust-peak: 0.88; --dust-mid: 0.56; --dx: -13px; --dy: -3px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(3) { --x0: -35px; --y0: -12px; --dust-size: 2.1px; --dust-duration: 5.4s; --dust-delay: -8.2s; --dust-peak: 0.82; --dust-mid: 0.53; --dx: -14px; --dy: -5px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(4) { --x0: -33px; --y0: -17px; --dust-size: 1.5px; --dust-duration: 7.3s; --dust-delay: -1.2s; --dust-peak: 0.91; --dust-mid: 0.6; --dx: -12px; --dy: -6px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(5) { --x0: -31px; --y0: -22px; --dust-size: 1.7px; --dust-duration: 6.1s; --dust-delay: -5.9s; --dust-peak: 0.87; --dust-mid: 0.55; --dx: -11px; --dy: -8px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(6) { --x0: -27px; --y0: -26px; --dust-size: 2.3px; --dust-duration: 7.4s; --dust-delay: -10.3s; --dust-peak: 0.79; --dust-mid: 0.51; --dx: -11px; --dy: -10px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(7) { --x0: -23px; --y0: -30px; --dust-size: 1.3px; --dust-duration: 4.9s; --dust-delay: -2.5s; --dust-peak: 0.92; --dust-mid: 0.61; --dx: -9px; --dy: -11px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(8) { --x0: -18px; --y0: -33px; --dust-size: 1.6px; --dust-duration: 6.8s; --dust-delay: -7.7s; --dust-peak: 0.89; --dust-mid: 0.58; --dx: -8px; --dy: -12px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(9) { --x0: -12px; --y0: -36px; --dust-size: 2px; --dust-duration: 5.2s; --dust-delay: -4.3s; --dust-peak: 0.84; --dust-mid: 0.54; --dx: -5px; --dy: -13px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(10) { --x0: -6px; --y0: -37px; --dust-size: 1.5px; --dust-duration: 7.1s; --dust-delay: -9.1s; --dust-peak: 0.9; --dust-mid: 0.6; --dx: -2px; --dy: -14px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(11) { --x0: 0px; --y0: -38px; --dust-size: 2.6px; --dust-duration: 5.7s; --dust-delay: -6.5s; --dust-peak: 0.74; --dust-mid: 0.46; --dx: 0px; --dy: -20px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(12) { --x0: 6px; --y0: -37px; --dust-size: 1.7px; --dust-duration: 6.2s; --dust-delay: -0.7s; --dust-peak: 0.88; --dust-mid: 0.57; --dx: 3px; --dy: -14px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(13) { --x0: 12px; --y0: -35px; --dust-size: 1.3px; --dust-duration: 7.5s; --dust-delay: -5.4s; --dust-peak: 0.93; --dust-mid: 0.62; --dx: 5px; --dy: -13px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(14) { --x0: 18px; --y0: -33px; --dust-size: 2.2px; --dust-duration: 5.4s; --dust-delay: -2.1s; --dust-peak: 0.8; --dust-mid: 0.51; --dx: 7px; --dy: -12px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(15) { --x0: 23px; --y0: -30px; --dust-size: 1.5px; --dust-duration: 6.9s; --dust-delay: -10.7s; --dust-peak: 0.89; --dust-mid: 0.57; --dx: 9px; --dy: -11px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(16) { --x0: 28px; --y0: -26px; --dust-size: 2.6px; --dust-duration: 4.8s; --dust-delay: -7.4s; --dust-peak: 0.75; --dust-mid: 0.47; --dx: 12px; --dy: -10px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(17) { --x0: 32px; --y0: -21px; --dust-size: 1.6px; --dust-duration: 5.9s; --dust-delay: -3.6s; --dust-peak: 0.87; --dust-mid: 0.56; --dx: 13px; --dy: -8px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(18) { --x0: 35px; --y0: -16px; --dust-size: 1.3px; --dust-duration: 7.2s; --dust-delay: -9.6s; --dust-peak: 0.9; --dust-mid: 0.6; --dx: 14px; --dy: -7px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(19) { --x0: 37px; --y0: -10px; --dust-size: 2.3px; --dust-duration: 5.6s; --dust-delay: -1.7s; --dust-peak: 0.79; --dust-mid: 0.5; --dx: 15px; --dy: -4px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(20) { --x0: 38px; --y0: -4px; --dust-size: 1.5px; --dust-duration: 6.3s; --dust-delay: -6.1s; --dust-peak: 0.91; --dust-mid: 0.62; --dx: 16px; --dy: -2px; --lift: -4px; }
+.languageMedallionWrap .languageDust:nth-of-type(21) { --x0: 37px; --y0: 2px; --dust-size: 1.6px; --dust-duration: 7.4s; --dust-delay: -11.2s; --dust-peak: 0.9; --dust-mid: 0.6; --dx: 15px; --dy: 1px; --lift: -4px; }
+.languageMedallionWrap .languageDust:nth-of-type(22) { --x0: 36px; --y0: 8px; --dust-size: 2.1px; --dust-duration: 5s; --dust-delay: -8.7s; --dust-peak: 0.82; --dust-mid: 0.52; --dx: 14px; --dy: 3px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(23) { --x0: 34px; --y0: 14px; --dust-size: 2.4px; --dust-duration: 6.4s; --dust-delay: -4.8s; --dust-peak: 0.78; --dust-mid: 0.49; --dx: 20px; --dy: 8px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(24) { --x0: 31px; --y0: 20px; --dust-size: 1.3px; --dust-duration: 7.3s; --dust-delay: -0.9s; --dust-peak: 0.94; --dust-mid: 0.64; --dx: 12px; --dy: 8px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(25) { --x0: 27px; --y0: 25px; --dust-size: 1.7px; --dust-duration: 5.2s; --dust-delay: -7.3s; --dust-peak: 0.88; --dust-mid: 0.57; --dx: 10px; --dy: 9px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(26) { --x0: 22px; --y0: 29px; --dust-size: 1.5px; --dust-duration: 6.9s; --dust-delay: -3.2s; --dust-peak: 0.89; --dust-mid: 0.58; --dx: 9px; --dy: 11px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(27) { --x0: 16px; --y0: 33px; --dust-size: 2.2px; --dust-duration: 5.8s; --dust-delay: -10.1s; --dust-peak: 0.81; --dust-mid: 0.52; --dx: 7px; --dy: 12px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(28) { --x0: 10px; --y0: 35px; --dust-size: 1.6px; --dust-duration: 7.1s; --dust-delay: -5.5s; --dust-peak: 0.9; --dust-mid: 0.61; --dx: 4px; --dy: 13px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(29) { --x0: 4px; --y0: 37px; --dust-size: 1.3px; --dust-duration: 6s; --dust-delay: -2.4s; --dust-peak: 0.92; --dust-mid: 0.63; --dx: 2px; --dy: 14px; --lift: -10px; }
+.languageMedallionWrap .languageDust:nth-of-type(30) { --x0: -2px; --y0: 38px; --dust-size: 2px; --dust-duration: 4.9s; --dust-delay: -8.5s; --dust-peak: 0.84; --dust-mid: 0.55; --dx: -1px; --dy: 15px; --lift: -10px; }
+.languageMedallionWrap .languageDust:nth-of-type(31) { --x0: -8px; --y0: 37px; --dust-size: 1.5px; --dust-duration: 6.7s; --dust-delay: -11.6s; --dust-peak: 0.91; --dust-mid: 0.62; --dx: -3px; --dy: 14px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(32) { --x0: -14px; --y0: 34px; --dust-size: 1.8px; --dust-duration: 5.1s; --dust-delay: -6.6s; --dust-peak: 0.85; --dust-mid: 0.56; --dx: -5px; --dy: 12px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(33) { --x0: -20px; --y0: 31px; --dust-size: 2.3px; --dust-duration: 7.2s; --dust-delay: -1.6s; --dust-peak: 0.81; --dust-mid: 0.52; --dx: -8px; --dy: 11px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(34) { --x0: -25px; --y0: 27px; --dust-size: 1.7px; --dust-duration: 5.5s; --dust-delay: -9.3s; --dust-peak: 0.88; --dust-mid: 0.58; --dx: -10px; --dy: 10px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(35) { --x0: -30px; --y0: 23px; --dust-size: 1.3px; --dust-duration: 6.3s; --dust-delay: -4.1s; --dust-peak: 0.93; --dust-mid: 0.64; --dx: -12px; --dy: 9px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(36) { --x0: -33px; --y0: 18px; --dust-size: 2.2px; --dust-duration: 7.5s; --dust-delay: -0.4s; --dust-peak: 0.81; --dust-mid: 0.52; --dx: -13px; --dy: 7px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(37) { --x0: -36px; --y0: 12px; --dust-size: 1.5px; --dust-duration: 5.8s; --dust-delay: -7.8s; --dust-peak: 0.9; --dust-mid: 0.6; --dx: -14px; --dy: 5px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(38) { --x0: -37px; --y0: 6px; --dust-size: 1.6px; --dust-duration: 6.6s; --dust-delay: -2.9s; --dust-peak: 0.88; --dust-mid: 0.57; --dx: -15px; --dy: 3px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(39) { --x0: -38px; --y0: 0px; --dust-size: 2.6px; --dust-duration: 5.3s; --dust-delay: -10.8s; --dust-peak: 0.76; --dust-mid: 0.47; --dx: -22px; --dy: 0px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(40) { --x0: -31px; --y0: -20px; --dust-size: 1.5px; --dust-duration: 6.1s; --dust-delay: -5.2s; --dust-peak: 0.9; --dust-mid: 0.61; --dx: -12px; --dy: -8px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(41) { --x0: -29px; --y0: 28px; --dust-size: 1.7px; --dust-duration: 7.4s; --dust-delay: -1.3s; --dust-peak: 0.87; --dust-mid: 0.56; --dx: -11px; --dy: 10px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(42) { --x0: 29px; --y0: 23px; --dust-size: 1.3px; --dust-duration: 5s; --dust-delay: -8.4s; --dust-peak: 0.94; --dust-mid: 0.65; --dx: 11px; --dy: 10px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(43) { --x0: 34px; --y0: 9px; --dust-size: 2.3px; --dust-duration: 6.8s; --dust-delay: -3.8s; --dust-peak: 0.8; --dust-mid: 0.51; --dx: 13px; --dy: 4px; --lift: -5px; }
+.languageMedallionWrap .languageDust:nth-of-type(44) { --x0: 21px; --y0: -31px; --dust-size: 2.6px; --dust-duration: 5.6s; --dust-delay: -11.4s; --dust-peak: 0.7; --dust-mid: 0.42; --dx: 12px; --dy: -13px; --lift: -8px; }
+.languageMedallionWrap .languageDust:nth-of-type(45) { --x0: -11px; --y0: 35px; --dust-size: 1.5px; --dust-duration: 7s; --dust-delay: -6.9s; --dust-peak: 0.91; --dust-mid: 0.62; --dx: -4px; --dy: 13px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(46) { --x0: 14px; --y0: 34px; --dust-size: 2px; --dust-duration: 6.2s; --dust-delay: -2.6s; --dust-peak: 0.83; --dust-mid: 0.54; --dx: 5px; --dy: 13px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(47) { --x0: -34px; --y0: -15px; --dust-size: 1.6px; --dust-duration: 5.4s; --dust-delay: -9.9s; --dust-peak: 0.9; --dust-mid: 0.6; --dx: -13px; --dy: -6px; --lift: -6px; }
+.languageMedallionWrap .languageDust:nth-of-type(48) { --x0: 8px; --y0: -36px; --dust-size: 1.8px; --dust-duration: 7.5s; --dust-delay: -0.6s; --dust-peak: 0.85; --dust-mid: 0.56; --dx: 3px; --dy: -14px; --lift: -9px; }
+.languageMedallionWrap .languageDust:nth-of-type(49) { --x0: 26px; --y0: -27px; --dust-size: 2.3px; --dust-duration: 5.9s; --dust-delay: -4.6s; --dust-peak: 0.8; --dust-mid: 0.51; --dx: 18px; --dy: -9px; --lift: -7px; }
+.languageMedallionWrap .languageDust:nth-of-type(50) { --x0: -23px; --y0: 29px; --dust-size: 1.5px; --dust-duration: 6.5s; --dust-delay: -10.9s; --dust-peak: 0.9; --dust-mid: 0.61; --dx: -9px; --dy: 12px; --lift: -8px; }
+
+.languageMedallionWrap:hover,
+.languageMedallionWrap:focus-visible {
+  transform: translateY(-3px);
+}
+
+.languageMedallionWrap:hover .languageMedallion,
+.languageMedallionWrap:focus-visible .languageMedallion {
+  border-color: #fff1bf;
+  box-shadow:
+    0 1px 0 rgba(255, 241, 191, 0.4) inset,
+    0 10px 22px rgba(31, 26, 23, 0.19);
+}
+
+.languageMedallionWrap:hover + .languageName,
+.languageMedallionWrap:focus-visible + .languageName {
+  color: #c79a49;
+}
+
+.languageMedallionWrap:focus-visible {
+  outline: 2px solid rgba(231, 196, 106, 0.55);
+  outline-offset: 4px;
+}
+
+@keyframes languageDustDrift {
+  0% {
+    transform: translate(-50%, -50%) translate(var(--x0, 0px), var(--y0, 0px)) scale(0.72);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: calc(var(--dust-peak, 0.82) * 0.45 * var(--dust-boost, 1));
+  }
+
+  18% {
+    transform: translate(-50%, -50%) translate(calc(var(--x0, 0px) + (var(--dx, 8px) * 0.1 * var(--dust-amp, 1))), calc(var(--y0, 0px) + ((var(--dy, -8px) + var(--lift, -6px)) * 0.1 * var(--dust-amp, 1)))) scale(0.9);
+    opacity: calc(var(--dust-peak, 0.82) * var(--dust-boost, 1));
+  }
+
+  70% {
+    transform: translate(-50%, -50%) translate(calc(var(--x0, 0px) + (var(--dx, 8px) * 0.66 * var(--dust-amp, 1))), calc(var(--y0, 0px) + ((var(--dy, -8px) + var(--lift, -6px)) * 0.66 * var(--dust-amp, 1)))) scale(0.98);
+    opacity: calc(var(--dust-mid, 0.58) * var(--dust-boost, 1));
+  }
+
+  86% {
+    transform: translate(-50%, -50%) translate(calc(var(--x0, 0px) + (var(--dx, 8px) * 0.86 * var(--dust-amp, 1))), calc(var(--y0, 0px) + ((var(--dy, -8px) + var(--lift, -6px)) * 0.86 * var(--dust-amp, 1)))) scale(0.88);
+    opacity: calc(var(--dust-mid, 0.58) * 0.5 * var(--dust-boost, 1));
+  }
+
+  100% {
+    transform: translate(-50%, -50%) translate(calc(var(--x0, 0px) + (var(--dx, 8px) * var(--dust-amp, 1))), calc(var(--y0, 0px) + ((var(--dy, -8px) + var(--lift, -6px)) * var(--dust-amp, 1)))) scale(0.74);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .languageDust {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .benefitsGrid {
@@ -2044,3 +2323,44 @@ html {
     transition: none;
   }
 }
+
+@media (min-width: 701px) and (max-width: 1024px) {
+  .languageList {
+    gap: clamp(0.8rem, 1.4vw, 1.1rem);
+  }
+
+  .languageItem {
+    width: clamp(68px, 9vw, 82px);
+  }
+
+  .languageMedallionWrap {
+    width: clamp(62px, 7.2vw, 70px);
+    height: clamp(62px, 7.2vw, 70px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .languageMedallionWrap,
+  .languageMedallion {
+    transition: none;
+  }
+
+  .languageMedallionWrap:hover,
+  .languageMedallionWrap:focus-visible {
+    transform: none;
+  }
+
+  .languageDust {
+    animation: none;
+    opacity: 0;
+  }
+
+  .languageMedallionWrap .languageDust:nth-of-type(2),
+  .languageMedallionWrap .languageDust:nth-of-type(7),
+  .languageMedallionWrap .languageDust:nth-of-type(12),
+  .languageMedallionWrap .languageDust:nth-of-type(18),
+  .languageMedallionWrap .languageDust:nth-of-type(23) {
+    opacity: 0.2;
+  }
+}
+

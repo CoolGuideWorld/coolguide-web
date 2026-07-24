@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FocusEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FocusEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,23 +11,44 @@ import {
 
 type SiteHeaderProps = {
   initialSolid?: boolean;
+  compact?: boolean;
 };
 
-export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
-  const [isHeaderSolid, setIsHeaderSolid] = useState(initialSolid);
+export default function SiteHeader({ initialSolid = false, compact = false }: SiteHeaderProps) {
+  const solidByDefault = initialSolid || compact;
+  const [isHeaderSolid, setIsHeaderSolid] = useState(solidByDefault);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<"world" | null>(null);
 
+  const headerStyle: CSSProperties | undefined = compact
+    ? { ["--header-height" as string]: "clamp(64px, 8.6vw, 80px)" }
+    : undefined;
+
+  const headerInnerStyle: CSSProperties | undefined = compact
+    ? {
+      padding: "0 clamp(0.85rem, 2.2vw, 1.5rem)",
+      gap: "clamp(0.8rem, 1.4vw, 1.2rem)",
+    }
+    : undefined;
+
+  const logoStyle: CSSProperties | undefined = compact
+    ? {
+      width: "clamp(95px, 11vw, 120px)",
+      height: "auto",
+      display: "block",
+    }
+    : undefined;
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsHeaderSolid(initialSolid || window.scrollY > 24);
+      setIsHeaderSolid(solidByDefault || window.scrollY > 24);
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [initialSolid]);
+  }, [solidByDefault]);
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -101,8 +122,8 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
   };
 
   return (
-    <header className={`siteHeader${isHeaderSolid || isMenuOpen ? " isSolid" : ""}`}>
-      <div className="siteHeaderInner">
+    <header className={`siteHeader${isHeaderSolid || isMenuOpen ? " isSolid" : ""}`} style={headerStyle}>
+      <div className="siteHeaderInner" style={headerInnerStyle}>
         <Link href="/#top" className="siteLogo" onClick={handleNavClick}>
           <Image
             src="/logo/coolguide-logo.png"
@@ -111,6 +132,7 @@ export default function SiteHeader({ initialSolid = false }: SiteHeaderProps) {
             height={42}
             priority
             className="siteLogoImage"
+            style={logoStyle}
           />
         </Link>
 

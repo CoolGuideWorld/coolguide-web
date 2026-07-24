@@ -1,6 +1,15 @@
 import Image from "next/image";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import AppRevealSection from "@/components/experience/AppRevealSection";
+import DownloadSection from "@/components/experience/DownloadSection";
+import ExperienceIntroSection from "@/components/experience/ExperienceIntroSection";
+import ExperienceSequenceSection from "@/components/experience/ExperienceSequenceSection";
+import HowItWorksSection from "@/components/experience/HowItWorksSection";
+import JourneyPauseSection from "@/components/experience/JourneyPauseSection";
+import LanguagesSection from "@/components/experience/LanguagesSection";
+import TranslationSection from "@/components/experience/TranslationSection";
+import WorldJourneySection from "@/components/experience/WorldJourneySection";
 
 export const metadata = {
   title: "CoolGuide | CoolGuide World",
@@ -28,67 +37,6 @@ export default function Home() {
     {
       image: "/hero/hero-05-story.jpg",
       text: "Chaque lieu a une histoire.\nCoolGuide la raconte au bon moment.",
-    },
-  ];
-
-  const worldJourney = [
-    {
-      image: "/world/01-carcassonne.jpg",
-      title: "Remonter le temps.",
-      place: "Carcassonne",
-    },
-    {
-      image: "/world/02-arenes-nimes.jpg",
-      title: "Comprendre.",
-      place: "Les Arènes de Nîmes",
-    },
-    {
-      image: "/world/03-vannes.jpg",
-      title: "Flâner.",
-      place: "Vannes",
-    },
-    {
-      image: "/world/04-grece.jpg",
-      title: "S’imprégner.",
-      place: "Îles grecques",
-    },
-    {
-      image: "/world/05-debarquement.jpg",
-      title: "Se souvenir.",
-      place: "Plages du Débarquement",
-    },
-    {
-      image: "/world/06-stonehenge.jpg",
-      title: "S’interroger.",
-      place: "Stonehenge",
-    },
-    {
-      image: "/world/07-pyramides.jpg",
-      title: "S’émerveiller.",
-      place: "Pyramides de Gizeh",
-    },
-    {
-      image: "/world/08-tour-eiffel.jpg",
-      title: "Lever les yeux.",
-      place: "Tour Eiffel",
-    },
-  ];
-
-  const howItWorksSteps = [
-    {
-      image: "/how-it-works/step-01-explore.jpg",
-      title: "Vous avancez.",
-      text: "CoolGuide détecte les lieux autour de vous.",
-    },
-    {
-      image: "/how-it-works/step-03-detect.jpg",
-      title: "Vous approchez.",
-      text: "Lorsqu'un lieu mérite votre attention, son récit apparaît naturellement.",
-    },
-    {
-      image: "/how-it-works/step-02-listen.jpg",
-      title: "Vous écoutez.",
-      text: "Découvrez le patrimoine dans votre langue, à votre rythme.",
     },
   ];
 
@@ -146,126 +94,21 @@ export default function Home() {
         ))}
       </main>
 
-      <section className="whyCoolGuide">
-        <div className="whyCoolGuideInner">
-          <p className="whyCoolGuideKicker">Pourquoi CoolGuide</p>
-          <h2>Nous traversons souvent des lieux sans vraiment les voir.</h2>
-          <p>
-            Derrière une façade, une pierre ou un paysage se cachent des histoires que rien ne révèle au premier regard. CoolGuide redonne une voix aux lieux pour transformer une simple visite en véritable découverte.
-          </p>
-        </div>
-      </section>
+      <ExperienceIntroSection />
 
-      <section className="journeyPause respirationSection">
-        <div className="journeyPauseImageLayer">
-          <Image
-            src="/hero/hero-06-bridge.jpg"
-            alt=""
-            fill
-            className="journeyPauseImage"
-          />
-        </div>
+      <LanguagesSection />
 
-        <div className="journeyPauseContent">
-          <p>{"Prenez le temps.\nLe monde vous le rendra."}</p>
-        </div>
-      </section>
+      <TranslationSection />
 
-      <section className="experienceSequence" aria-label="L'experience CoolGuide">
-        <div className="experienceBeat">
-          <p>Vous marchez.</p>
-        </div>
+      <JourneyPauseSection />
 
-        <div className="experienceBeat">
-          <p>Vous levez les yeux.</p>
-        </div>
+      <ExperienceSequenceSection />
 
-        <div className="experienceBeat">
-          <p>Vous écoutez.</p>
-        </div>
+      <WorldJourneySection />
 
-        <div className="experienceBeat">
-          <p>Une histoire commence.</p>
-        </div>
-      </section>
+      <AppRevealSection />
 
-      <section className="worldJourney" id="discover">
-        <div className="worldJourneyHeader">
-          <p>LE MONDE VOUS ATTEND</p>
-          <h2>Partout, des histoires prennent vie.</h2>
-        </div>
-
-        {worldJourney.map((item) => (
-          <article className="worldCard" key={item.image}>
-            <Image
-              src={item.image}
-              alt={item.place}
-              fill
-              className="worldImage"
-            />
-
-            <div className="worldOverlay" />
-
-            <div className="worldContent">
-              <p className="worldPlace">{item.place}</p>
-
-              <h3 className="worldEmotion">{item.title}</h3>
-            </div>
-          </article>
-        ))}
-
-      </section>
-
-      <section className="appReveal">
-        <div className="appRevealLead">
-          <h2>Et si ces histoires vous accompagnaient partout où vous voyagez ?</h2>
-        </div>
-
-        <div className="appRevealVisualWrap">
-          <div className="appRevealVisual">
-            <Image
-              src="/reveal/experience-reveal.jpg"
-              alt="Voyageuse vivant l'expérience CoolGuide"
-              fill
-              sizes="(max-width: 900px) calc(100vw - 2.5rem), min(90vw, 1560px)"
-              className="appRevealVisualImage"
-            />
-          </div>
-        </div>
-
-        <div className="appRevealClosing">
-          <p>CoolGuide les raconte au bon moment.</p>
-        </div>
-      </section>
-
-      <section className="howItWorksSection" id="experience">
-        <div className="howItWorksInner">
-          <div className="howItWorksHeader">
-            <p>Commencez votre voyage.</p>
-            <h2>CoolGuide s'occupe du reste.</h2>
-          </div>
-
-          <div className="howItWorksGrid">
-            {howItWorksSteps.map((step, index) => (
-              <article className="howItWorksStep" key={step.title}>
-                <div className="howPlaceholder" aria-hidden="true">
-                  <Image
-                    src={step.image}
-                    alt=""
-                    fill
-                    sizes="(max-width: 700px) calc(100vw - 2.5rem), (max-width: 1100px) calc((100vw - 6rem) / 2), calc((100vw - 8rem) / 3)"
-                    className="howPlaceholderImage"
-                  />
-                </div>
-
-                <p className="howStepIndex">Étape {index + 1}</p>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorksSection />
 
       <section className="benefitsSection" id="destinations">
         <div className="benefitsInner">
@@ -288,24 +131,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="conclusionSection" id="download">
-        <div className="conclusionInner">
-          <p className="conclusionLead">
-            Le monde est déjà extraordinaire.
-            <br />
-            Il suffit de réapprendre à le regarder.
-          </p>
-
-          <div className="storeButtons" aria-label="Boutons de téléchargement">
-            <a href="#" className="storeButton">
-              App Store
-            </a>
-            <a href="#" className="storeButton">
-              Google Play
-            </a>
-          </div>
-        </div>
-      </section>
+      <DownloadSection />
 
       <SiteFooter />
     </>
