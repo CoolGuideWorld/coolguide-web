@@ -48,6 +48,20 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
   }, [isMenuOpen]);
 
   useEffect(() => {
+    const root = document.documentElement;
+
+    if (isMenuOpen) {
+      root.classList.add("mobile-menu-open");
+    } else {
+      root.classList.remove("mobile-menu-open");
+    }
+
+    return () => {
+      root.classList.remove("mobile-menu-open");
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target;
 

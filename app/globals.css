@@ -967,6 +967,12 @@ html {
     height: 42px;
   }
 
+  @supports (-webkit-touch-callout: none) {
+    html.mobile-menu-open body > main {
+      visibility: hidden;
+    }
+  }
+
   .mobileMenu {
     display: block;
     position: fixed;
@@ -994,14 +1000,6 @@ html {
       transform 220ms ease;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  @supports (-webkit-touch-callout: none) {
-    .mobileMenu {
-      /* iPhone diagnostic: temporarily extend panel height by ~300px */
-      bottom: auto;
-      height: calc(100dvh - var(--header-height) + 300px);
-    }
   }
 
   .mobileMenu.isOpen {
