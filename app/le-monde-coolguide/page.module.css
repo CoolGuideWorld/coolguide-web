@@ -1,0 +1,113 @@
+.lmSection {
+  width: 100%;
+}
+
+.lmInner {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: clamp(1.1rem, 4vw, 3rem);
+  padding-right: clamp(1.1rem, 4vw, 3rem);
+}
+
+.lmCream {
+  background: #f4ede2;
+  background-image: radial-gradient(rgba(31, 26, 23, 0.018) 0.6px, transparent 0.6px);
+  background-size: 7px 7px;
+}
+
+.lmWhite {
+  background: #ffffff;
+}
+
+.lmTitle {
+  max-width: 28ch;
+  color: #10243d;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.lmTitleRule {
+  width: clamp(60px, 7vw, 80px);
+  height: 1px;
+  margin-top: 0.95rem;
+  background: rgba(16, 36, 61, 0.36);
+}
+
+.lmDropCap {
+  float: left;
+  font-size: 3.4em;
+  line-height: 0.88;
+  margin-right: 0.08em;
+  margin-top: 0.06em;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.lmPhotoWrap {
+  width: 100%;
+  margin: clamp(1rem, 2.5vw, 1.6rem) 0 clamp(2rem, 4.4vw, 3rem);
+}
+
+.lmPhoto {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.lmReveal {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: lmReveal 720ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes lmReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lmReveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .lmTitle {
+    max-width: none;
+  }
+}
+
+.lmSignature {
+  margin-top: clamp(3rem, 6vw, 4rem);
+  text-align: center;
+}
+
+.lmSignatureLead {
+  margin: 0;
+  font-size: clamp(0.94rem, 1.18vw, 1.02rem);
+  line-height: 1.7;
+  color: #5a5047;
+  font-style: italic;
+}
+
+.lmSignatureNames {
+  margin: 0.95rem 0 0;
+  font-size: clamp(1.18rem, 1.8vw, 1.42rem);
+  line-height: 1.45;
+  font-weight: 600;
+  color: #10243d;
+}
+
+.lmSignatureText {
+  margin: 0.5rem 0 0;
+  font-size: clamp(0.92rem, 1.14vw, 0.98rem);
+  line-height: 1.7;
+  color: #5a5047;
+  font-style: italic;
+}

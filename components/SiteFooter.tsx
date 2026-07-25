@@ -15,12 +15,6 @@ export default function SiteFooter() {
               className="siteFooterLogoImage"
             />
           </a>
-
-          <p className="siteFooterStatement">
-            Le monde est déjà extraordinaire.
-            <br />
-            Il suffit d'apprendre à le regarder.
-          </p>
         </div>
 
         <nav className="siteFooterNav" aria-label="Footer">

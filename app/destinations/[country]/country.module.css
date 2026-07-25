@@ -1,8 +1,8 @@
 .page {
   --cg-navy: #10243d;
   --cg-navy-strong: #0b1a2b;
-  --cg-accent: #2d7a66;
-  --cg-accent-soft: rgba(45, 122, 102, 0.14);
+  --cg-accent: #00A05D;
+  --cg-accent-soft: rgba(0, 160, 93, 0.14);
   --cg-ivory: #f4ede2;
   --cg-surface: #fcfaf6;
   --cg-surface-strong: #fffdf9;
@@ -167,15 +167,15 @@
 }
 
 .applyButton {
-  background: var(--cg-navy);
+  background: var(--cg-accent);
   color: #fff;
-  border-color: rgba(11, 26, 43, 0.22);
+  border-color: rgba(0, 160, 93, 0.24);
   cursor: pointer;
 }
 
 .applyButton:hover {
-  background: #143150;
-  border-color: rgba(45, 122, 102, 0.55);
+  background: var(--cg-accent);
+  border-color: rgba(0, 160, 93, 0.55);
 }
 
 .resetButton {

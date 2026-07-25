@@ -48,6 +48,7 @@ export default function PublicPageShell({
           <h1
             style={{
               margin: 0,
+              color: "#10243d",
               fontSize: "clamp(2rem, 5vw, 4rem)",
               fontWeight: 300,
               lineHeight: 1.08,
@@ -91,11 +92,11 @@ export default function PublicPageShell({
                     minHeight: "44px",
                     padding: "0.8rem 1.1rem",
                     borderRadius: "999px",
-                    border: "1px solid rgba(31, 26, 23, 0.14)",
-                    color: "#1f1a17",
+                    border: "1px solid rgba(0, 160, 93, 0.18)",
+                    color: "#f8f3ea",
                     textDecoration: "none",
                     fontSize: "0.98rem",
-                    background: "rgba(255, 255, 255, 0.24)",
+                    background: "#00A05D",
                   }}
                 >
                   {link.label}

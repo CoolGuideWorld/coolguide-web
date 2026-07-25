@@ -15,6 +15,7 @@ export const headerLinks = [
   { href: "/#top", label: "Découvrir" },
   { href: "/experience", label: "Expérience" },
   { href: "/destinations", label: "Destinations" },
+  { href: "/contact", label: "Contact" },
 ] satisfies HeaderLink[];
 
 export const coolGuideWorldLinks = [
