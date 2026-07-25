@@ -996,6 +996,14 @@ html {
     -webkit-overflow-scrolling: touch;
   }
 
+  @supports (-webkit-touch-callout: none) {
+    .mobileMenu {
+      /* iPhone diagnostic: temporarily extend panel height by ~300px */
+      bottom: auto;
+      height: calc(100dvh - var(--header-height) + 300px);
+    }
+  }
+
   .mobileMenu.isOpen {
     opacity: 1;
     pointer-events: auto;
