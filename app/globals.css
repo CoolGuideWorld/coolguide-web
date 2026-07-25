@@ -971,6 +971,11 @@ html {
     html.mobile-menu-open body > main {
       visibility: hidden;
     }
+
+    html.mobile-menu-open .siteHeader {
+      background: #ff0000 !important;
+      outline: 5px solid #00ff00 !important;
+    }
   }
 
   .mobileMenu {
