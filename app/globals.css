@@ -122,8 +122,25 @@ html {
 
 .siteLogoImage {
   display: block;
-  width: clamp(120px, 15vw, 170px);
+  width: clamp(108px, 13.5vw, 152px);
   height: auto;
+}
+
+@media (min-width: 901px) {
+  .siteHeader.isCompact {
+    --header-height: clamp(64px, 8.6vw, 80px);
+  }
+
+  .siteHeader.isCompact .siteHeaderInner {
+    padding: 0 clamp(0.85rem, 2.2vw, 1.5rem);
+    gap: clamp(0.8rem, 1.4vw, 1.2rem);
+  }
+
+  .siteHeader.isCompact .siteLogoImage {
+    width: clamp(95px, 11vw, 120px);
+    height: auto;
+    display: block;
+  }
 }
 
 .siteHeader.isSolid .siteLogo,
@@ -293,7 +310,7 @@ html {
 
 .mobileMenu {
   display: none;
-  z-index: 1;
+  z-index: 49;
 }
 .hero {
   position: relative;
@@ -953,7 +970,8 @@ html {
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 1rem 1rem 1.5rem;
+    padding: 1rem calc(1rem + env(safe-area-inset-right))
+      calc(1.5rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
     background: rgba(248, 243, 234, 0.96);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);

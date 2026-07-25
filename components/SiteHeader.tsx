@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type FocusEvent } from "react";
+import { useEffect, useState, type FocusEvent } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   coolGuideWorldDropdownConfig,
   coolGuideWorldLinks,
@@ -15,29 +17,16 @@ type SiteHeaderProps = {
 };
 
 export default function SiteHeader({ initialSolid = false, compact = false }: SiteHeaderProps) {
+  const pathname = usePathname();
   const solidByDefault = initialSolid || compact;
   const [isHeaderSolid, setIsHeaderSolid] = useState(solidByDefault);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<"world" | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const headerStyle: CSSProperties | undefined = compact
-    ? { ["--header-height" as string]: "clamp(64px, 8.6vw, 80px)" }
-    : undefined;
-
-  const headerInnerStyle: CSSProperties | undefined = compact
-    ? {
-      padding: "0 clamp(0.85rem, 2.2vw, 1.5rem)",
-      gap: "clamp(0.8rem, 1.4vw, 1.2rem)",
-    }
-    : undefined;
-
-  const logoStyle: CSSProperties | undefined = compact
-    ? {
-      width: "clamp(95px, 11vw, 120px)",
-      height: "auto",
-      display: "block",
-    }
-    : undefined;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,6 +80,11 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setOpenDesktopMenu(null);
+  }, [pathname]);
+
   const handleNavClick = () => {
     setIsMenuOpen(false);
     setOpenDesktopMenu(null);
@@ -121,9 +115,53 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
     setOpenDesktopMenu((currentMenu) => (currentMenu === menu ? null : currentMenu));
   };
 
+  const mobileMenuPanel = (
+    <div
+      id="mobile-navigation"
+      className={`mobileMenu${isMenuOpen ? " isOpen" : ""}`}
+    >
+      <nav className="mobileMenuNav" aria-label="Navigation mobile">
+        {headerLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="mobileMenuLink"
+            onClick={handleNavClick}
+          >
+            {link.label}
+          </Link>
+        ))}
+
+        <div className="mobileMenuGroup" aria-label="Le Monde CoolGuide">
+          <p className="mobileMenuGroupTitle">Le Monde CoolGuide</p>
+          <div className="mobileMenuSubLinks">
+            {coolGuideWorldLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="mobileMenuSubLink"
+                onClick={handleNavClick}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      <Link href="/#download" className="mobileMenuButton" onClick={handleNavClick}>
+        Télécharger
+      </Link>
+    </div>
+  );
+
   return (
-    <header className={`siteHeader${isHeaderSolid || isMenuOpen ? " isSolid" : ""}`} style={headerStyle}>
-      <div className="siteHeaderInner" style={headerInnerStyle}>
+    <header
+      className={`siteHeader${compact ? " isCompact" : ""}${
+        isHeaderSolid || isMenuOpen ? " isSolid" : ""
+      }`}
+    >
+      <div className="siteHeaderInner">
         <Link href="/#top" className="siteLogo" onClick={handleNavClick}>
           <Image
             src="/logo/coolguide-logo.png"
@@ -132,7 +170,6 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
             height={42}
             priority
             className="siteLogoImage"
-            style={logoStyle}
           />
         </Link>
 
@@ -227,43 +264,7 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
         </button>
       </div>
 
-      <div
-        id="mobile-navigation"
-        className={`mobileMenu${isMenuOpen ? " isOpen" : ""}`}
-      >
-        <nav className="mobileMenuNav" aria-label="Navigation mobile">
-          {headerLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="mobileMenuLink"
-              onClick={handleNavClick}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          <div className="mobileMenuGroup" aria-label="Le Monde CoolGuide">
-            <p className="mobileMenuGroupTitle">Le Monde CoolGuide</p>
-            <div className="mobileMenuSubLinks">
-              {coolGuideWorldLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="mobileMenuSubLink"
-                  onClick={handleNavClick}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </nav>
-
-        <Link href="/#download" className="mobileMenuButton" onClick={handleNavClick}>
-          Télécharger
-        </Link>
-      </div>
+      {isMounted ? createPortal(mobileMenuPanel, document.body) : null}
     </header>
   );
 }
