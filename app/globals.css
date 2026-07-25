@@ -942,6 +942,10 @@ html {
     --header-height: 68px;
   }
 
+  .siteHeader {
+    z-index: 1001;
+  }
+
   .siteHeaderInner {
     padding: 0 clamp(0.85rem, 4vw, 1.2rem);
     gap: 0.8rem;
@@ -970,11 +974,12 @@ html {
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 1000;
     padding: 1rem calc(1rem + env(safe-area-inset-right))
       calc(1.5rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
-    background: rgba(248, 243, 234, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: #f8f3ea;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-12px);
