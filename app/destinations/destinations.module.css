@@ -2,6 +2,7 @@
   position: relative;
   isolation: isolate;
   min-height: 100vh;
+  overflow-x: clip;
   background:
     radial-gradient(circle at 50% -5%, rgba(49, 86, 132, 0.24), transparent 46%),
     linear-gradient(180deg, #040d19 0%, #030814 52%, #030611 100%);
