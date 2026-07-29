@@ -1,11 +1,22 @@
 import {
-  type CityBadgeItem,
-  type CityNearbyDestinationItem,
   nimesCityData,
-  type CityHighlightItem,
-  type CityPageData,
 } from "@/data/cities/nimes";
+import type {
+  CityBadgeItem,
+  CityNearbyDestinationItem,
+  CityHighlightItem,
+  CityPageData,
+} from "@/types/city";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  getDestinationContentForCity,
+  type DestinationContentSupabaseRow,
+} from "@/services/destinations/getDestinationContent";
+import { getDestinationContext } from "@/services/destinations/getDestinationContext";
+import { getDestinationFaq } from "@/services/destinations/getDestinationFaq";
+import { getDestinationHighlights } from "@/services/destinations/getDestinationHighlights";
+import { getDestinationItineraries } from "@/services/destinations/getDestinationItineraries";
+import { getDestinationPractical } from "@/services/destinations/getDestinationPractical";
 
 type CityRelationRow = {
   name: string;
@@ -371,125 +382,182 @@ function mapComputedStatsToItems(
   return stats;
 }
 
+function resolveHeroName(
+  cityName: string,
+  destinationContent: DestinationContentSupabaseRow | null
+): string {
+  return firstNonEmptyString(destinationContent?.title, cityName) ?? cityName;
+}
+
+function resolveHeroTagline(
+  destinationContent: DestinationContentSupabaseRow | null,
+  fallbackTagline: string | null
+): string {
+  return firstNonEmptyString(destinationContent?.subtitle, fallbackTagline) ?? "";
+}
+
+function resolveHeroImage(
+  heroImage: CityImageSupabaseRow | null,
+  fallbackHighlights: CityHighlightItem[]
+): {
+  imageSrc: string | null;
+  imageAlt: string | null;
+} {
+  if (isNonEmptyString(heroImage?.image_url)) {
+    return {
+      imageSrc: heroImage.image_url.trim(),
+      imageAlt: firstNonEmptyString(heroImage?.alt_text) ?? null,
+    };
+  }
+
+  const fallbackHighlight = fallbackHighlights[0] ?? null;
+
+  if (fallbackHighlight && isNonEmptyString(fallbackHighlight.imageSrc)) {
+    return {
+      imageSrc: fallbackHighlight.imageSrc.trim(),
+      imageAlt: firstNonEmptyString(fallbackHighlight.imageAlt) ?? null,
+    };
+  }
+
+  return {
+    imageSrc: null,
+    imageAlt: null,
+  };
+}
+
+function buildCityCta(cityName: string): CityPageData["cta"] {
+  return {
+    title: "CoolGuide dans votre poche",
+    text: `Retrouvez les lieux, les histoires audio et les parcours de ${cityName} dans l'application, au rythme de votre visite.`,
+    linkLabel: "Découvrir CoolGuide",
+    linkHref: "/experience",
+  };
+}
+
 function buildUniversalCityData(
   city: CitySupabaseRow,
+  destinationContent: DestinationContentSupabaseRow | null,
   heroImage: CityImageSupabaseRow | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
+  destinationFaq: CityPageData["faq"],
+  destinationItineraries: CityPageData["itineraries"],
+  destinationPractical: CityPageData["practical"],
   nearbyDestinations: CityNearbyDestinationItem[],
   computedStats: ComputedCityStats
 ): CityPageData {
-  const heroTagline = firstNonEmptyString(
+  const resolvedHeroImage = resolveHeroImage(heroImage, supabaseHighlights);
+  const fallbackHeroTagline = firstNonEmptyString(
     computedStats.bestVisitPeriod,
     computedStats.idealVisitDuration
   );
-  const heroImageSrc = isNonEmptyString(heroImage?.image_url)
-    ? heroImage.image_url.trim()
-    : "";
+  const shortDescription = firstNonEmptyString(destinationContent?.short_description);
+  const introduction = firstNonEmptyString(destinationContent?.introduction);
+  const localFaq: CityPageData["faq"] = [];
+  const localItineraries: CityPageData["itineraries"] = [];
 
   return {
     hero: {
-      name: city.name,
+      name: resolveHeroName(city.name, destinationContent),
       location: buildLocation(city),
-      tagline: heroTagline ?? "",
-      imageSrc: heroImageSrc,
-      imageAlt: firstNonEmptyString(heroImage?.alt_text) ?? "",
+      tagline: resolveHeroTagline(destinationContent, fallbackHeroTagline),
+      imageSrc: resolvedHeroImage.imageSrc,
+      imageAlt: resolvedHeroImage.imageAlt as string,
     },
+    shortDescription,
+    introduction,
     stats: mapComputedStatsToItems(computedStats),
     badges: supabaseBadges,
     highlights: supabaseHighlights,
     nearbyDestinations,
-    practical: [],
-    itineraries: [],
-    faq: [],
-    cta: {
-      title: "",
-      text: "",
-      linkLabel: "",
-      linkHref: "",
-    },
+    practical:
+      destinationPractical.length > 0
+        ? destinationPractical
+        : [],
+    itineraries:
+      destinationItineraries.length > 0
+        ? destinationItineraries
+        : localItineraries,
+    faq:
+      destinationFaq.length > 0
+        ? destinationFaq
+        : localFaq,
+    cta: buildCityCta(city.name),
   };
 }
 
 function mergeWithLocalCityData(
-  localCityData: CityPageData,
+  localCityData: Omit<
+    CityPageData,
+    "cta" | "nearbyDestinations" | "badges" | "stats" | "hero" | "highlights"
+  > & {
+    hero: Omit<CityPageData["hero"], "imageSrc">;
+  },
   city: CitySupabaseRow,
+  destinationContent: DestinationContentSupabaseRow | null,
   heroImage: CityImageSupabaseRow | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
+  destinationFaq: CityPageData["faq"],
+  destinationItineraries: CityPageData["itineraries"],
+  destinationPractical: CityPageData["practical"],
   nearbyDestinations: CityNearbyDestinationItem[],
   computedStats: ComputedCityStats
 ): CityPageData {
+  const resolvedHeroImage = resolveHeroImage(heroImage, supabaseHighlights);
+  const fallbackHeroTagline = firstNonEmptyString(
+    localCityData.hero.tagline,
+    computedStats.bestVisitPeriod,
+    computedStats.idealVisitDuration
+  );
+  const localFaq = localCityData.faq;
+  const localItineraries = localCityData.itineraries;
+  const shortDescription = firstNonEmptyString(destinationContent?.short_description);
+  const introduction = firstNonEmptyString(destinationContent?.introduction);
+
   return {
     ...localCityData,
 
     hero: {
       ...localCityData.hero,
 
-      name: city.name,
+      name: resolveHeroName(city.name, destinationContent),
+
+      tagline: resolveHeroTagline(destinationContent, fallbackHeroTagline),
 
       location: buildLocation(city),
 
-      imageSrc: heroImage?.image_url ?? localCityData.hero.imageSrc,
+      imageSrc: resolvedHeroImage.imageSrc,
 
-      imageAlt: heroImage?.alt_text ?? localCityData.hero.imageAlt,
+      imageAlt: (resolvedHeroImage.imageAlt ?? localCityData.hero.imageAlt) as string,
     },
 
-    stats: localCityData.stats.map((item) => {
-      if (item.key === "population" && computedStats.population !== null) {
-        return {
-          ...item,
-          value: computedStats.population,
-        };
-      }
+    shortDescription,
 
-      if (item.key === "places" && computedStats.places !== null) {
-        return {
-          ...item,
-          value: String(computedStats.places),
-        };
-      }
+    introduction,
 
-      if (item.key === "audioguides" && computedStats.audioguides !== null) {
-        return {
-          ...item,
-          value: String(computedStats.audioguides),
-        };
-      }
+    stats: mapComputedStatsToItems(computedStats),
 
-      if (item.key === "languages" && computedStats.languages !== null) {
-        return {
-          ...item,
-          value: `${computedStats.languages} langues`,
-        };
-      }
+    badges: supabaseBadges,
 
-      if (item.key === "ideal-duration" && computedStats.idealVisitDuration) {
-        return {
-          ...item,
-          value: computedStats.idealVisitDuration,
-        };
-      }
+    highlights: supabaseHighlights,
 
-      if (item.key === "best-period" && computedStats.bestVisitPeriod) {
-        return {
-          ...item,
-          value: computedStats.bestVisitPeriod,
-        };
-      }
+    practical:
+      destinationPractical.length > 0
+        ? destinationPractical
+        : localCityData.practical,
 
-      return item;
-    }),
+    itineraries:
+      destinationItineraries.length > 0
+        ? destinationItineraries
+        : localItineraries,
 
-    badges:
-      supabaseBadges.length > 0
-        ? supabaseBadges
-        : localCityData.badges,
+    faq:
+      destinationFaq.length > 0
+        ? destinationFaq
+        : localFaq,
 
-    highlights:
-      supabaseHighlights.length > 0
-        ? supabaseHighlights
-        : nimesCityData.highlights,
+    cta: buildCityCta(city.name),
 
     nearbyDestinations,
   };
@@ -546,6 +614,38 @@ export async function getCity(
       console.warn(`No city found in Supabase for slug "${normalizedSlug}".`);
       return null;
     }
+
+    const destinationContext = await getDestinationContext(
+      supabase,
+      city.id,
+      "fr"
+    );
+
+    // Lecture editoriale du site via l'architecture destinations (FR).
+    const destinationContent = await getDestinationContentForCity(
+      supabase,
+      destinationContext
+    );
+
+    const destinationHighlights = await getDestinationHighlights(
+      supabase,
+      destinationContext
+    );
+
+    const destinationPractical = await getDestinationPractical(
+      supabase,
+      destinationContext
+    );
+
+    const destinationFaq = await getDestinationFaq(
+      supabase,
+      destinationContext
+    );
+
+    const destinationItineraries = await getDestinationItineraries(
+      supabase,
+      destinationContext
+    );
 
     /*
      * 2. Lecture de l'image Hero
@@ -881,6 +981,11 @@ export async function getCity(
       }
     }
 
+    const resolvedHighlights =
+      destinationHighlights.length > 0
+        ? destinationHighlights
+        : supabaseHighlights;
+
     const computedStats: ComputedCityStats = {
       population:
         city.population !== null ? formatPopulation(city.population) : null,
@@ -899,9 +1004,13 @@ export async function getCity(
       return mergeWithLocalCityData(
         nimesCityData,
         city,
+        destinationContent,
         heroImageError ? null : heroImage,
         supabaseBadges,
-        supabaseHighlights,
+        resolvedHighlights,
+        destinationFaq,
+        destinationItineraries,
+        destinationPractical,
         nearbyDestinations,
         computedStats
       );
@@ -909,9 +1018,13 @@ export async function getCity(
 
     return buildUniversalCityData(
       city,
+      destinationContent,
       heroImageError ? null : heroImage,
       supabaseBadges,
-      supabaseHighlights,
+      resolvedHighlights,
+      destinationFaq,
+      destinationItineraries,
+      destinationPractical,
       nearbyDestinations,
       computedStats
     );

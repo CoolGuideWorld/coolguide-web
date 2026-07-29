@@ -1,5 +1,5 @@
 import styles from "./city.module.css";
-import type { CityFaqItem } from "@/data/cities/nimes";
+import type { CityFaqItem } from "@/types/city";
 
 type CityFAQProps = {
   title: string;

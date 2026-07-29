@@ -1,6 +1,6 @@
 import Image from "next/image";
 import styles from "./city.module.css";
-import type { CityHighlightItem } from "@/data/cities/nimes";
+import type { CityHighlightItem } from "@/types/city";
 
 type CityHighlightsProps = {
   title: string;

@@ -1,5 +1,5 @@
 import styles from "./city.module.css";
-import type { CityBadgeItem } from "@/data/cities/nimes";
+import type { CityBadgeItem } from "@/types/city";
 
 type CityBadgesProps = {
   badges: CityBadgeItem[];

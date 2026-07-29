@@ -1,4 +1,4 @@
-import type { CityHighlightItem, CityPageData } from "@/data/cities/nimes";
+import type { CityHighlightItem, CityPageData } from "@/types/city";
 
 export type CityPublicationCheck = {
   publishable: boolean;
@@ -27,6 +27,52 @@ function isValidHighlight(
   );
 }
 
+function hasMainDestinationContent(cityData: CityPageData): boolean {
+  return (
+    isNonEmptyString(cityData?.hero?.name) &&
+    isNonEmptyString(cityData?.hero?.tagline)
+  );
+}
+
+function hasCompletePracticalContent(cityData: CityPageData): boolean {
+  if (!Array.isArray(cityData?.practical) || cityData.practical.length === 0) {
+    return false;
+  }
+
+  return cityData.practical.every(
+    (item) => isNonEmptyString(item?.title) && isNonEmptyString(item?.answer)
+  );
+}
+
+function hasCompleteItinerariesContent(cityData: CityPageData): boolean {
+  if (!Array.isArray(cityData?.itineraries) || cityData.itineraries.length === 0) {
+    return false;
+  }
+
+  return cityData.itineraries.every(
+    (item) =>
+      isNonEmptyString(item?.title) &&
+      isNonEmptyString(item?.duration) &&
+      isNonEmptyString(item?.summary) &&
+      isNonEmptyString(item?.content)
+  );
+}
+
+function getHighlightsCompleteness(cityData: CityPageData): {
+  hasHighlights: boolean;
+  allHighlightsComplete: boolean;
+  validHighlights: CityHighlightItem[];
+} {
+  const highlights = Array.isArray(cityData?.highlights) ? cityData.highlights : [];
+  const validHighlights = highlights.filter(isValidHighlight);
+
+  return {
+    hasHighlights: highlights.length > 0,
+    allHighlightsComplete: highlights.length > 0 && validHighlights.length === highlights.length,
+    validHighlights,
+  };
+}
+
 export function getCityPublicationCheck(
   cityData: CityPageData
 ): CityPublicationCheck {
@@ -39,9 +85,12 @@ export function getCityPublicationCheck(
     isNonEmptyString(heroTagline) &&
     isNonEmptyString(heroImage);
 
-  const validHighlights = Array.isArray(cityData?.highlights)
-    ? cityData.highlights.filter(isValidHighlight)
-    : [];
+  const { hasHighlights, allHighlightsComplete, validHighlights } =
+    getHighlightsCompleteness(cityData);
+
+  const hasDestinationContent = hasMainDestinationContent(cityData);
+  const hasPracticalContent = hasCompletePracticalContent(cityData);
+  const hasItinerariesContent = hasCompleteItinerariesContent(cityData);
 
   const validStats = Array.isArray(cityData?.stats)
     ? cityData.stats.filter(
@@ -62,30 +111,20 @@ export function getCityPublicationCheck(
 
   const missing: string[] = [];
 
-  if (!hasCompleteHero) {
-    if (!isNonEmptyString(heroTitle)) {
-      missing.push("hero.title");
-    }
-
-    if (!isNonEmptyString(heroTagline)) {
-      missing.push("hero.tagline");
-    }
-
-    if (!isNonEmptyString(heroImage)) {
-      missing.push("hero.image");
-    }
+  if (!hasDestinationContent) {
+    missing.push("destination_contents");
   }
 
-  if (validHighlights.length < 3) {
-    missing.push("highlights.minimum_3");
+  if (!hasPracticalContent) {
+    missing.push("practical");
   }
 
-  if (validStats.length === 0) {
-    missing.push("stats");
+  if (!hasItinerariesContent) {
+    missing.push("itineraries");
   }
 
-  if (validBadges.length === 0) {
-    missing.push("badges");
+  if (!hasHighlights || !allHighlightsComplete) {
+    missing.push("highlights.complete");
   }
 
   return {

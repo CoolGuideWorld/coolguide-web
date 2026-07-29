@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "./city.module.css";
-import type { CityCTAData } from "@/data/cities/nimes";
+import type { CityCTAData } from "@/types/city";
 
 type CityCTAProps = {
   cta: CityCTAData;

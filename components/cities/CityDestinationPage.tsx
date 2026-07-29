@@ -5,11 +5,12 @@ import CityStats from "@/components/cities/CityStats";
 import CityBadges from "@/components/cities/CityBadges";
 import CityHighlights from "@/components/cities/CityHighlights";
 import CityNearbyDestinations from "@/components/cities/CityNearbyDestinations";
+import CityIntroduction from "@/components/cities/CityIntroduction";
 import CityPractical from "@/components/cities/CityPractical";
 import CityItineraries from "@/components/cities/CityItineraries";
 import CityFAQ from "@/components/cities/CityFAQ";
 import CityCTA from "@/components/cities/CityCTA";
-import type { CityPageData } from "@/data/cities/nimes";
+import type { CityPageData } from "@/types/city";
 import styles from "@/components/cities/city.module.css";
 
 type CityDestinationPageProps = {
@@ -39,6 +40,12 @@ export default function CityDestinationPage({
       <main className={styles.main}>
         <div className={styles.stack}>
           <CityHero hero={cityData.hero} />
+          {typeof cityData.shortDescription === "string" || typeof cityData.introduction === "string" ? (
+            <CityIntroduction
+              shortDescription={cityData.shortDescription}
+              introduction={cityData.introduction}
+            />
+          ) : null}
           {cityData.stats.length > 0 ? (
             <CityStats title="En un coup d'oeil" stats={cityData.stats} />
           ) : null}

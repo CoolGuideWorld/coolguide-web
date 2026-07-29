@@ -1,10 +1,21 @@
 import styles from "./city.module.css";
-import type { CityItineraryItem } from "@/data/cities/nimes";
+import type { CityItineraryItem } from "@/types/city";
 
 type CityItinerariesProps = {
   title: string;
   items: CityItineraryItem[];
 };
+
+function normalizeText(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function getContentLines(content: string): string[] {
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
 
 export default function CityItineraries({ title, items }: CityItinerariesProps) {
   return (
@@ -19,11 +30,14 @@ export default function CityItineraries({ title, items }: CityItinerariesProps) 
             <h3 className={styles.itineraryTitle}>{item.title}</h3>
             <p className={styles.itineraryDuration}>{item.duration}</p>
             <p className={styles.itinerarySummary}>{item.summary}</p>
-            <ul className={styles.itineraryStops}>
-              {item.stops.map((stop) => (
-                <li key={stop}>{stop}</li>
-              ))}
-            </ul>
+            {normalizeText(item.content).length > 0 &&
+            normalizeText(item.content) !== normalizeText(item.summary) ? (
+              <ul className={styles.itineraryStops}>
+                {getContentLines(item.content).map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
           </article>
         ))}
       </div>

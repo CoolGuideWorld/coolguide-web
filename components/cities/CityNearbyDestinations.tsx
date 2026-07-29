@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CityNearbyDestinationItem } from "@/data/cities/nimes";
+import type { CityNearbyDestinationItem } from "@/types/city";
 import styles from "./city.module.css";
 
 type CityNearbyDestinationsProps = {

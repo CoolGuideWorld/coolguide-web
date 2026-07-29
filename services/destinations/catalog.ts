@@ -15,9 +15,22 @@ type RelationRow = {
   name: string;
 };
 
+type PoiCategoryRow = {
+  name: string;
+};
+
+type PoiRow = {
+  id: string;
+  name: string | null;
+  category: PoiCategoryRow | PoiCategoryRow[] | null;
+};
+
 type ImageRow = {
   image_url: string | null;
   alt_text: string | null;
+  image_type: string | null;
+  is_active: boolean | null;
+  position?: number | null;
 };
 
 type SearchableCityImageRow = {
@@ -26,11 +39,70 @@ type SearchableCityImageRow = {
   is_active: boolean | null;
 };
 
+type ActiveCityRow = {
+  id: string;
+  slug: string;
+};
+
+type DestinationRow = {
+  id: string;
+  city_id: string;
+};
+
+type DestinationContentRow = {
+  destination_id: string;
+};
+
+type DestinationPracticalItemRow = {
+  id: string;
+  destination_id: string;
+};
+
+type DestinationPracticalItemContentRow = {
+  destination_practical_item_id: string;
+  title: string | null;
+  answer: string | null;
+};
+
+type DestinationItineraryRow = {
+  id: string;
+  destination_id: string;
+};
+
+type DestinationItineraryContentRow = {
+  destination_itinerary_id: string;
+  title: string | null;
+  duration_label: string | null;
+  summary: string | null;
+};
+
+type DestinationHighlightRow = {
+  id: string;
+  destination_id: string;
+  poi_id: string | null;
+};
+
+type DestinationHighlightContentRow = {
+  destination_highlight_id: string;
+  category_label: string | null;
+};
+
+type PoiImageRow = {
+  poi_id: string;
+  image_url: string | null;
+  display_order?: number | null;
+};
+
 type CatalogCityRow = {
+  id: string;
   slug: string;
   name: string;
   administrative_areas: RelationRow | RelationRow[] | null;
   city_images: ImageRow | ImageRow[] | null;
+};
+
+type AdministrativeAreaCityRow = {
+  administrative_areas: RelationRow | RelationRow[] | null;
 };
 
 type SearchableCityCountryRow = {
@@ -40,7 +112,6 @@ type SearchableCityCountryRow = {
   latitude: number | null;
   longitude: number | null;
   countries: CountryRow | CountryRow[] | null;
-  city_images: SearchableCityImageRow | SearchableCityImageRow[] | null;
 };
 
 export type CountryDestinationCard = {
@@ -124,6 +195,34 @@ function readCountryRelation(relation: CountryRow | CountryRow[] | null): Countr
   return relation;
 }
 
+function readSingleRelation<T>(relation: T | T[] | null): T | null {
+  if (!relation) {
+    return null;
+  }
+
+  if (Array.isArray(relation)) {
+    return relation[0] ?? null;
+  }
+
+  return relation;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function firstNonEmptyString(
+  ...values: Array<string | null | undefined>
+): string | null {
+  for (const value of values) {
+    if (isNonEmptyString(value)) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
 function normalizeSlug(value: string): string {
   return value
     .normalize("NFD")
@@ -148,11 +247,637 @@ function applyCatalogPublicationFilters<T>(query: T, relationPrefix = ""): T {
   // Shared publication source for catalog list + administrative filters.
   const field = (column: string) => (relationPrefix ? `${relationPrefix}.${column}` : column);
 
-  return (query as any)
-    .eq(field("status"), "active")
-    .eq(field("city_images.image_type"), "hero")
-    .eq(field("city_images.is_active"), true)
-    .not(field("city_images.image_url"), "is", null);
+  return (query as any).eq(field("status"), "active");
+}
+
+function readCatalogHeroImage(relation: ImageRow | ImageRow[] | null): ImageRow | null {
+  if (!relation) {
+    return null;
+  }
+
+  const images = Array.isArray(relation) ? relation : [relation];
+  const compatibleImages = images.filter(
+    (image) =>
+      image !== null &&
+      image !== undefined &&
+      image.image_type === "hero" &&
+      image.is_active === true &&
+      typeof image.image_url === "string" &&
+      image.image_url.trim().length > 0
+  );
+
+  if (compatibleImages.length === 0) {
+    return null;
+  }
+
+  const sorted = [...compatibleImages].sort((a, b) => {
+    const aPosition = typeof a.position === "number" ? a.position : Number.MAX_SAFE_INTEGER;
+    const bPosition = typeof b.position === "number" ? b.position : Number.MAX_SAFE_INTEGER;
+    return aPosition - bPosition;
+  });
+
+  return sorted[0] ?? null;
+}
+
+function getFirstImageByPoiId(rows: PoiImageRow[]): Map<string, PoiImageRow> {
+  const firstImageByPoiId = new Map<string, PoiImageRow>();
+
+  for (const row of rows) {
+    if (!isNonEmptyString(row.poi_id) || !isNonEmptyString(row.image_url)) {
+      continue;
+    }
+
+    if (!firstImageByPoiId.has(row.poi_id)) {
+      firstImageByPoiId.set(row.poi_id, row);
+    }
+  }
+
+  return firstImageByPoiId;
+}
+
+function getLanguageIdByIsoCodeRows(rows: Array<{ id: string }>): string | null {
+  const languageId = rows[0]?.id;
+  return isNonEmptyString(languageId) ? languageId : null;
+}
+
+function splitIntoChunks<T>(values: T[], size = 200): T[][] {
+  if (values.length === 0) {
+    return [];
+  }
+
+  const chunks: T[][] = [];
+
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+
+  return chunks;
+}
+
+async function getCatalogFallbackImagesByCityId(
+  supabase = createServerSupabaseClient(),
+  cityIds: string[]
+): Promise<
+  Map<
+    string,
+    {
+      imageSrc: string | null;
+      imageAlt: string | null;
+    }
+  >
+> {
+  const fallbackByCityId = new Map<
+    string,
+    {
+      imageSrc: string | null;
+      imageAlt: string | null;
+    }
+  >();
+
+  const validCityIds = cityIds.filter((cityId): cityId is string => isNonEmptyString(cityId));
+
+  if (validCityIds.length === 0) {
+    return fallbackByCityId;
+  }
+
+  const destinations: DestinationRow[] = [];
+
+  for (const cityIdChunk of splitIntoChunks(validCityIds)) {
+    const { data, error } = await supabase
+      .from("destinations")
+      .select("id,city_id")
+      .in("city_id", cityIdChunk);
+
+    if (error) {
+      console.error(
+        `Supabase destinations query failed for catalog fallback: ${error.message}`
+      );
+      return fallbackByCityId;
+    }
+
+    destinations.push(...((data ?? []) as DestinationRow[]));
+  }
+
+  const destinationIdByCityId = new Map<string, string>();
+
+  for (const destination of destinations) {
+    if (isNonEmptyString(destination.id) && isNonEmptyString(destination.city_id)) {
+      destinationIdByCityId.set(destination.city_id, destination.id);
+    }
+  }
+
+  const destinationIds = Array.from(destinationIdByCityId.values());
+
+  if (destinationIds.length === 0) {
+    return fallbackByCityId;
+  }
+
+  const highlights: DestinationHighlightRow[] = [];
+
+  for (const destinationIdChunk of splitIntoChunks(destinationIds)) {
+    const { data, error } = await supabase
+      .from("destination_highlights")
+      .select("id,destination_id,poi_id,position")
+      .in("destination_id", destinationIdChunk)
+      .order("position", { ascending: true });
+
+    if (error) {
+      console.error(
+        `Supabase destination highlights fallback query failed: ${error.message}`
+      );
+      return fallbackByCityId;
+    }
+
+    highlights.push(...((data ?? []) as DestinationHighlightRow[]));
+  }
+
+  const firstHighlightByDestinationId = new Map<string, DestinationHighlightRow>();
+
+  for (const highlight of highlights) {
+    if (!isNonEmptyString(highlight.destination_id) || !isNonEmptyString(highlight.poi_id)) {
+      continue;
+    }
+
+    if (!firstHighlightByDestinationId.has(highlight.destination_id)) {
+      firstHighlightByDestinationId.set(highlight.destination_id, highlight);
+    }
+  }
+
+  const firstHighlightPoiIds = Array.from(firstHighlightByDestinationId.values())
+    .map((highlight) => highlight.poi_id)
+    .filter((poiId): poiId is string => isNonEmptyString(poiId));
+
+  if (firstHighlightPoiIds.length === 0) {
+    return fallbackByCityId;
+  }
+
+  const poiImages: PoiImageRow[] = [];
+
+  for (const poiIdChunk of splitIntoChunks(firstHighlightPoiIds)) {
+    const { data, error } = await supabase
+      .from("poi_images")
+      .select("poi_id,image_url,display_order")
+      .in("poi_id", poiIdChunk)
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      console.error(
+        `Supabase poi images fallback query failed: ${error.message}`
+      );
+      return fallbackByCityId;
+    }
+
+    poiImages.push(...((data ?? []) as PoiImageRow[]));
+  }
+
+  const firstImageByPoiId = getFirstImageByPoiId(poiImages);
+
+  for (const [cityId, destinationId] of destinationIdByCityId) {
+    const highlight = firstHighlightByDestinationId.get(destinationId);
+    if (!highlight?.poi_id) {
+      continue;
+    }
+
+    const image = firstImageByPoiId.get(highlight.poi_id) ?? null;
+
+    if (!image?.image_url || !isNonEmptyString(image.image_url)) {
+      continue;
+    }
+
+    fallbackByCityId.set(cityId, {
+      imageSrc: image.image_url.trim(),
+      imageAlt: null,
+    });
+  }
+
+  return fallbackByCityId;
+}
+
+async function getPublishableCityIdsForCountry(
+  countryId: string
+): Promise<Set<string>> {
+  const supabase = createServerSupabaseClient();
+
+  const { data: activeCityRows, error: activeCitiesError } = await supabase
+    .from("cities")
+    .select("id,slug")
+    .eq("country_id", countryId)
+    .eq("status", "active");
+
+  if (activeCitiesError) {
+    console.error(
+      `Supabase active cities query failed for country_id "${countryId}": ${activeCitiesError.message}`
+    );
+    return new Set();
+  }
+
+  const activeCities = (activeCityRows ?? []) as ActiveCityRow[];
+  const cityIds = activeCities
+    .map((city) => city.id)
+    .filter((cityId): cityId is string => isNonEmptyString(cityId));
+
+  if (cityIds.length === 0) {
+    return new Set();
+  }
+
+  const { data: destinationRows, error: destinationsError } = await supabase
+    .from("destinations")
+    .select(
+      `
+        id,
+        city_id,
+        cities!inner(country_id,status)
+      `
+    )
+    .eq("cities.country_id", countryId)
+    .eq("cities.status", "active");
+
+  if (destinationsError) {
+    console.error(
+      `Supabase destinations query failed for country_id "${countryId}": ${destinationsError.message}`
+    );
+    return new Set();
+  }
+
+  const destinations = (destinationRows ?? []) as DestinationRow[];
+
+  if (destinations.length === 0) {
+    return new Set();
+  }
+
+  const destinationIds = destinations
+    .map((destination) => destination.id)
+    .filter((destinationId): destinationId is string => isNonEmptyString(destinationId));
+
+  if (destinationIds.length === 0) {
+    return new Set();
+  }
+
+  const cityIdByDestinationId = new Map<string, string>();
+
+  for (const destination of destinations) {
+    if (isNonEmptyString(destination.id) && isNonEmptyString(destination.city_id)) {
+      cityIdByDestinationId.set(destination.id, destination.city_id);
+    }
+  }
+
+  const { data: languageRows, error: languageError } = await supabase
+    .from("languages")
+    .select("id")
+    .eq("iso_code", "fr")
+    .limit(1);
+
+  if (languageError) {
+    console.error(
+      `Supabase language lookup failed for country_id "${countryId}": ${languageError.message}`
+    );
+    return new Set();
+  }
+
+  const languageId = getLanguageIdByIsoCodeRows((languageRows ?? []) as Array<{ id: string }>);
+
+  if (!languageId) {
+    return new Set();
+  }
+
+  const destinationContentRows: DestinationContentRow[] = [];
+
+  for (const destinationIdChunk of splitIntoChunks(destinationIds)) {
+    const { data, error } = await supabase
+      .from("destination_contents")
+      .select("destination_id")
+      .eq("language_id", languageId)
+      .in("destination_id", destinationIdChunk);
+
+    if (error) {
+      console.error(
+        `Supabase destination contents query failed for country_id "${countryId}": ${error.message}`
+      );
+      return new Set();
+    }
+
+    destinationContentRows.push(...((data ?? []) as DestinationContentRow[]));
+  }
+
+  const destinationsWithContent = new Set(
+    destinationContentRows
+      .map((row) => row.destination_id)
+      .filter((destinationId): destinationId is string => isNonEmptyString(destinationId))
+  );
+
+  const practicalItems: DestinationPracticalItemRow[] = [];
+
+  for (const destinationIdChunk of splitIntoChunks(destinationIds)) {
+    const { data, error } = await supabase
+      .from("destination_practical_items")
+      .select("id,destination_id")
+      .in("destination_id", destinationIdChunk);
+
+    if (error) {
+      console.error(
+        `Supabase destination practical items query failed for country_id "${countryId}": ${error.message}`
+      );
+      return new Set();
+    }
+
+    practicalItems.push(...((data ?? []) as DestinationPracticalItemRow[]));
+  }
+  const practicalItemIds = practicalItems
+    .map((row) => row.id)
+    .filter((itemId): itemId is string => isNonEmptyString(itemId));
+  const destinationIdByPracticalItemId = new Map<string, string>();
+
+  for (const item of practicalItems) {
+    if (isNonEmptyString(item.id) && isNonEmptyString(item.destination_id)) {
+      destinationIdByPracticalItemId.set(item.id, item.destination_id);
+    }
+  }
+
+  let destinationsWithPractical = new Set<string>();
+
+  if (practicalItemIds.length > 0) {
+    const practicalContentRows: DestinationPracticalItemContentRow[] = [];
+
+    for (const practicalItemIdChunk of splitIntoChunks(practicalItemIds)) {
+      const { data, error } = await supabase
+        .from("destination_practical_item_contents")
+        .select("destination_practical_item_id,title,answer")
+        .eq("language_id", languageId)
+        .in("destination_practical_item_id", practicalItemIdChunk);
+
+      if (error) {
+        console.error(
+          `Supabase destination practical contents query failed for country_id "${countryId}": ${error.message}`
+        );
+        return new Set();
+      }
+
+      practicalContentRows.push(...((data ?? []) as DestinationPracticalItemContentRow[]));
+    }
+
+    destinationsWithPractical = new Set(
+      practicalContentRows
+        .filter(
+          (row) =>
+            isNonEmptyString(row.title) &&
+            isNonEmptyString(row.answer) &&
+            isNonEmptyString(destinationIdByPracticalItemId.get(row.destination_practical_item_id))
+        )
+        .map((row) => destinationIdByPracticalItemId.get(row.destination_practical_item_id) as string)
+    );
+  }
+
+  const itineraries: DestinationItineraryRow[] = [];
+
+  for (const destinationIdChunk of splitIntoChunks(destinationIds)) {
+    const { data, error } = await supabase
+      .from("destination_itineraries")
+      .select("id,destination_id")
+      .in("destination_id", destinationIdChunk);
+
+    if (error) {
+      console.error(
+        `Supabase destination itineraries query failed for country_id "${countryId}": ${error.message}`
+      );
+      return new Set();
+    }
+
+    itineraries.push(...((data ?? []) as DestinationItineraryRow[]));
+  }
+  const itineraryIds = itineraries
+    .map((row) => row.id)
+    .filter((itineraryId): itineraryId is string => isNonEmptyString(itineraryId));
+  const destinationIdByItineraryId = new Map<string, string>();
+
+  for (const itinerary of itineraries) {
+    if (isNonEmptyString(itinerary.id) && isNonEmptyString(itinerary.destination_id)) {
+      destinationIdByItineraryId.set(itinerary.id, itinerary.destination_id);
+    }
+  }
+
+  let destinationsWithItineraries = new Set<string>();
+
+  if (itineraryIds.length > 0) {
+    const itineraryContentRows: DestinationItineraryContentRow[] = [];
+
+    for (const itineraryIdChunk of splitIntoChunks(itineraryIds)) {
+      const { data, error } = await supabase
+        .from("destination_itinerary_contents")
+        .select("destination_itinerary_id,title,duration_label,summary")
+        .eq("language_id", languageId)
+        .in("destination_itinerary_id", itineraryIdChunk);
+
+      if (error) {
+        console.error(
+          `Supabase destination itinerary contents query failed for country_id "${countryId}": ${error.message}`
+        );
+        return new Set();
+      }
+
+      itineraryContentRows.push(...((data ?? []) as DestinationItineraryContentRow[]));
+    }
+
+    destinationsWithItineraries = new Set(
+      itineraryContentRows
+        .filter(
+          (row) =>
+            isNonEmptyString(row.title) &&
+            isNonEmptyString(row.duration_label) &&
+            isNonEmptyString(row.summary) &&
+            isNonEmptyString(destinationIdByItineraryId.get(row.destination_itinerary_id))
+        )
+        .map((row) => destinationIdByItineraryId.get(row.destination_itinerary_id) as string)
+    );
+  }
+
+  const highlights: DestinationHighlightRow[] = [];
+
+  for (const destinationIdChunk of splitIntoChunks(destinationIds)) {
+    const { data, error } = await supabase
+      .from("destination_highlights")
+      .select("id,destination_id,poi_id")
+      .in("destination_id", destinationIdChunk)
+      .order("position", { ascending: true });
+
+    if (error) {
+      console.error(
+        `Supabase destination highlights query failed for country_id "${countryId}": ${error.message}`
+      );
+      return new Set();
+    }
+
+    highlights.push(...((data ?? []) as DestinationHighlightRow[]));
+  }
+  const highlightsByDestinationId = new Map<string, DestinationHighlightRow[]>();
+
+  for (const highlight of highlights) {
+    if (!isNonEmptyString(highlight.destination_id)) {
+      continue;
+    }
+
+    const bucket = highlightsByDestinationId.get(highlight.destination_id) ?? [];
+    bucket.push(highlight);
+    highlightsByDestinationId.set(highlight.destination_id, bucket);
+  }
+
+  const highlightIds = highlights
+    .map((row) => row.id)
+    .filter((highlightId): highlightId is string => isNonEmptyString(highlightId));
+  const poiIds = Array.from(
+    new Set(
+      highlights
+        .map((row) => row.poi_id)
+        .filter((poiId): poiId is string => isNonEmptyString(poiId))
+    )
+  );
+
+  const contentByHighlightId = new Map<string, DestinationHighlightContentRow>();
+
+  if (highlightIds.length > 0) {
+    for (const highlightIdChunk of splitIntoChunks(highlightIds)) {
+      const { data, error } = await supabase
+        .from("destination_highlight_contents")
+        .select("destination_highlight_id,category_label")
+        .eq("language_id", languageId)
+        .in("destination_highlight_id", highlightIdChunk);
+
+      if (error) {
+        console.error(
+          `Supabase destination highlight contents query failed for country_id "${countryId}": ${error.message}`
+        );
+        return new Set();
+      }
+
+      for (const row of (data ?? []) as DestinationHighlightContentRow[]) {
+        if (!contentByHighlightId.has(row.destination_highlight_id)) {
+          contentByHighlightId.set(row.destination_highlight_id, row);
+        }
+      }
+    }
+  }
+
+  const poiById = new Map<string, PoiRow>();
+
+  if (poiIds.length > 0) {
+    for (const poiIdChunk of splitIntoChunks(poiIds)) {
+      const { data, error } = await supabase
+        .from("poi")
+        .select(
+          `
+            id,
+            name,
+            category:categories!poi_category_id_fkey(name)
+          `
+        )
+        .in("id", poiIdChunk);
+
+      if (error) {
+        console.error(`Supabase poi query failed for country_id "${countryId}": ${error.message}`);
+        return new Set();
+      }
+
+      for (const poi of (data ?? []) as PoiRow[]) {
+        if (isNonEmptyString(poi.id)) {
+          poiById.set(poi.id, poi);
+        }
+      }
+    }
+  }
+
+  const firstImageByPoiId = new Map<string, string>();
+
+  if (poiIds.length > 0) {
+    for (const poiIdChunk of splitIntoChunks(poiIds)) {
+      const { data, error } = await supabase
+        .from("poi_images")
+        .select("poi_id,image_url")
+        .in("poi_id", poiIdChunk)
+        .order("display_order", { ascending: true });
+
+      if (error) {
+        console.error(
+          `Supabase poi images query failed for country_id "${countryId}": ${error.message}`
+        );
+        return new Set();
+      }
+
+      for (const row of (data ?? []) as PoiImageRow[]) {
+        if (!isNonEmptyString(row.poi_id) || !isNonEmptyString(row.image_url)) {
+          continue;
+        }
+
+        if (!firstImageByPoiId.has(row.poi_id)) {
+          firstImageByPoiId.set(row.poi_id, row.image_url.trim());
+        }
+      }
+    }
+  }
+
+  const destinationsWithCompleteHighlights = new Set<string>();
+
+  for (const destinationId of destinationIds) {
+    const destinationHighlights = highlightsByDestinationId.get(destinationId) ?? [];
+
+    if (destinationHighlights.length === 0) {
+      continue;
+    }
+
+    const allHighlightsComplete = destinationHighlights.every((highlight) => {
+      if (!isNonEmptyString(highlight.poi_id)) {
+        return false;
+      }
+
+      const poi = poiById.get(highlight.poi_id);
+
+      if (!poi || !isNonEmptyString(poi.name)) {
+        return false;
+      }
+
+      const content = contentByHighlightId.get(highlight.id) ?? null;
+      const poiCategoryRelation = readSingleRelation(poi.category);
+      const categoryFromPoi = isNonEmptyString(poiCategoryRelation?.name)
+        ? poiCategoryRelation.name
+        : null;
+      const category = isNonEmptyString(content?.category_label)
+        ? content.category_label.trim()
+        : categoryFromPoi;
+      const imageUrl = firstImageByPoiId.get(highlight.poi_id) ?? null;
+
+      return isNonEmptyString(category) && isNonEmptyString(imageUrl);
+    });
+
+    if (allHighlightsComplete) {
+      destinationsWithCompleteHighlights.add(destinationId);
+    }
+  }
+
+  const publishedCityIds = new Set<string>();
+
+  for (const destinationId of destinationIds) {
+    if (!destinationsWithContent.has(destinationId)) {
+      continue;
+    }
+
+    if (!destinationsWithPractical.has(destinationId)) {
+      continue;
+    }
+
+    if (!destinationsWithItineraries.has(destinationId)) {
+      continue;
+    }
+
+    if (!destinationsWithCompleteHighlights.has(destinationId)) {
+      continue;
+    }
+
+    const cityId = cityIdByDestinationId.get(destinationId);
+
+    if (isNonEmptyString(cityId)) {
+      publishedCityIds.add(cityId);
+    }
+  }
+
+  return publishedCityIds;
 }
 
 function collectUniqueTerms(...groups: Array<Array<string | null | undefined>>): string[] {
@@ -196,8 +921,7 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
           name,
           latitude,
           longitude,
-          countries!cities_country_id_fkey(id, name),
-          city_images!inner(image_url, image_type, is_active)
+          countries!cities_country_id_fkey(id, name)
         `
       )
       .order("name", { ascending: true })
@@ -339,28 +1063,33 @@ export async function getCountryBySlug(countrySlug: string): Promise<{
   };
 }
 
-export async function getPublishedAdministrativeAreas(countryId: string): Promise<string[]> {
+export async function getPublishedAdministrativeAreas(
+  countryId: string,
+  publishedCityIds?: Set<string>
+): Promise<string[]> {
   const supabase = createServerSupabaseClient();
 
+  if (publishedCityIds && publishedCityIds.size === 0) {
+    return [];
+  }
+
   let query = supabase
-    .from("administrative_areas")
+    .from("cities")
     .select(
       `
-        name,
-        cities!inner(
-          id,
-          status,
-          country_id,
-          city_images!inner(image_url, image_type, is_active)
-        )
+        id,
+        status,
+        administrative_areas!cities_administrative_area_id_fkey(name)
       `
     )
-    .eq("cities.country_id", countryId)
-    .not("name", "is", null)
-    .neq("name", "")
-    .order("name", { ascending: true });
+    .eq("country_id", countryId)
+    .order("slug", { ascending: true });
 
-  query = applyCatalogPublicationFilters(query, "cities");
+  query = applyCatalogPublicationFilters(query);
+
+  if (publishedCityIds && publishedCityIds.size > 0) {
+    query = query.in("id", Array.from(publishedCityIds));
+  }
 
   const { data, error } = await query;
 
@@ -371,8 +1100,8 @@ export async function getPublishedAdministrativeAreas(countryId: string): Promis
 
   const values = new Set<string>();
 
-  for (const row of (data ?? []) as Array<{ name: string | null }>) {
-    const name = row.name?.trim() ?? "";
+  for (const row of (data ?? []) as AdministrativeAreaCityRow[]) {
+    const name = readRelationName(row.administrative_areas)?.trim() ?? "";
 
     if (name.length > 0) {
       values.add(name);
@@ -384,10 +1113,20 @@ export async function getPublishedAdministrativeAreas(countryId: string): Promis
 
 export async function getCountryDestinations(
   countryId: string,
-  queryParams: CountryDestinationsQuery
+  queryParams: CountryDestinationsQuery,
+  publishedCityIds?: Set<string>
 ): Promise<CountryDestinationsResult> {
   try {
     const supabase = createServerSupabaseClient();
+
+    if (publishedCityIds && publishedCityIds.size === 0) {
+      return {
+        cards: [],
+        total: 0,
+        totalPages: 1,
+        page: 1,
+      };
+    }
 
     const isAscending = queryParams.sort === "az";
 
@@ -396,10 +1135,11 @@ export async function getCountryDestinations(
       .from("cities")
       .select(
         `
+          id,
           slug,
           name,
           administrative_areas!cities_administrative_area_id_fkey(name),
-          city_images!inner(image_url, alt_text, image_type, is_active)
+          city_images(image_url, alt_text, image_type, is_active, position)
         `,
         { count: "exact" }
       )
@@ -408,6 +1148,10 @@ export async function getCountryDestinations(
       .order("slug", { ascending: isAscending });
 
       cityQuery = applyCatalogPublicationFilters(cityQuery);
+
+      if (publishedCityIds && publishedCityIds.size > 0) {
+        cityQuery = cityQuery.in("id", Array.from(publishedCityIds));
+      }
 
       if (queryParams.administrativeArea) {
         cityQuery = cityQuery.eq("administrative_areas.name", queryParams.administrativeArea);
@@ -472,17 +1216,30 @@ export async function getCountryDestinations(
       }
     }
 
-    const cards = ((cityRows ?? []) as CatalogCityRow[]).map((row) => {
+    const typedCityRows = (cityRows ?? []) as CatalogCityRow[];
+    const cityIdsWithoutHero = typedCityRows
+      .filter((row) => !readCatalogHeroImage(row.city_images))
+      .map((row) => row.id)
+      .filter((cityId): cityId is string => isNonEmptyString(cityId));
+
+    const fallbackImagesByCityId = await getCatalogFallbackImagesByCityId(
+      supabase,
+      cityIdsWithoutHero
+    );
+
+    const cards = typedCityRows.map((row) => {
       const administrativeArea = readRelationName(row.administrative_areas);
-      const image = readFirstImage(row.city_images);
-      const imageSrc = image?.image_url ?? null;
+      const image = readCatalogHeroImage(row.city_images);
+      const fallbackImage = fallbackImagesByCityId.get(row.id) ?? null;
+      const imageSrc = image?.image_url ?? fallbackImage?.imageSrc ?? null;
+      const imageAlt = firstNonEmptyString(image?.alt_text) ?? fallbackImage?.imageAlt ?? `Vue de ${row.name}`;
 
       return {
         slug: row.slug,
         href: `/${row.slug}`,
         name: row.name,
         imageSrc,
-        imageAlt: image?.alt_text ?? `Vue de ${row.name}`,
+        imageAlt,
         administrativeArea,
       } satisfies CountryDestinationCard;
     });
@@ -519,7 +1276,9 @@ export async function getCountryCatalogData(input: {
     return null;
   }
 
-  const administrativeAreas = await getPublishedAdministrativeAreas(country.id);
+  const publishedCityIds = await getPublishableCityIdsForCountry(country.id);
+
+  const administrativeAreas = await getPublishedAdministrativeAreas(country.id, publishedCityIds);
   const selectedAdministrativeArea = administrativeAreas.includes(input.administrativeArea)
     ? input.administrativeArea
     : "";
@@ -529,7 +1288,7 @@ export async function getCountryCatalogData(input: {
     q: input.q,
     administrativeArea: selectedAdministrativeArea,
     sort: input.sort,
-  });
+  }, publishedCityIds);
 
   return {
     country,
