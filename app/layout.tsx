@@ -27,6 +27,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "/",
+    siteName: "CoolGuide World",
+    title: "CoolGuide World",
+    description:
+      "Découvrez des destinations, des histoires et des expériences culturelles avec CoolGuide.",
+  },
+  twitter: {
+  card: "summary_large_image",
+  title: "CoolGuide World",
+  description:
+    "Découvrez des destinations, des histoires et des expériences culturelles avec CoolGuide.",
+},
 };
 
 export default function RootLayout({
@@ -42,7 +57,7 @@ export default function RootLayout({
     alternateName: "CoolGuide World",
     url: "https://coolguideworld.com",
     description:
-  "CoolGuide est une application gratuite de découverte du patrimoine proposant des guides audio géolocalisés en 7 langues, des itinéraires de voyage et des contenus culturels pour explorer les destinations à pied ou en voiture.",
+      "CoolGuide est une application gratuite de découverte du patrimoine proposant des guides audio géolocalisés en 7 langues, des itinéraires de voyage et des contenus culturels pour explorer les destinations à pied ou en voiture.",
     logo: {
       "@type": "ImageObject",
       "@id": "https://coolguideworld.com/#logo",

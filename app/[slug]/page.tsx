@@ -59,16 +59,45 @@ export async function generateMetadata(
   const shortDescription = destinationSeo.shortDescription ?? "";
   const introduction = destinationSeo.introduction ?? "";
 
+  const metadataTitle = seoTitle || cityData.hero.name;
+
+  const metadataDescription =
+    seoDescription ||
+    shortDescription ||
+    introduction ||
+    cityData.hero.tagline ||
+    `Découvrez ${cityData.hero.name} avec CoolGuide.`;
+
+  const destinationUrl = `${SITE_URL}/${slug}`;
+
   return {
-    title: seoTitle || cityData.hero.name,
-    description:
-      seoDescription ||
-      shortDescription ||
-      introduction ||
-      cityData.hero.tagline ||
-      `Découvrez ${cityData.hero.name} avec CoolGuide.`,
+    title: metadataTitle,
+    description: metadataDescription,
+
     alternates: {
       canonical: `/${slug}`,
+    },
+
+    openGraph: {
+      type: "website",
+      locale: "fr_FR",
+      url: destinationUrl,
+      siteName: "CoolGuide World",
+      title: metadataTitle,
+      description: metadataDescription,
+
+      ...(isNonEmptyString(cityData.hero.imageSrc)
+        ? {
+            images: [
+              {
+                url: cityData.hero.imageSrc,
+                alt:
+                  cityData.hero.imageAlt ||
+                  `Découvrir ${cityData.hero.name} avec CoolGuide`,
+              },
+            ],
+          }
+        : {}),
     },
   };
 }
