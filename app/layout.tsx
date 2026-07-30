@@ -18,15 +18,19 @@ function serializeJsonLd(data: unknown): string {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://coolguideworld.com"),
+
   title: {
     default: "CoolGuide World",
     template: "%s | CoolGuide World",
   },
+
   description:
-    "Découvrez des destinations, des histoires et des expériences culturelles avec CoolGuide.",
+    "Découvrez le monde grâce à des audioguides géolocalisés, des histoires et des itinéraires culturels dans votre langue.",
+
   alternates: {
     canonical: "/",
   },
+
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -34,14 +38,26 @@ export const metadata: Metadata = {
     siteName: "CoolGuide World",
     title: "CoolGuide World",
     description:
-      "Découvrez des destinations, des histoires et des expériences culturelles avec CoolGuide.",
+      "Découvrez le monde grâce à des audioguides géolocalisés, des histoires et des itinéraires culturels dans votre langue.",
+
+    images: [
+      {
+        url: "/og/coolguide-world.jpg",
+        width: 1200,
+        height: 630,
+        alt: "CoolGuide World",
+      },
+    ],
   },
+
   twitter: {
-  card: "summary_large_image",
-  title: "CoolGuide World",
-  description:
-    "Découvrez des destinations, des histoires et des expériences culturelles avec CoolGuide.",
-},
+    card: "summary_large_image",
+    title: "CoolGuide World",
+    description:
+      "Découvrez le monde grâce à des audioguides géolocalisés, des histoires et des itinéraires culturels dans votre langue.",
+
+    images: ["/og/coolguide-world.jpg"],
+  },
 };
 
 export default function RootLayout({
