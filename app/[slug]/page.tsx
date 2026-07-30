@@ -29,6 +29,9 @@ export async function generateMetadata(
     return {
       title: "Destination introuvable | CoolGuide World",
       description: "Cette destination n'est pas disponible pour le moment.",
+      alternates: {
+        canonical: `/${slug}`,
+      },
     };
   }
 
@@ -37,7 +40,9 @@ export async function generateMetadata(
   const destinationContext = cityId
     ? await getDestinationContext(supabase, cityId, "fr")
     : null;
+
   const destinationSeo = await getDestinationSeo(supabase, destinationContext);
+
   const seoTitle = destinationSeo.seoTitle ?? "";
   const seoDescription = destinationSeo.seoDescription ?? "";
   const shortDescription = destinationSeo.shortDescription ?? "";
@@ -50,7 +55,10 @@ export async function generateMetadata(
       shortDescription ||
       introduction ||
       cityData.hero.tagline ||
-      `Decouvrez ${cityData.hero.name} avec CoolGuide.`,
+      `Découvrez ${cityData.hero.name} avec CoolGuide.`,
+    alternates: {
+      canonical: `/${slug}`,
+    },
   };
 }
 
