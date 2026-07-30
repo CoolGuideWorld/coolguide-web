@@ -41,6 +41,8 @@ export default function RootLayout({
     name: "CoolGuide",
     alternateName: "CoolGuide World",
     url: "https://coolguideworld.com",
+    description:
+  "CoolGuide est une application gratuite de découverte du patrimoine proposant des guides audio géolocalisés en 7 langues, des itinéraires de voyage et des contenus culturels pour explorer les destinations à pied ou en voiture.",
     logo: {
       "@type": "ImageObject",
       "@id": "https://coolguideworld.com/#logo",
