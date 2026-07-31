@@ -10,21 +10,27 @@ const onboardingSteps = [
   {
     image: onboardingMode,
     label: "Choisissez votre mode",
+    description:
+      "À pied, les récits se déclenchent près des monuments. En voiture, découvrez les lieux et les histoires qui jalonnent votre trajet.",
     alt: "Écran d'onboarding : choix du mode de découverte",
   },
   {
     image: onboardingLocation,
     label: "Autorisez votre position",
+    description:
+      "Grâce au GPS, CoolGuide repère les lieux autour de vous et vous aide à ne manquer aucun point d’intérêt.",
     alt: "Écran d'onboarding : autorisation de la localisation",
   },
   {
     image: onboardingDiscovery,
     label: "Découvrez les lieux autour de vous",
+    description: "À l’approche d’un lieu, son récit apparaît automatiquement et peut se lancer au bon moment.",
     alt: "Écran d'onboarding : détection des lieux à proximité",
   },
   {
     image: onboardingAudio,
     label: "Écoutez les histoires",
+    description: "Écoutez librement, mettez en pause et reprenez votre récit quand vous le souhaitez.",
     alt: "Écran d'onboarding : écoute des récits audio",
   },
 ];
@@ -36,8 +42,12 @@ export default function OnboardingJourneySection() {
         <div className="onboardingJourneyHeader">
           <p>VOTRE PREMIÈRE VISITE</p>
           <h2 id="onboarding-journey-title">Quelques secondes suffisent pour préparer votre voyage.</h2>
-          <p>
+          <p className="onboardingJourneyIntro">
             Choisissez votre mode de découverte, autorisez la géolocalisation et laissez CoolGuide vous accompagner automatiquement tout au long de votre visite.
+          </p>
+          <p className="onboardingFreeNote">
+            <span className="onboardingFreeNoteDot" aria-hidden="true" />
+            Disponible gratuitement sur iOS et Android.
           </p>
         </div>
 
@@ -54,7 +64,10 @@ export default function OnboardingJourneySection() {
                   sizes="(max-width: 700px) min(100vw - 3rem, 320px), (max-width: 1100px) min((100vw - 5rem) / 2, 260px), clamp(220px, 18vw, 270px)"
                 />
               </div>
-              <p className="onboardingStepLabel">{step.label}</p>
+              <p className="onboardingStepLabel">
+                {step.label}
+                <span className="onboardingStepDescription">{step.description}</span>
+              </p>
               {index < onboardingSteps.length - 1 ? <span className="onboardingConnector" aria-hidden="true" /> : null}
             </li>
           ))}
@@ -96,12 +109,31 @@ export default function OnboardingJourneySection() {
           max-width: 20ch;
         }
 
-        .onboardingJourneyHeader > p:last-child {
+        .onboardingJourneyHeader .onboardingJourneyIntro {
           margin: clamp(0.95rem, 2vw, 1.25rem) 0 0;
           color: #4d433a;
-          font-size: clamp(0.98rem, 1.25vw, 1.08rem);
+          font-size: clamp(1.04rem, 1.32vw, 1.14rem);
           line-height: 1.6;
           max-width: 72ch;
+        }
+
+        .onboardingFreeNote {
+          margin: clamp(0.45rem, 0.95vw, 0.65rem) 0 0;
+          color: #00A05D;
+          font-size: clamp(0.9rem, 1.05vw, 0.96rem);
+          font-weight: 500;
+          line-height: 1.35;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.42rem;
+        }
+
+        .onboardingFreeNoteDot {
+          width: 0.42rem;
+          height: 0.42rem;
+          border-radius: 50%;
+          background: #00A05D;
+          flex: 0 0 auto;
         }
 
         .onboardingJourneyTrack {
@@ -163,6 +195,15 @@ export default function OnboardingJourneySection() {
           line-height: 1.35;
           text-align: center;
           max-width: 22ch;
+        }
+
+        .onboardingStepDescription {
+          display: block;
+          margin-top: 0.38rem;
+          font-size: 0.9rem;
+          line-height: 1.45;
+          color: #4d433a;
+          max-width: 24ch;
         }
 
         .onboardingConnector {

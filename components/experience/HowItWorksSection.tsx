@@ -1,6 +1,21 @@
+import Link from "next/link";
 import Image from "next/image";
 
-const howItWorksSteps = [
+type HowItWorksImageStep = {
+  image: string;
+  title: string;
+  text: string;
+};
+
+type HowItWorksEditorialStep = {
+  kicker: string;
+  title: string;
+  text: string;
+  ctaLabel: string;
+  ctaHref: string;
+};
+
+const howItWorksSteps: Array<HowItWorksImageStep | HowItWorksEditorialStep> = [
   {
     image: "/how-it-works/step-01-explore.jpg",
     title: "Vous avancez.",
@@ -15,6 +30,13 @@ const howItWorksSteps = [
     image: "/how-it-works/step-03-listen.jpg",
     title: "Vous écoutez.",
     text: "Découvrez le patrimoine dans votre langue, à votre rythme.",
+  },
+  {
+    kicker: "ÉTAPE 4",
+    title: "Vous explorez.",
+    text: "Des centaines de lieux sont déjà disponibles. Découvrez les destinations et choisissez votre prochaine visite.",
+    ctaLabel: "Découvrir les destinations",
+    ctaHref: "/destinations",
   },
 ];
 
@@ -51,25 +73,45 @@ export default function HowItWorksSection() {
                 gap: "0.18rem",
               }}
             >
-              <div
-                className="howPlaceholder"
-                aria-hidden="true"
-                style={{
-                  width: "min(100%, clamp(176px, 13.4vw, 202px))",
-                }}
-              >
-                <Image
-                  src={step.image}
-                  alt=""
-                  fill
-                  sizes="(max-width: 700px) min(100vw - 2.5rem, 280px), (max-width: 1100px) min((100vw - 6rem) / 2, 202px), 202px"
-                  className="howPlaceholderImage"
-                />
-              </div>
+              {"image" in step ? (
+                <>
+                  <div
+                    className="howPlaceholder"
+                    aria-hidden="true"
+                    style={{
+                      width: "min(100%, clamp(176px, 13.4vw, 202px))",
+                    }}
+                  >
+                    <Image
+                      src={step.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 700px) min(100vw - 2.5rem, 280px), (max-width: 1100px) min((100vw - 6rem) / 2, 202px), 202px"
+                      className="howPlaceholderImage"
+                    />
+                  </div>
 
-              <p className="howStepIndex">Étape {index + 1}</p>
-              <h3 style={{ fontSize: "clamp(1.1rem, 1.55vw, 1.35rem)", lineHeight: 1.16 }}>{step.title}</h3>
-              <p style={{ fontSize: "clamp(0.92rem, 1.18vw, 1.02rem)", lineHeight: 1.5 }}>{step.text}</p>
+                  <p className="howStepIndex">Étape {index + 1}</p>
+                  <h3 style={{ fontSize: "clamp(1.1rem, 1.55vw, 1.35rem)", lineHeight: 1.16 }}>{step.title}</h3>
+                  <p style={{ fontSize: "clamp(0.92rem, 1.18vw, 1.02rem)", lineHeight: 1.5 }}>{step.text}</p>
+                </>
+              ) : (
+                <div
+                  className="howPlaceholder howEditorialPlaceholder"
+                  style={{
+                    width: "min(100%, clamp(176px, 13.4vw, 202px))",
+                  }}
+                >
+                  <div className="howEditorialContent">
+                    <p className="howStepIndex">{step.kicker}</p>
+                    <h3 style={{ fontSize: "clamp(1.1rem, 1.55vw, 1.35rem)", lineHeight: 1.16 }}>{step.title}</h3>
+                    <p style={{ fontSize: "clamp(0.92rem, 1.18vw, 1.02rem)", lineHeight: 1.5 }}>{step.text}</p>
+                    <Link href={step.ctaHref} className="storeButton">
+                      {step.ctaLabel}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </article>
           ))}
         </div>

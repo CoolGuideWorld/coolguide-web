@@ -1,7 +1,7 @@
 .contactForm {
   border: 1px solid rgba(31, 26, 23, 0.1);
   border-radius: 16px;
-  background: #ffffff;
+  background: linear-gradient(135deg, #10243d 0%, rgba(16, 36, 61, 0.9) 100%);
   padding: clamp(1rem, 2.2vw, 1.5rem);
   display: grid;
   gap: 0.9rem;
@@ -16,7 +16,7 @@
 .contactField {
   display: grid;
   gap: 0.4rem;
-  color: #1f1a17;
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -32,7 +32,7 @@
   padding: 0.72rem 0.82rem;
   font: inherit;
   color: #1f1a17;
-  background: #fffdf9;
+  background: #ffffff;
   box-sizing: border-box;
 }
 

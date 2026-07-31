@@ -274,19 +274,17 @@ html {
   min-width: 138px;
   padding: 0.8rem 1.2rem;
   border-radius: 999px;
-  background: #1f1a17;
+  background: #00A05D;
   color: #f8f3ea;
   text-decoration: none;
   font-size: 0.95rem;
-  border: 1px solid rgba(31, 26, 23, 0.12);
+  border: 1px solid rgba(0, 160, 93, 0.18);
 }
 
 .siteHeader:not(.isSolid) .siteNavButton {
-  background: rgba(248, 243, 234, 0.18);
-  border-color: rgba(248, 243, 234, 0.28);
-  color: #f8f6f2;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #00A05D;
+  border-color: rgba(0, 160, 93, 0.18);
+  color: #f8f3ea;
 }
 
 .siteMenuButton {
@@ -1707,9 +1705,59 @@ html {
   margin-top: 0;
 }
 
+.experiencePageMain .onboardingJourneySection .onboardingFreeNote {
+  margin: clamp(0.45rem, 0.95vw, 0.65rem) 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  width: fit-content;
+  padding: 0.28rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 160, 93, 0.32);
+  background: rgba(0, 160, 93, 0.07);
+  color: #007546;
+  font-size: clamp(0.82rem, 0.98vw, 0.88rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.experiencePageMain .onboardingJourneySection .onboardingFreeNoteDot {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: #00A05D;
+  flex: 0 0 auto;
+}
+
+.experiencePageMain .conclusionSection .conclusionFreeBadge {
+  margin: 0 auto clamp(0.75rem, 1.6vw, 1rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.44rem;
+  width: fit-content;
+  padding: 0.46rem 0.84rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 160, 93, 0.34);
+  background: rgba(0, 160, 93, 0.08);
+  color: #007546;
+  font-size: clamp(0.88rem, 1.04vw, 0.95rem);
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: 0 3px 10px rgba(75, 54, 24, 0.08);
+}
+
+.experiencePageMain .conclusionSection .conclusionFreeBadgeDot {
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 50%;
+  background: #00A05D;
+  flex: 0 0 auto;
+}
+
 .howItWorksGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(0.85rem, 1.6vw, 1.35rem);
 }
 
@@ -1755,6 +1803,49 @@ html {
   font-size: clamp(0.98rem, 1.3vw, 1.08rem);
   line-height: 1.55;
   max-width: 34ch;
+}
+
+.howEditorialPlaceholder {
+  border: 1px solid rgba(16, 36, 61, 0.24);
+  border-radius: 24px;
+  box-sizing: border-box;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 14px 28px rgba(16, 36, 61, 0.16),
+    0 0 24px rgba(16, 36, 61, 0.08);
+  background: linear-gradient(135deg, #10243d 0%, rgba(16, 36, 61, 0.9) 100%);
+}
+
+.howEditorialContent {
+  height: 100%;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  gap: 0.38rem;
+  text-align: center;
+  padding: clamp(0.75rem, 1.25vw, 1.05rem);
+}
+
+.howEditorialContent .howStepIndex,
+.howEditorialContent h3 {
+  color: #ffffff;
+}
+
+.howEditorialContent p:last-of-type {
+  margin: 0;
+  max-width: 38ch;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.howEditorialContent .storeButton {
+  margin-top: 0.2rem;
+  min-width: 0;
+  width: auto;
+  border-radius: 999px;
+  padding: 0.72rem 1.18rem;
+  justify-self: center;
 }
 
 .benefitsSection {

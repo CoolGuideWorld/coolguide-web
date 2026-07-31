@@ -37,7 +37,7 @@ export default function ExperienceIntroSection() {
           >
             LE VOYAGE COMMENCE ICI
           </p>
-          <h2
+          <h1
             style={{
               maxWidth: "22ch",
               fontSize: "clamp(1.5rem, 3vw, 2.65rem)",
@@ -45,10 +45,21 @@ export default function ExperienceIntroSection() {
               marginBottom: "clamp(1.2rem, 2.4vh, 1.65rem)",
             }}
           >
+            L’application qui raconte les lieux autour de vous
+          </h1>
+          <p
+            style={{
+              maxWidth: "24ch",
+              fontSize: "clamp(1.2rem, 2.35vw, 2rem)",
+              lineHeight: 1.1,
+              margin: "0 0 clamp(1.05rem, 2vh, 1.4rem)",
+              color: "#1f1a17",
+            }}
+          >
             Êtes-vous déjà passé devant un lieu sans savoir ce qu'il avait à raconter ?
-          </h2>
+          </p>
           <p style={{ maxWidth: "620px", marginBottom: "clamp(0.95rem, 2vh, 1.35rem)" }}>
-            Les histoires sont souvent invisibles, éparpillées et parfois racontées dans une langue que l'on ne comprend pas.
+            Une application de découverte audio qui raconte automatiquement les lieux autour de vous, à pied comme en voiture.
           </p>
           <p style={{ maxWidth: "620px", marginTop: "clamp(0.65rem, 1.2vh, 0.9rem)" }}>
             CoolGuide les rend enfin accessibles.

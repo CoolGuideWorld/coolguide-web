@@ -17,7 +17,7 @@ export default function LeMondeCoolGuidePage() {
         style={{
           background: "#f4ede2",
           color: "#1f1a17",
-          padding: "clamp(5rem, 10vw, 8rem) 0 clamp(4rem, 8vw, 6rem)",
+          padding: "calc(clamp(4.25rem, 8.5vw, 6.8rem) + 36px) 0 clamp(3.4rem, 6.8vw, 5.1rem)",
         }}
       >
         <div
@@ -30,7 +30,7 @@ export default function LeMondeCoolGuidePage() {
           <section
             className={`${styles.lmSection} ${styles.lmCream} ${styles.lmReveal}`}
             style={{
-              paddingBottom: "clamp(3rem, 7vw, 5rem)",
+              paddingBottom: "clamp(2.55rem, 6vw, 4.25rem)",
             }}
           >
             <div className={styles.lmInner}>
@@ -51,7 +51,7 @@ export default function LeMondeCoolGuidePage() {
 
             <figure
               className={`${styles.lmPhotoWrap} ${styles.lmReveal}`}
-              style={{ marginTop: "1.5rem", marginBottom: "1.75rem" }}
+              style={{ marginTop: "1.25rem", marginBottom: "1.45rem" }}
             >
               <img
                 className={styles.lmPhoto}
@@ -62,9 +62,9 @@ export default function LeMondeCoolGuidePage() {
             </figure>
 
             <div
+              className={styles.lmTextBlock}
               style={{
                 marginTop: 0,
-                maxWidth: "54rem",
                 fontSize: "clamp(1.05rem, 1.7vw, 1.28rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",
@@ -106,9 +106,9 @@ export default function LeMondeCoolGuidePage() {
           </figure>
 
           <section
-            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmReveal}`}
+            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmCreamToWhite} ${styles.lmReveal}`}
             style={{
-              padding: "clamp(3rem, 7vw, 5rem) 0",
+              padding: "clamp(2.55rem, 6vw, 4.25rem) 0",
             }}
           >
             <div className={styles.lmInner}>
@@ -128,9 +128,9 @@ export default function LeMondeCoolGuidePage() {
             <div className={styles.lmTitleRule} aria-hidden="true" />
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                marginTop: "1.45rem",
-                maxWidth: "54rem",
+                marginTop: "1.2rem",
                 fontSize: "clamp(1.02rem, 1.65vw, 1.2rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",
@@ -147,9 +147,9 @@ export default function LeMondeCoolGuidePage() {
           </section>
 
           <section
-            className={`${styles.lmSection} ${styles.lmCream} ${styles.lmReveal}`}
+            className={`${styles.lmSection} ${styles.lmCream} ${styles.lmWhiteToCream} ${styles.lmReveal}`}
             style={{
-              padding: "clamp(3rem, 7vw, 5rem) 0",
+              padding: "clamp(2.55rem, 6vw, 4.25rem) 0",
             }}
           >
             <div className={styles.lmInner}>
@@ -169,9 +169,9 @@ export default function LeMondeCoolGuidePage() {
             <div className={styles.lmTitleRule} aria-hidden="true" />
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                marginTop: "1.4rem",
-                maxWidth: "54rem",
+                marginTop: "1.2rem",
                 fontSize: "clamp(1.02rem, 1.65vw, 1.2rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",
@@ -202,9 +202,9 @@ export default function LeMondeCoolGuidePage() {
           </figure>
 
           <section
-            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmReveal}`}
+            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmCreamToWhite} ${styles.lmReveal}`}
             style={{
-              padding: "clamp(4rem, 9vw, 7rem) 0",
+              padding: "clamp(3.4rem, 7.65vw, 5.95rem) 0",
             }}
           >
             <div className={styles.lmInner}>
@@ -224,9 +224,9 @@ export default function LeMondeCoolGuidePage() {
             <div className={styles.lmTitleRule} aria-hidden="true" />
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                marginTop: "1.4rem",
-                maxWidth: "54rem",
+                marginTop: "1.2rem",
                 fontSize: "clamp(1.02rem, 1.65vw, 1.2rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",
@@ -244,9 +244,9 @@ export default function LeMondeCoolGuidePage() {
           </section>
 
           <section
-            className={`${styles.lmSection} ${styles.lmCream} ${styles.lmReveal}`}
+            className={`${styles.lmSection} ${styles.lmCream} ${styles.lmWhiteToCream} ${styles.lmReveal}`}
             style={{
-              padding: "clamp(3rem, 7vw, 5rem) 0",
+              padding: "clamp(2.55rem, 6vw, 4.25rem) 0",
             }}
           >
             <div className={styles.lmInner}>
@@ -266,9 +266,9 @@ export default function LeMondeCoolGuidePage() {
             <div className={styles.lmTitleRule} aria-hidden="true" />
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                marginTop: "1.35rem",
-                maxWidth: "54rem",
+                marginTop: "1.15rem",
                 fontSize: "clamp(1.02rem, 1.65vw, 1.2rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",
@@ -280,9 +280,9 @@ export default function LeMondeCoolGuidePage() {
             </div>
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                marginTop: "1.75rem",
-                maxWidth: "54rem",
+                marginTop: "1.5rem",
                 display: "grid",
                 gap: "0.85rem",
                 fontSize: "clamp(1.02rem, 1.55vw, 1.12rem)",
@@ -311,9 +311,9 @@ export default function LeMondeCoolGuidePage() {
           </figure>
 
           <section
-            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmReveal}`}
+            className={`${styles.lmSection} ${styles.lmWhite} ${styles.lmCreamToWhite} ${styles.lmWhiteToCreamFooter} ${styles.lmReveal}`}
             style={{
-              padding: "clamp(3rem, 7vw, 5rem) 0 0",
+              padding: "clamp(2.55rem, 6vw, 4.25rem) 0 0",
             }}
           >
             <div className={styles.lmInner}>
@@ -332,9 +332,9 @@ export default function LeMondeCoolGuidePage() {
             <div className={styles.lmTitleRule} aria-hidden="true" />
 
             <div
+              className={styles.lmTextBlock}
               style={{
-                margin: "1.75rem 0 0",
-                maxWidth: "54rem",
+                margin: "1.5rem 0 0",
                 fontSize: "clamp(1.08rem, 1.75vw, 1.26rem)",
                 lineHeight: 1.85,
                 color: "#3f362f",

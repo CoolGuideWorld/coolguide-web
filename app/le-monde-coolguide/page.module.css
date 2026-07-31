@@ -1,5 +1,7 @@
 .lmSection {
   width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .lmInner {
@@ -20,6 +22,30 @@
   background: #ffffff;
 }
 
+.lmCreamToWhite {
+  background: linear-gradient(180deg, #f4ede2 0%, #f8f3ea 72%, #fbf8f2 90%, #ffffff 100%);
+}
+
+.lmWhiteToCream {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 16%, #f4ede2 28%, #f4ede2 100%);
+}
+
+.lmWhiteToCreamFooter::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(180px, 32%);
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 16%, #f4ede2 28%, #f4ede2 100%);
+  pointer-events: none;
+}
+
+.lmInner {
+  position: relative;
+  z-index: 1;
+}
+
 .lmTitle {
   max-width: 28ch;
   color: #10243d;
@@ -27,10 +53,14 @@
   font-style: italic;
 }
 
+.lmTextBlock {
+  max-width: 62rem;
+}
+
 .lmTitleRule {
   width: clamp(60px, 7vw, 80px);
   height: 1px;
-  margin-top: 0.95rem;
+  margin-top: 0.8rem;
   background: rgba(16, 36, 61, 0.36);
 }
 
@@ -46,7 +76,7 @@
 
 .lmPhotoWrap {
   width: 100%;
-  margin: clamp(1rem, 2.5vw, 1.6rem) 0 clamp(2rem, 4.4vw, 3rem);
+  margin: clamp(0.85rem, 2.1vw, 1.35rem) 0 clamp(0.85rem, 1.85vw, 1.28rem);
 }
 
 .lmPhoto {
@@ -84,7 +114,7 @@
 }
 
 .lmSignature {
-  margin-top: clamp(3rem, 6vw, 4rem);
+  margin-top: clamp(2.55rem, 5.1vw, 3.4rem);
   text-align: center;
 }
 
