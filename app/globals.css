@@ -527,7 +527,7 @@ html {
 }
 
 .whyCoolGuide {
-  background: linear-gradient(180deg, #f8f3ea 0%, #f4ede2 100%);
+  background: linear-gradient(180deg, #f8f3ea 0%, #f8f3ea 72%, #fbf8f2 90%, #ffffff 100%);
   color: #1f1a17;
   position: relative;
   z-index: 2;
@@ -1397,9 +1397,166 @@ html {
 }
 
 .experiencePageMain .experienceLanguagesStats {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 16%, #f4ede2 28%, #f4ede2 100%);
+  padding-top: clamp(3.85rem, 6.6vw, 5.15rem);
+  padding-bottom: clamp(0.85rem, 1.6vw, 1.25rem);
+  overflow: hidden;
+}
+
+.experiencePageMain .translationSection {
+  background: linear-gradient(180deg, #f4ede2 0%, #f4ede2 72%, #ffffff 100%);
+}
+
+.experiencePageMain .experienceLanguagesStats .howItWorksHeader {
+  margin-bottom: clamp(1rem, 1.9vw, 1.45rem);
+  max-width: none;
+  width: 100%;
+}
+
+.experiencePageMain .experienceLanguagesStats .howItWorksHeader h2 {
+  max-width: none;
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceLanguagesBadgeList {
+  margin-bottom: clamp(0.8rem, 1.45vw, 1.1rem);
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceStatsGrid {
   position: relative;
-  padding-top: clamp(5.1rem, 8.4vw, 7rem);
-  padding-bottom: clamp(1.1rem, 2.1vw, 1.75rem);
+  margin: clamp(0.55rem, 1vw, 0.8rem) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(0.45rem, 0.9vw, 0.72rem);
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceStatItem {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceStatCapsule {
+  width: 100%;
+  min-height: clamp(78px, 8vw, 94px);
+  border-radius: 999px;
+  border: 1px solid rgba(16, 36, 61, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 14px 28px rgba(16, 36, 61, 0.16),
+    0 0 24px rgba(16, 36, 61, 0.08);
+  background: linear-gradient(135deg, #10243d 0%, rgba(16, 36, 61, 0.9) 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem 0.65rem;
+  font-size: clamp(1.25rem, 1.75vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease,
+    border-color 300ms ease;
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceStatItem:hover .experienceStatCapsule {
+  transform: translateY(-2px);
+  border-color: rgba(16, 36, 61, 0.34);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 18px 32px rgba(16, 36, 61, 0.18),
+    0 0 30px rgba(16, 36, 61, 0.1);
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceStatItem p {
+  margin: 0;
+  text-align: center;
+  color: #4d433a;
+  font-size: clamp(0.88rem, 1.02vw, 0.95rem);
+  line-height: 1.38;
+  max-width: 18ch;
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceLanguageBadge {
+  justify-content: center;
+  gap: 0.42rem;
+  white-space: nowrap;
+}
+
+.experiencePageMain .experienceLanguagesStats .experienceLanguageBadgeFlag {
+  flex: 0 0 auto;
+  display: block;
+  border-radius: 2px;
+}
+
+@media (min-width: 960px) and (max-width: 1320px) {
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid li:nth-child(n + 4) {
+    grid-column: span 1;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid li:nth-child(4) {
+    grid-column: 1 / span 2;
+    justify-self: center;
+    width: min(100%, 94%);
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid li:nth-child(5) {
+    grid-column: 3 / span 1;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 1100px) {
+  .experiencePageMain .experienceLanguagesStats {
+    padding-top: clamp(3.25rem, 7vw, 4.2rem);
+    padding-bottom: 1rem;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .experiencePageMain .experienceLanguagesStats {
+    padding-top: clamp(2.8rem, 10vw, 3.5rem);
+    padding-bottom: 0.9rem;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .howItWorksHeader {
+    margin-bottom: 0.85rem;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceLanguagesBadgeList {
+    margin-bottom: 0.8rem;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceStatCapsule {
+    min-height: 80px;
+    font-size: clamp(1.22rem, 5vw, 1.45rem);
+  }
+
+  .experiencePageMain .experienceLanguagesStats .experienceLanguageBadge {
+    gap: 0.35rem;
+  }
+}
+
+.experiencePageMain .experienceLanguagesStats {
+  position: relative;
   overflow: hidden;
 }
 
@@ -1601,6 +1758,7 @@ html {
 }
 
 .benefitsSection {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 76%, #f4ede2 100%);
   padding: clamp(0.45rem, 2vw, 1.25rem) clamp(1.25rem, 4vw, 3rem) clamp(3rem, 5.4vw, 4.6rem);
 }
 
@@ -2094,8 +2252,7 @@ html {
   }
 
   .experiencePageMain .experienceLanguagesStats {
-    padding-top: clamp(4.1rem, 11vw, 4.9rem);
-    padding-bottom: 1.05rem;
+    overflow: hidden;
   }
 
   .experiencePageMain .conclusionSection {

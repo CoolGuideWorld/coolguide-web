@@ -6,8 +6,8 @@ export default function ExperienceIntroSection() {
       className="whyCoolGuide"
       style={{
         marginTop: 0,
-        paddingTop: "calc(var(--header-height, 76px) + clamp(0.8rem, 1.8vh, 1.2rem))",
-        paddingBottom: "clamp(1.2rem, 2.4vh, 1.8rem)",
+        paddingTop: "calc(var(--header-height, 76px) + clamp(0.55rem, 1.2vh, 0.85rem))",
+        paddingBottom: "clamp(0.85rem, 1.6vh, 1.25rem)",
       }}
     >
       <div
@@ -19,36 +19,38 @@ export default function ExperienceIntroSection() {
           paddingInline: "clamp(1rem, 4vw, 3rem)",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
-          gap: "clamp(1.4rem, 3vw, 2.8rem)",
+          gap: "clamp(1rem, 2.1vw, 2.1rem)",
           alignItems: "center",
-          minHeight: "clamp(420px, 58svh, 600px)",
+          minHeight: "clamp(330px, 46svh, 470px)",
         }}
       >
         <div
           style={{
-            maxWidth: "740px",
+            maxWidth: "680px",
           }}
         >
           <p
             className="whyCoolGuideKicker"
             style={{
-              marginBottom: "clamp(1.25rem, 2.2vh, 1.75rem)",
+              marginBottom: "clamp(0.9rem, 1.7vh, 1.25rem)",
             }}
           >
             LE VOYAGE COMMENCE ICI
           </p>
           <h2
             style={{
-              maxWidth: "24ch",
-              marginBottom: "clamp(1.75rem, 3.4vh, 2.25rem)",
+              maxWidth: "22ch",
+              fontSize: "clamp(1.5rem, 3vw, 2.65rem)",
+              lineHeight: 1.05,
+              marginBottom: "clamp(1.2rem, 2.4vh, 1.65rem)",
             }}
           >
             Êtes-vous déjà passé devant un lieu sans savoir ce qu'il avait à raconter ?
           </h2>
-          <p style={{ maxWidth: "620px", marginBottom: "clamp(1.35rem, 2.8vh, 1.85rem)" }}>
+          <p style={{ maxWidth: "620px", marginBottom: "clamp(0.95rem, 2vh, 1.35rem)" }}>
             Les histoires sont souvent invisibles, éparpillées et parfois racontées dans une langue que l'on ne comprend pas.
           </p>
-          <p style={{ maxWidth: "620px", marginTop: 0 }}>
+          <p style={{ maxWidth: "620px", marginTop: "clamp(0.65rem, 1.2vh, 0.9rem)" }}>
             CoolGuide les rend enfin accessibles.
           </p>
         </div>
@@ -58,7 +60,7 @@ export default function ExperienceIntroSection() {
           style={{
             justifySelf: "end",
             width: "100%",
-            maxWidth: "clamp(375px, 31.5vw, 488px)",
+            maxWidth: "clamp(300px, 25vw, 380px)",
             minWidth: 0,
           }}
         >
@@ -68,7 +70,7 @@ export default function ExperienceIntroSection() {
             width={1200}
             height={1800}
             priority
-            sizes="(max-width: 900px) 100vw, (max-width: 1400px) 31.5vw, 488px"
+            sizes="(max-width: 900px) 100vw, (max-width: 1400px) 25vw, 380px"
             style={{
               width: "100%",
               height: "auto",

@@ -100,11 +100,29 @@ export default function ExperienceFaqSection() {
       <style jsx>{`
         .experienceFaqSection {
           background: #ffffff;
+          padding-top: clamp(1.95rem, 3.7vw, 3.1rem);
+          padding-bottom: clamp(2rem, 3.7vw, 3.15rem);
+        }
+
+        .experienceFaqSection .howItWorksHeader {
+          margin-bottom: clamp(0.7rem, 1.45vw, 1.05rem);
+          max-width: none;
+          width: 100%;
+        }
+
+        .experienceFaqSection .howItWorksHeader p {
+          margin-bottom: 0.62rem;
+        }
+
+        .experienceFaqSection .howItWorksHeader h2 {
+          font-size: clamp(1.55rem, 3.1vw, 2.7rem);
+          line-height: 1.04;
+          max-width: none;
         }
 
         .experienceFaqList {
           display: grid;
-          gap: clamp(0.7rem, 1.2vw, 1rem);
+          gap: clamp(0.55rem, 1vw, 0.82rem);
         }
 
         .experienceFaqItem {
@@ -138,20 +156,20 @@ export default function ExperienceFaqSection() {
           font: inherit;
           text-align: left;
           cursor: pointer;
-          min-height: 64px;
-          padding: clamp(1rem, 1.7vw, 1.25rem) clamp(1rem, 2.2vw, 1.4rem);
+          min-height: 58px;
+          padding: clamp(0.86rem, 1.45vw, 1.06rem) clamp(0.9rem, 1.9vw, 1.22rem);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 1rem;
+          gap: 0.8rem;
         }
 
         .experienceFaqTrigger span:first-child {
-          font-size: clamp(1.04rem, 1.35vw, 1.12rem);
+          font-size: clamp(0.98rem, 1.25vw, 1.06rem);
           font-weight: 500;
-          line-height: 1.4;
+          line-height: 1.32;
           letter-spacing: -0.01em;
-          max-width: 60ch;
+          max-width: none;
         }
 
         .experienceFaqTrigger:focus-visible {
@@ -214,20 +232,34 @@ export default function ExperienceFaqSection() {
         .experienceFaqPanel p {
           margin: 0;
           color: #4d433a;
-          font-size: clamp(0.98rem, 1.25vw, 1.06rem);
-          line-height: 1.68;
-          max-width: 76ch;
-          padding: 0 clamp(1rem, 2.2vw, 1.4rem) clamp(1.05rem, 2vw, 1.35rem);
+          font-size: clamp(0.95rem, 1.18vw, 1.02rem);
+          line-height: 1.62;
+          max-width: none;
+          padding: 0 clamp(0.9rem, 1.9vw, 1.22rem) clamp(0.85rem, 1.7vw, 1.1rem);
         }
 
         @media (max-width: 900px) {
+          .experienceFaqSection {
+            padding-top: 1.8rem;
+            padding-bottom: 1.9rem;
+          }
+
+          .experienceFaqSection .howItWorksHeader {
+            margin-bottom: 0.8rem;
+          }
+
+          .experienceFaqSection .howItWorksHeader h2 {
+            font-size: clamp(1.45rem, 6.6vw, 2.1rem);
+            max-width: none;
+          }
+
           .experienceFaqTrigger {
-            min-height: 62px;
-            padding: 0.95rem 1rem;
+            min-height: 56px;
+            padding: 0.88rem 0.95rem;
           }
 
           .experienceFaqPanel p {
-            padding: 0 1rem 1rem;
+            padding: 0 0.95rem 0.9rem;
           }
         }
       `}</style>

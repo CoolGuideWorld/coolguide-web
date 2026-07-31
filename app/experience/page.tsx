@@ -37,7 +37,10 @@ export default async function ExperiencePage() {
         <ExperienceFaqSection />
 
         <div className="experienceCreamBand">
-          <ExperienceLanguagesStats availableAudioCount={stats.availableAudioCount} />
+          <ExperienceLanguagesStats
+            availableAudioCount={stats.availableAudioCount}
+            availablePoiCount={stats.availablePoiCount}
+          />
         </div>
 
         <div className="experienceCreamBand">

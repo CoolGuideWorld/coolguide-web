@@ -19,7 +19,7 @@ const translationPromises = [
 
 export default function TranslationSection() {
   return (
-    <section className="howItWorksSection" aria-labelledby="translation-section-title">
+    <section className="howItWorksSection translationSection" aria-labelledby="translation-section-title">
       <div className="howItWorksInner">
         <div className="howItWorksHeader">
           <p>Une traduction pensée pour les voyageurs</p>

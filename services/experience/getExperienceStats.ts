@@ -3,47 +3,62 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type ExperienceStats = {
   availableAudioCount: number | null;
-};
-
-type AudioPoiJoinRow = {
-  poi_id: string | null;
+  availablePoiCount: number | null;
 };
 
 const getExperienceStatsCached = cache(async (): Promise<ExperienceStats> => {
   try {
     const supabase = createServerSupabaseClient();
 
-    const { data, error } = await supabase
-      .from("audios")
-      .select("poi_id, poi:poi!inner(id, status)")
-      .eq("status", "active")
-      .not("audio_url", "is", null)
-      .eq("poi.status", "active");
+    const [{ count: availableAudioCount, error: audioError }, { count: availablePoiCount, error: poiError }] =
+      await Promise.all([
+        supabase.from("audios").select("id", { count: "exact", head: true }),
+        supabase.from("poi").select("id", { count: "exact", head: true }),
+      ]);
 
-    if (error) {
+    if (audioError || poiError) {
       console.error("[getExperienceStats] Unable to retrieve available audio count", {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
+        audioError: audioError
+          ? {
+              message: audioError.message,
+              code: audioError.code,
+              details: audioError.details,
+              hint: audioError.hint,
+            }
+          : null,
+        poiError: poiError
+          ? {
+              message: poiError.message,
+              code: poiError.code,
+              details: poiError.details,
+              hint: poiError.hint,
+            }
+          : null,
       });
 
-      return { availableAudioCount: null };
+      return { availableAudioCount: null, availablePoiCount: null };
     }
 
-    const distinctPoiIds = new Set(
-      ((data ?? []) as AudioPoiJoinRow[])
-        .map((row) => row.poi_id)
-        .filter((poiId): poiId is string => Boolean(poiId))
-    );
+    const normalizedAvailableAudioCount = Number(availableAudioCount);
+    const normalizedAvailablePoiCount = Number(availablePoiCount);
+
+    if (!Number.isFinite(normalizedAvailableAudioCount) || !Number.isFinite(normalizedAvailablePoiCount)) {
+      console.error("[getExperienceStats] Supabase returned a non-numeric experience count", {
+        availableAudioCount,
+        availablePoiCount,
+      });
+
+      return { availableAudioCount: null, availablePoiCount: null };
+    }
 
     return {
-      availableAudioCount: distinctPoiIds.size,
+      availableAudioCount: normalizedAvailableAudioCount,
+      availablePoiCount: normalizedAvailablePoiCount,
     };
   } catch (error) {
     console.error("[getExperienceStats] Unable to retrieve available audio count", error);
 
-    return { availableAudioCount: null };
+    return { availableAudioCount: null, availablePoiCount: null };
   }
 });
 
