@@ -34,7 +34,7 @@ export default function LanguagesSection() {
           }}
         >
           <p>Comprenez chaque lieu dans votre langue</p>
-          <h2 id="languages-section-title">Où que vous soyez, l'histoire vous accompagne.</h2>
+          <h2 id="languages-section-title">Où que vous soyez, l&apos;histoire vous accompagne.</h2>
         </div>
 
         <p
@@ -45,7 +45,7 @@ export default function LanguagesSection() {
             marginBottom: "clamp(0.95rem, 2vw, 1.25rem)",
           }}
         >
-          Choisissez votre langue et profitez d'une expérience naturelle, fluide et immersive. Chaque histoire est racontée comme si elle avait été pensée pour vous.
+          Choisissez votre langue et profitez d&apos;une expérience naturelle, fluide et immersive. Chaque histoire est racontée comme si elle avait été pensée pour vous.
         </p>
 
         <div

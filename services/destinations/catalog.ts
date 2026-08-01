@@ -33,12 +33,6 @@ type ImageRow = {
   position?: number | null;
 };
 
-type SearchableCityImageRow = {
-  image_url: string | null;
-  image_type: string | null;
-  is_active: boolean | null;
-};
-
 type ActiveCityRow = {
   id: string;
   slug: string;
@@ -169,18 +163,6 @@ function readRelationName(relation: RelationRow | RelationRow[] | null): string 
   }
 
   return relation.name;
-}
-
-function readFirstImage(relation: ImageRow | ImageRow[] | null): ImageRow | null {
-  if (!relation) {
-    return null;
-  }
-
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null;
-  }
-
-  return relation;
 }
 
 function readCountryRelation(relation: CountryRow | CountryRow[] | null): CountryRow | null {

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useEffect, useRef } from "react";
 
 type GuardianRank = {
@@ -219,11 +220,11 @@ export default function GuardiansNarrativeTrail() {
         </div>
 
         <div className="guardianFinalContent">
-          <h2>Le voyage ne s'arrête jamais.</h2>
+          <h2>Le voyage ne s&apos;arrête jamais.</h2>
           <p>Le patrimoine du monde vous attend.</p>
-          <a href="/" className="storeButton">
-            Commencer l'aventure avec CoolGuide
-          </a>
+          <Link href="/" className="storeButton">
+            Commencer l&apos;aventure avec CoolGuide
+          </Link>
         </div>
       </section>
     </section>

@@ -56,7 +56,7 @@ export default function ExperienceIntroSection() {
               color: "#1f1a17",
             }}
           >
-            Êtes-vous déjà passé devant un lieu sans savoir ce qu'il avait à raconter ?
+            Êtes-vous déjà passé devant un lieu sans savoir ce qu&apos;il avait à raconter ?
           </p>
           <p style={{ maxWidth: "620px", marginBottom: "clamp(0.95rem, 2vh, 1.35rem)" }}>
             Une application de découverte audio qui raconte automatiquement les lieux autour de vous, à pied comme en voiture.

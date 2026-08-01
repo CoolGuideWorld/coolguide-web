@@ -777,7 +777,7 @@ export async function getCity(
 
             const nearbyCityIds = orderedNearbyCities.map((row) => row.id);
             let administrativeAreaNameById = new Map<string, string>();
-            let heroImageByCityId = new Map<string, string>();
+            const heroImageByCityId = new Map<string, string>();
 
             if (administrativeAreaIds.length > 0) {
               const { data: areaRows, error: areasError } = await supabase

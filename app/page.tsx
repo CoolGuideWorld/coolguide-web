@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import DownloadSection from "@/components/experience/DownloadSection";
@@ -140,9 +141,9 @@ export default function Home() {
           </div>
 
           <div className="storeButtons" style={{ marginTop: 0 }}>
-            <a href="/experience" className="storeButton">
+            <Link href="/experience" className="storeButton">
               Voir l&apos;expérience
-            </a>
+            </Link>
           </div>
         </div>
       </section>

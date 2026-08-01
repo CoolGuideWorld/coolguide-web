@@ -36,7 +36,7 @@ export default async function DestinationsPage() {
 
           <p className={styles.caption}>
             Chaque lumiere represente un pays ou CoolGuide est disponible. La lumiere
-            de la France est deja active. D'autres commencements suivront.
+            de la France est deja active. D&apos;autres commencements suivront.
           </p>
         </section>
       </main>

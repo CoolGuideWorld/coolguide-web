@@ -58,7 +58,7 @@ export default function HowItWorksSection() {
         >
           <p style={{ marginBottom: "clamp(0.55rem, 1vw, 0.8rem)" }}>La promesse prend vie pendant votre trajet.</p>
           <h2 style={{ maxWidth: "18ch", fontSize: "clamp(1.5rem, 2.55vw, 2.65rem)", lineHeight: 1.05 }}>
-            Vous voyagez. CoolGuide s'occupe du reste.
+            Vous voyagez. CoolGuide s&apos;occupe du reste.
           </h2>
         </div>
 

@@ -6,7 +6,6 @@ import ImmersiveGlobeExperience, {
   type ImmersiveGlobeExperienceHandle,
 } from "@/components/destinations/ImmersiveGlobeExperience";
 import {
-  type AvailableCountry,
   normalizeCountryQuery,
 } from "@/components/destinations/availableCountries";
 import type { SearchableDestinationCountry } from "@/services/destinations";

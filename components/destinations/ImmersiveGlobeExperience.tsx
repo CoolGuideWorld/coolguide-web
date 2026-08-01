@@ -22,7 +22,6 @@ import styles from "./ImmersiveGlobeExperience.module.css";
 
 const GLOBE_RADIUS = 1.55;
 const ROTATION_SPEED = (Math.PI * 2) / 240;
-const PULSE_SECONDS = 8;
 const ROTATION_RAMP_SECONDS = 18;
 const AUTO_ROTATION_RESUME_DELAY_MS = 5000;
 const AUTO_ROTATION_RESUME_BLEND_MS = 1400;
@@ -779,8 +778,6 @@ const GlobeScene = forwardRef<
     if (!globeGroup) {
       return;
     }
-
-    const countryDirection = latLonToVector3(country.latitude, country.longitude, 1).normalize();
 
     focusAnimationRef.current = {
       country,

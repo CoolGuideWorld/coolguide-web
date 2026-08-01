@@ -80,7 +80,7 @@ export default function GardiensDuPatrimoinePage() {
 
               <blockquote className="guardiansQuote">
                 <p>
-                  « Le véritable trésor n'est pas le lieu que vous découvrez. C'est le regard que vous portez désormais sur le monde. »
+                  « Le véritable trésor n&apos;est pas le lieu que vous découvrez. C&apos;est le regard que vous portez désormais sur le monde. »
                 </p>
               </blockquote>
             </div>
@@ -94,8 +94,8 @@ export default function GardiensDuPatrimoinePage() {
                 lineHeight: 1.82,
               }}
             >
-              <p>Voyager, ce n'est pas seulement découvrir de nouveaux lieux.</p>
-              <p>C'est apprendre à les regarder autrement.</p>
+              <p>Voyager, ce n&apos;est pas seulement découvrir de nouveaux lieux.</p>
+              <p>C&apos;est apprendre à les regarder autrement.</p>
               <p>Chaque monument, chaque paysage, chaque histoire entendue change un peu notre regard sur le monde.</p>
               <p>Les Gardiens du Patrimoine ne récompensent pas la vitesse, ni le nombre de kilomètres parcourus.</p>
               <p>Ils célèbrent une autre forme de progression.</p>

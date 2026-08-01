@@ -1,24 +1,75 @@
+.pageMain {
+  position: relative;
+  overflow: clip;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #ffffff 28%,
+      #fdfaf5 49%,
+      #f8f1e7 74%,
+      #f6efe4 100%
+    );
+  border-radius: 24px;
+  max-width: none;
+  margin: 0;
+  padding-bottom: clamp(0.7rem, 1.4vw, 1.1rem);
+  display: grid;
+  gap: 0;
+}
+
+.explorationSection {
+  background: transparent;
+  box-shadow: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: clamp(1rem, 2.1vw, 1.5rem);
+  padding-bottom: clamp(2.25rem, 3.2vw, 3.25rem);
+  border-radius: 0;
+  width: min(100%, 1220px);
+  margin-inline: auto;
+}
+
+.heroInner {
+  display: grid;
+  gap: clamp(0.85rem, 1.8vw, 1.1rem);
+  padding-inline: clamp(1rem, 2.2vw, 1.5rem);
+  padding-bottom: clamp(0.75rem, 1.6vw, 1.1rem);
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.heroLead {
+  max-width: 38ch;
+  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+  color: #3f362f;
+}
+
 .cardsGrid {
-  margin-top: 1rem;
-  width: min(100%, 780px);
+  margin-top: clamp(1.75rem, 2.4vw, 2.5rem);
+  width: min(100%, 1040px);
   margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.95rem;
+  gap: clamp(1.25rem, 1.8vw, 1.75rem);
+  align-items: stretch;
 }
 
 .choiceCard {
   position: relative;
   display: grid;
-  gap: 0.56rem;
-  align-content: start;
-  min-height: 176px;
+  grid-template-rows: auto 1fr;
+  min-height: 100%;
   color: inherit;
   text-decoration: none;
-  border-radius: 16px;
+  border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #fffdf9 100%);
-  box-shadow: 0 8px 24px rgba(31, 26, 23, 0.06);
-  padding: 1.15rem 1.15rem 1.2rem;
+  box-shadow: 0 10px 28px rgba(31, 26, 23, 0.08);
+  overflow: hidden;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -29,52 +80,182 @@
 
 .choiceCard:hover,
 .choiceCard:focus-visible {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: rgba(0, 160, 93, 0.28);
-  box-shadow: 0 14px 30px rgba(31, 26, 23, 0.1);
+  box-shadow: 0 18px 38px rgba(31, 26, 23, 0.12);
   outline: none;
 }
 
-.choiceCardInner {
-  display: grid;
-  gap: 0.56rem;
-  padding-right: 1.1rem;
+.choiceMedia {
+  position: relative;
+  min-height: clamp(260px, 24vw, 320px);
+  background: #d8cec0;
+  overflow: hidden;
 }
 
-.choiceLabel {
-  margin: 0;
-  color: #4d433a;
-  font-size: 0.79rem;
-  letter-spacing: 0.09em;
+.choiceImage {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 240ms ease;
+}
+
+.choiceOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.choiceButton {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.7rem;
+  padding: 0.78rem 1rem;
+  border-radius: 999px;
+  background: #1e8e57;
+  color: #ffffff;
+  font-size: 0.92rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 20px rgba(8, 45, 27, 0.22);
+}
+
+.choiceCardBody {
+  display: grid;
+  gap: 0.72rem;
+  align-content: start;
+  padding: 1.3rem 1.35rem 1.4rem;
+}
+
+.choiceTitle {
+  margin: 0;
+  color: #10243d;
+  font-size: clamp(1.28rem, 2vw, 1.7rem);
+  line-height: 1.08;
+  font-weight: 470;
+  letter-spacing: -0.03em;
+}
+
+.choiceText {
+  margin: 0;
+  color: #3f362f;
+  font-size: 0.98rem;
+  line-height: 1.6;
 }
 
 .choiceMeta {
   margin: 0;
   color: #5b5148;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.choiceCard:hover .choiceImage,
+.choiceCard:focus-visible .choiceImage {
+  transform: scale(1.03);
+}
+
+.signatureBand {
+  width: min(100%, 700px);
+  margin-inline: auto;
+  margin-top: 0;
+  margin-bottom: clamp(1rem, 1.6vw, 1.5rem);
+  background: #10395d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 26px;
+  display: grid;
+  align-items: center;
+  padding: 22px 38px;
+}
+
+.signatureInner {
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+.signatureTitle {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.4rem, 2vw, 1.55rem);
+  font-weight: 450;
+  letter-spacing: -0.02em;
+}
+
+.signatureText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 56ch;
+}
+
+.signatureButton {
+  margin-top: 0.1rem;
+  min-width: 0;
+  padding: 0.6rem 0.95rem;
   font-size: 0.9rem;
-  line-height: 1.5;
 }
 
-.choiceArrow {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  color: #0f7a45;
-  font-size: 1.05rem;
-  line-height: 1;
-  opacity: 0.8;
-  transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.choiceCard:hover .choiceArrow,
-.choiceCard:focus-visible .choiceArrow {
-  transform: translateX(2px);
-  opacity: 1;
+.pageMain + :global(.siteFooter) {
+  padding-top: 32px;
 }
 
 @media (max-width: 900px) {
+  .pageMain {
+    border-radius: 18px;
+  }
+
+  .explorationSection {
+    width: min(100%, 100%);
+    border-radius: 0;
+    padding-top: 0.95rem;
+    padding-bottom: clamp(1.9rem, 7vw, 2.5rem);
+  }
+
+  .heroInner {
+    padding-inline: clamp(0.9rem, 3vw, 1.15rem);
+    padding-bottom: 0.85rem;
+  }
+
   .cardsGrid {
     grid-template-columns: 1fr;
+    margin-top: clamp(1.4rem, 5vw, 2rem);
+    width: min(100%, 680px);
+  }
+
+  .choiceCard {
+    border-radius: 20px;
+  }
+
+  .choiceMedia {
+    min-height: clamp(240px, 56vw, 300px);
+  }
+
+  .choiceCardBody {
+    padding: 1.15rem 1.15rem 1.25rem;
+  }
+
+  .signatureBand {
+    width: min(100%, calc(100% - 32px));
+    margin-bottom: 32px;
+    border-radius: 24px;
+    padding: 20px 18px;
+  }
+
+  .signatureButton {
+    min-width: min(100%, 280px);
+    width: min(100%, 280px);
+  }
+
+  .pageMain + :global(.siteFooter) {
+    padding-top: 32px;
   }
 }

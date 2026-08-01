@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import styles from "./country.module.css";
 
 type CountryDestinationsFiltersClientProps = {
@@ -20,6 +20,27 @@ export default function CountryDestinationsFiltersClient({
   administrativeAreas,
   basePath,
 }: CountryDestinationsFiltersClientProps) {
+  const formStateKey = `${initialQ}\u0000${initialAdministrativeArea}\u0000${initialSort}`;
+
+  return (
+    <CountryDestinationsFiltersForm
+      key={formStateKey}
+      initialQ={initialQ}
+      initialAdministrativeArea={initialAdministrativeArea}
+      initialSort={initialSort}
+      administrativeAreas={administrativeAreas}
+      basePath={basePath}
+    />
+  );
+}
+
+function CountryDestinationsFiltersForm({
+  initialQ,
+  initialAdministrativeArea,
+  initialSort,
+  administrativeAreas,
+  basePath,
+}: CountryDestinationsFiltersClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,12 +49,6 @@ export default function CountryDestinationsFiltersClient({
   const [q, setQ] = useState(initialQ);
   const [administrativeArea, setAdministrativeArea] = useState(initialAdministrativeArea);
   const [sort, setSort] = useState<"az" | "za">(initialSort);
-
-  useEffect(() => {
-    setQ(initialQ);
-    setAdministrativeArea(initialAdministrativeArea);
-    setSort(initialSort);
-  }, [initialAdministrativeArea, initialQ, initialSort]);
 
   const pushFilters = useCallback(
     (nextQ: string, nextAdministrativeArea: string, nextSort: "az" | "za") => {

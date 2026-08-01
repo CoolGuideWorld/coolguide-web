@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { footerLinks, socialLinks } from "./siteLinks";
 
 export default function SiteFooter() {
@@ -6,7 +7,7 @@ export default function SiteFooter() {
     <footer className="siteFooter">
       <div className="siteFooterInner">
         <div className="siteFooterBrand">
-          <a href="/#top" className="siteFooterLogo" aria-label="Retour en haut de page">
+          <Link href="/#top" className="siteFooterLogo" aria-label="Retour en haut de page">
             <Image
               src="/logo/coolguide-logo.png"
               alt="CoolGuide"
@@ -14,19 +15,25 @@ export default function SiteFooter() {
               height={42}
               className="siteFooterLogoImage"
             />
-          </a>
+          </Link>
         </div>
 
         <nav className="siteFooterNav" aria-label="Footer">
           {footerLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              target={link.href.startsWith("http") ? "_blank" : undefined}
-              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-            >
-              {link.label}
-            </a>
+            link.href.startsWith("http") ? (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            )
           ))}
         </nav>
 
