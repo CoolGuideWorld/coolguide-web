@@ -41,7 +41,7 @@ export default function FrancePage() {
             >
               <div className={pageStyles.choiceMedia}>
                 <Image
-                  src="/heroes/france-circuits-hero.webp"
+                  src="/heroes/france-circuits-hero-v2.webp"
                   alt="Vue illustrée pour explorer les circuits de France"
                   fill
                   sizes="(max-width: 900px) 100vw, 50vw"
