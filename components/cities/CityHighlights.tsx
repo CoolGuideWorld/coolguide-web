@@ -15,7 +15,7 @@ export default function CityHighlights({ title, highlights }: CityHighlightsProp
       </h2>
 
       <div className={styles.highlightsGrid}>
-        {highlights.map((highlight) => (
+        {highlights.map((highlight, index) => (
           <article key={highlight.name} className={styles.highlightCard}>
             <div className={styles.highlightVisual}>
               <Image
@@ -24,6 +24,7 @@ export default function CityHighlights({ title, highlights }: CityHighlightsProp
                 alt={highlight.imageAlt}
                 fill
                 sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                loading={index < 3 ? "eager" : "lazy"}
               />
             </div>
 

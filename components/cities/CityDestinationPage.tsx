@@ -4,6 +4,7 @@ import CityHero from "@/components/cities/CityHero";
 import CityStats from "@/components/cities/CityStats";
 import CityBadges from "@/components/cities/CityBadges";
 import CityHighlights from "@/components/cities/CityHighlights";
+import DestinationCircuit from "@/components/circuits/DestinationCircuit";
 import CityNearbyDestinations from "@/components/cities/CityNearbyDestinations";
 import CityIntroduction from "@/components/cities/CityIntroduction";
 import CityPractical from "@/components/cities/CityPractical";
@@ -11,10 +12,12 @@ import CityItineraries from "@/components/cities/CityItineraries";
 import CityFAQ from "@/components/cities/CityFAQ";
 import CityCTA from "@/components/cities/CityCTA";
 import type { CityPageData } from "@/types/city";
+import type { DestinationCircuitContext } from "@/types/circuit";
 import styles from "@/components/cities/city.module.css";
 
 type CityDestinationPageProps = {
   cityData: CityPageData;
+  destinationCircuitContexts?: DestinationCircuitContext[];
 };
 
 function hasRenderableCTA(cta: CityPageData["cta"]): boolean {
@@ -32,6 +35,7 @@ function hasRenderableCTA(cta: CityPageData["cta"]): boolean {
 
 export default function CityDestinationPage({
   cityData,
+  destinationCircuitContexts = [],
 }: CityDestinationPageProps) {
   return (
     <div className={styles.page}>
@@ -58,6 +62,7 @@ export default function CityDestinationPage({
               highlights={cityData.highlights}
             />
           ) : null}
+          <DestinationCircuit contexts={destinationCircuitContexts} />
           <CityNearbyDestinations
             cityName={cityData.hero.name}
             destinations={cityData.nearbyDestinations}

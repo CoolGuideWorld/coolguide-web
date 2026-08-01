@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import CityDestinationPage from "@/components/cities/CityDestinationPage";
+import { getDestinationCircuits } from "@/services/circuits/getDestinationCircuits";
 import { getCity, isCityPublishable } from "@/services/cities";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getDestinationContext } from "@/services/destinations/getDestinationContext";
@@ -104,7 +105,12 @@ export async function generateMetadata(
 
 export default async function CitySlugPage(props: CitySlugPageProps) {
   const { slug } = await props.params;
-  const cityData = await getCityCached(slug);
+  const [cityData, destinationCircuitContextsResult] = await Promise.all([
+    getCityCached(slug),
+    getDestinationCircuits(slug, "fr"),
+  ]);
+
+  const destinationCircuitContexts = destinationCircuitContextsResult ?? [];
 
   if (!cityData || !isCityPublishable(cityData)) {
     notFound();
@@ -290,7 +296,10 @@ export default async function CitySlugPage(props: CitySlugPageProps) {
         }}
       />
 
-      <CityDestinationPage cityData={cityData} />
+      <CityDestinationPage
+        cityData={cityData}
+        destinationCircuitContexts={destinationCircuitContexts}
+      />
     </>
   );
 }

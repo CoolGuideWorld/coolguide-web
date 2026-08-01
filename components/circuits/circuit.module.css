@@ -1,0 +1,79 @@
+.timelineList {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, 1fr);
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0 0 0.25rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.timelineItem {
+  min-width: 180px;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.timelineTopRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timelinePoint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid rgba(63, 54, 47, 0.14);
+  background: #fffdf9;
+  color: #1f1a17;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.timelineConnector {
+  height: 2px;
+  flex: 1;
+  background: rgba(63, 54, 47, 0.22);
+  border-radius: 999px;
+}
+
+.destinationCircuitsStack {
+  display: grid;
+  gap: clamp(1.2rem, 2.4vw, 1.9rem);
+}
+
+.destinationTimelineNav {
+  margin-top: 1rem;
+}
+
+.timelinePointCurrent {
+  border-color: rgba(0, 160, 93, 0.5);
+  background: rgba(0, 160, 93, 0.12);
+}
+
+.timelineStepLinkCurrent {
+  font-weight: 600;
+}
+
+.currentStepHint {
+  margin: 0;
+  color: #4d433a;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.stepNav {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
