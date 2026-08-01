@@ -879,7 +879,11 @@ const GlobeScene = forwardRef<
     setIsFocusAnimating(false);
     setZooming(false);
     onFocusStateChange?.(false);
-    router.push(`/destinations/${activeCountry.slug}`);
+    router.push(
+      activeCountry.slug === "france"
+        ? "/france"
+        : `/destinations/${activeCountry.slug}`
+    );
   };
 
   const handleOrbitStart = () => {
@@ -1213,7 +1217,10 @@ function GlobeFallback({ message, countrySlug }: { message: string; countrySlug:
         loading="lazy"
       />
       <p className={styles.fallbackText}>{message}</p>
-      <a href={`/destinations/${countrySlug}`} className={styles.fallbackLink}>
+      <a
+        href={countrySlug === "france" ? "/france" : `/destinations/${countrySlug}`}
+        className={styles.fallbackLink}
+      >
         Voir les pays disponibles
       </a>
     </div>

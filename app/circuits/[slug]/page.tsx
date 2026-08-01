@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CircuitPage from "@/components/circuits/CircuitPage";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 import { getCircuit } from "@/services/circuits/getCircuit";
 
 type CircuitSlugParams = {
@@ -47,5 +49,11 @@ export default async function CircuitSlugPage(
     notFound();
   }
 
-  return <CircuitPage circuit={circuit} />;
+  return (
+    <>
+      <SiteHeader initialSolid />
+      <CircuitPage circuit={circuit} />
+      <SiteFooter />
+    </>
+  );
 }
