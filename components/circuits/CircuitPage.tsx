@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "@/components/cities/city.module.css";
 import circuitStyles from "@/components/circuits/circuit.module.css";
@@ -25,21 +26,145 @@ export default function CircuitPage({ circuit }: CircuitPageProps) {
     <main className={styles.main}>
       <div className={styles.stack}>
         <section className={styles.section} aria-labelledby="circuit-title">
-          <div className={styles.introBlock}>
-            <p className={styles.heroMeta}>Circuit CoolGuide</p>
+          {isNonEmptyString(circuit.heroImage?.imageUrl) ? (
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                minHeight: "clamp(280px, 28vw, 360px)",
+                display: "grid",
+                alignItems: "end",
+                overflow: "hidden",
+                borderRadius: "24px",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                }}
+              >
+                <Image
+                  src={circuit.heroImage.imageUrl}
+                  alt={circuit.heroImage.altText || circuit.content.title}
+                  width={1536}
+                  height={1024}
+                  priority
+                  sizes="100vw"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: circuit.heroImage.displayMode === "contain" ? "contain" : "cover",
+                    objectPosition: circuit.heroImage.focalPosition || "center",
+                  }}
+                />
+              </div>
 
-            <h1 id="circuit-title" className={styles.sectionTitle}>
-              {circuit.content.title}
-            </h1>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(12, 18, 28, 0.1) 0%, rgba(12, 18, 28, 0.58) 100%)",
+                }}
+              />
 
-            {isNonEmptyString(circuit.content.subtitle) ? (
-              <p className={styles.introLead}>{circuit.content.subtitle}</p>
-            ) : null}
+              <div
+                className={styles.introBlock}
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  color: "#ffffff",
+                  padding:
+                    "clamp(1rem, 2.7vw, 1.9rem) clamp(1.2rem, 3.2vw, 2.4rem) clamp(1.7rem, 4vw, 2.8rem)",
+                  display: "grid",
+                  gap: "clamp(0.55rem, 1.2vw, 0.85rem)",
+                  maxWidth: "min(100%, 780px)",
+                  textAlign: "left",
+                  margin: 0,
+                }}
+              >
+                <p
+                  className={styles.heroMeta}
+                  style={{
+                    margin: 0,
+                    fontSize: "clamp(0.92rem, 1vw, 1.02rem)",
+                    color: "rgba(255, 255, 255, 0.9)",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  Circuit CoolGuide
+                </p>
 
-            <span className={styles.guideBadge}>
-              Durée estimée: {circuit.content.estimatedDuration}
-            </span>
-          </div>
+                <h1
+                  id="circuit-title"
+                  className={styles.sectionTitle}
+                  style={{
+                    margin: 0,
+                    color: "#ffffff",
+                    fontSize: "clamp(3rem, 3.8vw, 3.5rem)",
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    letterSpacing: "normal",
+                  }}
+                >
+                  {circuit.content.title}
+                </h1>
+
+                {isNonEmptyString(circuit.content.subtitle) ? (
+                  <p
+                    className={styles.introLead}
+                    style={{
+                      margin: 0,
+                      fontSize: "clamp(1rem, 1.45vw, 1.2rem)",
+                      lineHeight: 1.55,
+                      color: "rgba(255, 255, 255, 0.97)",
+                    }}
+                  >
+                    {circuit.content.subtitle}
+                  </p>
+                ) : null}
+
+                <span
+                  className={styles.guideBadge}
+                  style={{
+                    color: "#ffffff",
+                    backgroundColor: "rgba(255, 255, 255, 0.14)",
+                    border: "1px solid rgba(255, 255, 255, 0.26)",
+                    borderRadius: "999px",
+                    padding: "0.35rem 0.72rem",
+                    fontSize: "clamp(0.78rem, 0.88vw, 0.9rem)",
+                    fontWeight: 500,
+                    lineHeight: 1.2,
+                    letterSpacing: "0.01em",
+                    width: "fit-content",
+                    boxShadow: "none",
+                  }}
+                >
+                  Durée : {circuit.content.estimatedDuration}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          {!isNonEmptyString(circuit.heroImage?.imageUrl) ? (
+            <div className={styles.introBlock}>
+              <p className={styles.heroMeta}>Circuit CoolGuide</p>
+
+              <h1 id="circuit-title" className={styles.sectionTitle}>
+                {circuit.content.title}
+              </h1>
+
+              {isNonEmptyString(circuit.content.subtitle) ? (
+                <p className={styles.introLead}>{circuit.content.subtitle}</p>
+              ) : null}
+
+              <span className={styles.guideBadge}>
+                Durée estimée: {circuit.content.estimatedDuration}
+              </span>
+            </div>
+          ) : null}
         </section>
 
         <section className={styles.section} aria-labelledby="circuit-journey-title">

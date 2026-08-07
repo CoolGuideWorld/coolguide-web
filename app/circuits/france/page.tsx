@@ -13,6 +13,19 @@ const HERO_IMAGE = "/heroes/france-circuits-hero-v2.webp";
 // Temporary fallback until circuit_images architecture is available in catalog data.
 const CIRCUIT_FALLBACK_IMAGE = "/heroes/france-destinations-hero.webp";
 
+function isUsableHeroImageUrl(value: string | null | undefined): value is string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname !== "example.com";
+  } catch {
+    return false;
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Les plus beaux circuits de France",
@@ -77,63 +90,27 @@ export default async function FranceCircuitsPage() {
             </div>
 
             <div className={pageStyles.circuitsGrid}>
-              {featuredCircuits.map((circuit) => (
-                <Link
-                  key={`featured-${circuit.slug}`}
-                  href={`/circuits/${circuit.slug}`}
-                  className={pageStyles.circuitCard}
-                  aria-label={`Ouvrir le circuit ${circuit.title}`}
-                >
-                  <div className={pageStyles.cardMedia}>
-                    <Image
-                      src={CIRCUIT_FALLBACK_IMAGE}
-                      alt={`Illustration du circuit ${circuit.title}`}
-                      fill
-                      sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 25vw"
-                      className={pageStyles.cardImage}
-                    />
-                  </div>
+              {featuredCircuits.map((circuit) => {
+                const heroImageUrl = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
+                  ? circuit.heroImage.imageUrl
+                  : CIRCUIT_FALLBACK_IMAGE;
+                const heroImageAlt = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
+                  ? circuit.heroImage.altText || circuit.title
+                  : circuit.title;
 
-                  <div className={pageStyles.cardBody}>
-                    <h3 className={pageStyles.cardTitle}>{circuit.title}</h3>
-                    <p className={pageStyles.cardSubtitle}>{circuit.subtitle}</p>
-                    <p className={pageStyles.cardMeta}>
-                      {circuit.destination_count} étape
-                      {circuit.destination_count > 1 ? "s" : ""} • {circuit.estimated_duration}
-                    </p>
-                  </div>
-
-                  <p className={pageStyles.cardLinkLabel}>Découvrir le circuit →</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="circuits-disponibles" className={pageStyles.circuitsSection}>
-          <div className={pageStyles.sectionInner}>
-            <div className={pageStyles.sectionIntro}>
-              <h2 className={pageStyles.sectionTitle}>Toutes les escapades</h2>
-              <p className={pageStyles.sectionLead}>
-                Explorez tous nos itinéraires classés par région, durée et thème.
-              </p>
-            </div>
-
-            {circuits.length > 0 ? (
-              <div className={pageStyles.circuitsGrid}>
-                {circuits.map((circuit) => (
+                return (
                   <Link
-                    key={circuit.slug}
+                    key={`featured-${circuit.slug}`}
                     href={`/circuits/${circuit.slug}`}
                     className={pageStyles.circuitCard}
                     aria-label={`Ouvrir le circuit ${circuit.title}`}
                   >
                     <div className={pageStyles.cardMedia}>
                       <Image
-                        src={CIRCUIT_FALLBACK_IMAGE}
-                        alt={`Illustration du circuit ${circuit.title}`}
+                        src={heroImageUrl}
+                        alt={heroImageAlt}
                         fill
-                        sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                        sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 25vw"
                         className={pageStyles.cardImage}
                       />
                     </div>
@@ -149,7 +126,61 @@ export default async function FranceCircuitsPage() {
 
                     <p className={pageStyles.cardLinkLabel}>Découvrir le circuit →</p>
                   </Link>
-                ))}
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section id="circuits-disponibles" className={pageStyles.circuitsSection}>
+          <div className={pageStyles.sectionInner}>
+            <div className={pageStyles.sectionIntro}>
+              <h2 className={pageStyles.sectionTitle}>Toutes les escapades</h2>
+              <p className={pageStyles.sectionLead}>
+                Explorez tous nos itinéraires classés par région, durée et thème.
+              </p>
+            </div>
+
+            {circuits.length > 0 ? (
+              <div className={pageStyles.circuitsGrid}>
+                {circuits.map((circuit) => {
+                  const heroImageUrl = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
+                    ? circuit.heroImage.imageUrl
+                    : CIRCUIT_FALLBACK_IMAGE;
+                  const heroImageAlt = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
+                    ? circuit.heroImage.altText || circuit.title
+                    : circuit.title;
+
+                  return (
+                    <Link
+                      key={circuit.slug}
+                      href={`/circuits/${circuit.slug}`}
+                      className={pageStyles.circuitCard}
+                      aria-label={`Ouvrir le circuit ${circuit.title}`}
+                    >
+                      <div className={pageStyles.cardMedia}>
+                        <Image
+                          src={heroImageUrl}
+                          alt={heroImageAlt}
+                          fill
+                          sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                          className={pageStyles.cardImage}
+                        />
+                      </div>
+
+                      <div className={pageStyles.cardBody}>
+                        <h3 className={pageStyles.cardTitle}>{circuit.title}</h3>
+                        <p className={pageStyles.cardSubtitle}>{circuit.subtitle}</p>
+                        <p className={pageStyles.cardMeta}>
+                          {circuit.destination_count} étape
+                          {circuit.destination_count > 1 ? "s" : ""} • {circuit.estimated_duration}
+                        </p>
+                      </div>
+
+                      <p className={pageStyles.cardLinkLabel}>Découvrir le circuit →</p>
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
               <div className={pageStyles.emptyState}>

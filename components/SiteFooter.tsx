@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { footerLinks, socialLinks } from "./siteLinks";
+import { STUDIO_URL, socialLinks } from "./siteLinks";
 
 export default function SiteFooter() {
   return (
@@ -19,22 +19,26 @@ export default function SiteFooter() {
         </div>
 
         <nav className="siteFooterNav" aria-label="Footer">
-          {footerLinks.map((link) => (
-            link.href.startsWith("http") ? (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.href} href={link.href}>
-                {link.label}
-              </Link>
-            )
-          ))}
+          <div style={{ display: "grid", gap: "0.6rem" }}>
+            <p style={{ margin: 0, color: "#1f1a17", fontSize: "0.95rem", fontWeight: 600 }}>
+              CoolGuide
+            </p>
+            <Link href="/le-monde-coolguide">Le Monde CoolGuide</Link>
+            <Link href="/contact">Contact</Link>
+            <a href={STUDIO_URL} target="_blank" rel="noreferrer">
+              Accès Studio
+            </a>
+          </div>
+
+          <div style={{ display: "grid", gap: "0.6rem" }}>
+            <p style={{ margin: 0, color: "#1f1a17", fontSize: "0.95rem", fontWeight: 600 }}>
+              Informations légales
+            </p>
+            <Link href="/privacy-policy">Politique de confidentialité</Link>
+            <Link href="/terms-of-use">Conditions d&apos;utilisation (CGU)</Link>
+            <Link href="/delete-account">Suppression du compte</Link>
+            <Link href="/legal-notice">Mentions légales</Link>
+          </div>
         </nav>
 
         <div className="siteFooterSocials" aria-label="Réseaux sociaux">
@@ -51,7 +55,7 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        <p className="siteFooterCopyright">© 2026 CoolGuide. Tous droits réservés.</p>
+        <p className="siteFooterCopyright">© 2026 CoolGuide — Tous droits réservés.</p>
       </div>
     </footer>
   );

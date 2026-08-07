@@ -29,6 +29,10 @@ circuit_rows as (
     coalesce(cc.title, '') as title,
     coalesce(cc.subtitle, '') as subtitle,
     coalesce(cc.estimated_duration, '') as estimated_duration,
+    hero_image.image_url as hero_image_url,
+    hero_image.alt_text as hero_image_alt_text,
+    hero_image.display_mode as hero_image_display_mode,
+    hero_image.focal_position as hero_image_focal_position,
     country_input.country_slug as country_slug,
     country.name as country_name,
     count(cd.destination_id)::int as destination_count
@@ -41,12 +45,30 @@ circuit_rows as (
    and cc.language_id = (select id from language_row)
   left join circuit_destinations cd
     on cd.circuit_id = c.id
+  left join lateral (
+    select
+      ci.image_url,
+      ci.alt_text,
+      ci.display_mode,
+      ci.focal_position
+    from circuit_images ci
+    where ci.circuit_id = c.id
+      and ci.image_type = 'hero'
+      and ci.is_active = true
+    order by ci.position asc nulls last
+    limit 1
+  ) as hero_image
+    on true
   group by
     c.id,
     c.slug,
     cc.title,
     cc.subtitle,
     cc.estimated_duration,
+    hero_image.image_url,
+    hero_image.alt_text,
+    hero_image.display_mode,
+    hero_image.focal_position,
     country_input.country_slug,
     country.name
 )
@@ -58,6 +80,16 @@ select coalesce(
       'title', title,
       'subtitle', subtitle,
       'estimated_duration', estimated_duration,
+      'heroImage',
+        case
+          when hero_image_url is null then null
+          else jsonb_build_object(
+            'imageUrl', hero_image_url,
+            'altText', coalesce(hero_image_alt_text, ''),
+            'displayMode', coalesce(hero_image_display_mode, ''),
+            'focalPosition', coalesce(hero_image_focal_position, '')
+          )
+        end,
       'country_slug', country_slug,
       'country_name', country_name,
       'destination_count', destination_count

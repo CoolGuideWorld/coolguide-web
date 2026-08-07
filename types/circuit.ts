@@ -28,10 +28,18 @@ export type CircuitContent = {
   seoDescription: string;
 };
 
+export type CircuitHeroImage = {
+  imageUrl: string;
+  altText: string;
+  displayMode: string;
+  focalPosition: string;
+};
+
 export type Circuit = {
   id: string;
   slug: string;
   countryId: string;
+  heroImage: CircuitHeroImage | null;
   content: CircuitContent;
   destinations: CircuitDestination[];
 };
@@ -50,6 +58,7 @@ export type CountryCircuitSummary = {
   title: string;
   subtitle: string;
   estimated_duration: string;
+  heroImage: CircuitHeroImage | null;
   country_slug: string;
   country_name: string;
   destination_count: number;

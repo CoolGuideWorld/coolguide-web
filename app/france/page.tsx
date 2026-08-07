@@ -53,9 +53,9 @@ export default function FrancePage() {
               </div>
 
               <div className={pageStyles.choiceCardBody}>
-                <h3 className={pageStyles.choiceTitle}>Explorer les circuits</h3>
+                <h3 className={pageStyles.choiceTitle}>Découvrez les circuits et parcours de France</h3>
                 <p className={pageStyles.choiceText}>
-                  Découvrez les circuits et parcours de France.
+                  Road trips, escapades et itinéraires pour explorer les plus beaux territoires de France.
                 </p>
                 <p className={pageStyles.choiceMeta}>Routes • Road trips • Escapades</p>
               </div>
@@ -79,9 +79,9 @@ export default function FrancePage() {
               </div>
 
               <div className={pageStyles.choiceCardBody}>
-                <h3 className={pageStyles.choiceTitle}>Explorer les destinations</h3>
+                <h3 className={pageStyles.choiceTitle}>Découvrez les villes et lieux incontournables</h3>
                 <p className={pageStyles.choiceText}>
-                  Découvrez les villes et lieux incontournables de France.
+                  Explorez les villes, villages, monuments et sites emblématiques de France.
                 </p>
                 <p className={pageStyles.choiceMeta}>Villes • Villages • Monuments</p>
               </div>
