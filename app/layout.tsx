@@ -17,7 +17,7 @@ function serializeJsonLd(data: unknown): string {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://coolguideworld.com"),
+  metadataBase: new URL("https://www.coolguideworld.com"),
 
   title: {
     default: "CoolGuide World",
@@ -68,17 +68,17 @@ export default function RootLayout({
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "@id": "https://coolguideworld.com/#organization",
+    "@id": "https://www.coolguideworld.com/#organization",
     name: "CoolGuide",
     alternateName: "CoolGuide World",
-    url: "https://coolguideworld.com",
+    url: "https://www.coolguideworld.com",
     description:
       "CoolGuide est une application gratuite de découverte du patrimoine proposant des guides audio géolocalisés en 7 langues, des itinéraires de voyage et des contenus culturels pour explorer les destinations à pied ou en voiture.",
     logo: {
       "@type": "ImageObject",
-      "@id": "https://coolguideworld.com/#logo",
-      url: "https://coolguideworld.com/logo/coolguide-logo.png",
-      contentUrl: "https://coolguideworld.com/logo/coolguide-logo.png",
+      "@id": "https://www.coolguideworld.com/#logo",
+      url: "https://www.coolguideworld.com/logo/coolguide-logo.png",
+      contentUrl: "https://www.coolguideworld.com/logo/coolguide-logo.png",
       caption: "CoolGuide",
     },
     email: "mailto:contact.coolguide@gmail.com",
@@ -87,13 +87,13 @@ export default function RootLayout({
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": "https://coolguideworld.com/#website",
-    url: "https://coolguideworld.com",
+    "@id": "https://www.coolguideworld.com/#website",
+    url: "https://www.coolguideworld.com",
     name: "CoolGuide World",
     alternateName: "CoolGuide",
     inLanguage: "fr-FR",
     publisher: {
-      "@id": "https://coolguideworld.com/#organization",
+      "@id": "https://www.coolguideworld.com/#organization",
     },
   };
 

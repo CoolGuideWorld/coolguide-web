@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { getCountryCircuits } from "@/services/circuits/getCountryCircuits";
 import {
   getCountryCatalogData,
   getPublishedDestinationCountries,
 } from "@/services/destinations";
 
-const CANONICAL_ORIGIN = "https://coolguideworld.com";
+const CANONICAL_ORIGIN = "https://www.coolguideworld.com";
 
 const STATIC_PATHS = [
   "/",
@@ -49,6 +50,23 @@ async function collectDynamicUrls(): Promise<Set<string>> {
     }
 
     dynamicUrls.add(toAbsoluteUrl(buildPath("destinations", countrySlug)));
+
+    try {
+      const circuits = await getCountryCircuits(countrySlug);
+
+      if (circuits) {
+        for (const circuit of circuits) {
+          const circuitSlug = safeString(circuit.slug);
+
+          if (circuitSlug) {
+            dynamicUrls.add(toAbsoluteUrl(buildPath("circuits", circuitSlug)));
+          }
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown country circuits sitemap error";
+      console.error(`[sitemap] Failed to build circuit URLs for country \"${countrySlug}\": ${message}`);
+    }
 
     try {
       const firstPage = await getCountryCatalogData({
