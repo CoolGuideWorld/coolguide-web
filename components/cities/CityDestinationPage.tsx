@@ -4,8 +4,10 @@ import CityHero from "@/components/cities/CityHero";
 import CityStats from "@/components/cities/CityStats";
 import CityBadges from "@/components/cities/CityBadges";
 import CityHighlights from "@/components/cities/CityHighlights";
+import LocalGuidesSection from "@/components/cities/LocalGuidesSection";
 import DestinationCircuit from "@/components/circuits/DestinationCircuit";
 import CityNearbyDestinations from "@/components/cities/CityNearbyDestinations";
+import LocalCreatorsSection from "@/components/cities/LocalCreatorsSection";
 import CityIntroduction from "@/components/cities/CityIntroduction";
 import CityPractical from "@/components/cities/CityPractical";
 import CityItineraries from "@/components/cities/CityItineraries";
@@ -62,11 +64,13 @@ export default function CityDestinationPage({
               highlights={cityData.highlights}
             />
           ) : null}
+          <LocalGuidesSection cityName={cityData.hero.name} />
           <DestinationCircuit contexts={destinationCircuitContexts} />
           <CityNearbyDestinations
             cityName={cityData.hero.name}
             destinations={cityData.nearbyDestinations}
           />
+          <LocalCreatorsSection cityName={cityData.hero.name} />
           {cityData.practical.length > 0 ? (
             <CityPractical title="Preparer votre visite" items={cityData.practical} />
           ) : null}

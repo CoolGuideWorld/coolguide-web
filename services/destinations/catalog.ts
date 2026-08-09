@@ -74,6 +74,7 @@ type DestinationHighlightRow = {
   id: string;
   destination_id: string;
   poi_id: string | null;
+  position?: number | null;
 };
 
 type DestinationHighlightContentRow = {
@@ -296,7 +297,7 @@ function splitIntoChunks<T>(values: T[], size = 200): T[][] {
   return chunks;
 }
 
-async function getCatalogFallbackImagesByCityId(
+export async function getCatalogFallbackImagesByCityId(
   supabase = createServerSupabaseClient(),
   cityIds: string[]
 ): Promise<
@@ -373,29 +374,29 @@ async function getCatalogFallbackImagesByCityId(
     highlights.push(...((data ?? []) as DestinationHighlightRow[]));
   }
 
-  const firstHighlightByDestinationId = new Map<string, DestinationHighlightRow>();
+  const highlightByDestinationId = new Map<string, DestinationHighlightRow[]>();
+  const highlightPoiIds: string[] = [];
 
   for (const highlight of highlights) {
     if (!isNonEmptyString(highlight.destination_id) || !isNonEmptyString(highlight.poi_id)) {
       continue;
     }
 
-    if (!firstHighlightByDestinationId.has(highlight.destination_id)) {
-      firstHighlightByDestinationId.set(highlight.destination_id, highlight);
-    }
+    const existing = highlightByDestinationId.get(highlight.destination_id) ?? [];
+    existing.push(highlight);
+    highlightByDestinationId.set(highlight.destination_id, existing);
+    highlightPoiIds.push(highlight.poi_id);
   }
 
-  const firstHighlightPoiIds = Array.from(firstHighlightByDestinationId.values())
-    .map((highlight) => highlight.poi_id)
-    .filter((poiId): poiId is string => isNonEmptyString(poiId));
+  const uniqueHighlightPoiIds = Array.from(new Set(highlightPoiIds));
 
-  if (firstHighlightPoiIds.length === 0) {
+  if (uniqueHighlightPoiIds.length === 0) {
     return fallbackByCityId;
   }
 
   const poiImages: PoiImageRow[] = [];
 
-  for (const poiIdChunk of splitIntoChunks(firstHighlightPoiIds)) {
+  for (const poiIdChunk of splitIntoChunks(uniqueHighlightPoiIds)) {
     const { data, error } = await supabase
       .from("poi_images")
       .select("poi_id,image_url,display_order")
@@ -415,21 +416,25 @@ async function getCatalogFallbackImagesByCityId(
   const firstImageByPoiId = getFirstImageByPoiId(poiImages);
 
   for (const [cityId, destinationId] of destinationIdByCityId) {
-    const highlight = firstHighlightByDestinationId.get(destinationId);
-    if (!highlight?.poi_id) {
-      continue;
+    const destinationHighlights = highlightByDestinationId.get(destinationId) ?? [];
+
+    for (const highlight of destinationHighlights) {
+      if (!highlight.poi_id) {
+        continue;
+      }
+
+      const image = firstImageByPoiId.get(highlight.poi_id) ?? null;
+
+      if (!image?.image_url || !isNonEmptyString(image.image_url)) {
+        continue;
+      }
+
+      fallbackByCityId.set(cityId, {
+        imageSrc: image.image_url.trim(),
+        imageAlt: null,
+      });
+      break;
     }
-
-    const image = firstImageByPoiId.get(highlight.poi_id) ?? null;
-
-    if (!image?.image_url || !isNonEmptyString(image.image_url)) {
-      continue;
-    }
-
-    fallbackByCityId.set(cityId, {
-      imageSrc: image.image_url.trim(),
-      imageAlt: null,
-    });
   }
 
   return fallbackByCityId;

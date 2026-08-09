@@ -12,6 +12,7 @@ import {
   getDestinationContentForCity,
   type DestinationContentSupabaseRow,
 } from "@/services/destinations/getDestinationContent";
+import { getCatalogFallbackImagesByCityId } from "@/services/destinations/catalog";
 import { getDestinationContext } from "@/services/destinations/getDestinationContext";
 import { getDestinationFaq } from "@/services/destinations/getDestinationFaq";
 import { getDestinationHighlights } from "@/services/destinations/getDestinationHighlights";
@@ -398,7 +399,7 @@ function resolveHeroTagline(
 
 function resolveHeroImage(
   heroImage: CityImageSupabaseRow | null,
-  fallbackHighlights: CityHighlightItem[]
+  fallbackCatalogImageSrc: string | null
 ): {
   imageSrc: string | null;
   imageAlt: string | null;
@@ -410,12 +411,10 @@ function resolveHeroImage(
     };
   }
 
-  const fallbackHighlight = fallbackHighlights[0] ?? null;
-
-  if (fallbackHighlight && isNonEmptyString(fallbackHighlight.imageSrc)) {
+  if (isNonEmptyString(fallbackCatalogImageSrc)) {
     return {
-      imageSrc: fallbackHighlight.imageSrc.trim(),
-      imageAlt: firstNonEmptyString(fallbackHighlight.imageAlt) ?? null,
+      imageSrc: fallbackCatalogImageSrc.trim(),
+      imageAlt: null,
     };
   }
 
@@ -438,6 +437,7 @@ function buildUniversalCityData(
   city: CitySupabaseRow,
   destinationContent: DestinationContentSupabaseRow | null,
   heroImage: CityImageSupabaseRow | null,
+  fallbackCatalogHeroImageSrc: string | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
   destinationFaq: CityPageData["faq"],
@@ -446,7 +446,10 @@ function buildUniversalCityData(
   nearbyDestinations: CityNearbyDestinationItem[],
   computedStats: ComputedCityStats
 ): CityPageData {
-  const resolvedHeroImage = resolveHeroImage(heroImage, supabaseHighlights);
+  const resolvedHeroImage = resolveHeroImage(
+    heroImage,
+    fallbackCatalogHeroImageSrc
+  );
   const fallbackHeroTagline = firstNonEmptyString(
     computedStats.bestVisitPeriod,
     computedStats.idealVisitDuration
@@ -496,6 +499,7 @@ function mergeWithLocalCityData(
   city: CitySupabaseRow,
   destinationContent: DestinationContentSupabaseRow | null,
   heroImage: CityImageSupabaseRow | null,
+  fallbackCatalogHeroImageSrc: string | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
   destinationFaq: CityPageData["faq"],
@@ -504,7 +508,10 @@ function mergeWithLocalCityData(
   nearbyDestinations: CityNearbyDestinationItem[],
   computedStats: ComputedCityStats
 ): CityPageData {
-  const resolvedHeroImage = resolveHeroImage(heroImage, supabaseHighlights);
+  const resolvedHeroImage = resolveHeroImage(
+    heroImage,
+    fallbackCatalogHeroImageSrc
+  );
   const fallbackHeroTagline = firstNonEmptyString(
     localCityData.hero.tagline,
     computedStats.bestVisitPeriod,
@@ -671,6 +678,17 @@ export async function getCity(
       .limit(1)
       .maybeSingle<CityImageSupabaseRow>();
 
+    let fallbackCatalogHeroImageSrc: string | null = null;
+
+    if (!heroImageError && !isNonEmptyString(heroImage?.image_url)) {
+      const fallbackImagesByCityId = await getCatalogFallbackImagesByCityId(
+        supabase,
+        [city.id]
+      );
+      fallbackCatalogHeroImageSrc =
+        fallbackImagesByCityId.get(city.id)?.imageSrc ?? null;
+    }
+
     if (heroImageError) {
       console.error(
         `Supabase hero image query failed for city "${normalizedSlug}": ${heroImageError.message}`
@@ -778,6 +796,13 @@ export async function getCity(
             const nearbyCityIds = orderedNearbyCities.map((row) => row.id);
             let administrativeAreaNameById = new Map<string, string>();
             const heroImageByCityId = new Map<string, string>();
+            let fallbackImageByCityId = new Map<
+              string,
+              {
+                imageSrc: string | null;
+                imageAlt: string | null;
+              }
+            >();
 
             if (administrativeAreaIds.length > 0) {
               const { data: areaRows, error: areasError } = await supabase
@@ -819,6 +844,17 @@ export async function getCity(
                   }
                 }
               }
+
+              const nearbyCityIdsWithoutHero = orderedNearbyCities
+                .map((nearbyCity) => nearbyCity.id)
+                .filter((nearbyCityId) => !heroImageByCityId.has(nearbyCityId));
+
+              if (nearbyCityIdsWithoutHero.length > 0) {
+                fallbackImageByCityId = await getCatalogFallbackImagesByCityId(
+                  supabase,
+                  nearbyCityIdsWithoutHero
+                );
+              }
             }
 
             nearbyDestinations = orderedNearbyCities.map((nearbyCity) => ({
@@ -831,7 +867,10 @@ export async function getCity(
                 nearbyCity.latitude,
                 nearbyCity.longitude
               ),
-              image: heroImageByCityId.get(nearbyCity.id) ?? null,
+              image:
+                heroImageByCityId.get(nearbyCity.id) ??
+                fallbackImageByCityId.get(nearbyCity.id)?.imageSrc ??
+                null,
               administrativeArea:
                 nearbyCity.administrative_area_id !== null
                   ? administrativeAreaNameById.get(nearbyCity.administrative_area_id) ?? null
@@ -1006,6 +1045,7 @@ export async function getCity(
         city,
         destinationContent,
         heroImageError ? null : heroImage,
+        fallbackCatalogHeroImageSrc,
         supabaseBadges,
         resolvedHighlights,
         destinationFaq,
@@ -1020,6 +1060,7 @@ export async function getCity(
       city,
       destinationContent,
       heroImageError ? null : heroImage,
+      fallbackCatalogHeroImageSrc,
       supabaseBadges,
       resolvedHighlights,
       destinationFaq,
