@@ -1,6 +1,7 @@
 export type AvailableCountry = {
   name: string;
   slug: string;
+  isoCode?: string | null;
   latitude: number;
   longitude: number;
   searchTerms?: string[];

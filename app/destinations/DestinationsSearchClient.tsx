@@ -15,6 +15,7 @@ const SEARCH_ERROR_MESSAGE = "Cette destination n'est pas encore disponible.";
 
 type DestinationsSearchClientProps = {
   countries: SearchableDestinationCountry[];
+  publishedCountries: SearchableDestinationCountry[];
 };
 
 function findPublishedCountryByQuery(
@@ -34,7 +35,10 @@ function findPublishedCountryByQuery(
   );
 }
 
-export default function DestinationsSearchClient({ countries }: DestinationsSearchClientProps) {
+export default function DestinationsSearchClient({
+  countries,
+  publishedCountries,
+}: DestinationsSearchClientProps) {
   const router = useRouter();
   const globeRef = useRef<ImmersiveGlobeExperienceHandle | null>(null);
 
@@ -113,6 +117,7 @@ export default function DestinationsSearchClient({ countries }: DestinationsSear
 
       <ImmersiveGlobeExperience
         ref={globeRef}
+        publishedCountries={publishedCountries}
         activeCountry={selectedCountry}
         onFocusStateChange={setIsFocusingCountry}
       />

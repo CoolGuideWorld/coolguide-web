@@ -9,6 +9,7 @@ export type CatalogSortValue = (typeof CATALOG_SORT_VALUES)[number];
 export type CountryRow = {
   id: string;
   name: string;
+  iso_code?: string | null;
 };
 
 type RelationRow = {
@@ -101,6 +102,7 @@ type AdministrativeAreaCityRow = {
 };
 
 type SearchableCityCountryRow = {
+  id: string;
   country_id: string;
   slug: string;
   name: string;
@@ -149,6 +151,7 @@ export type CountryCatalogData = {
 export type SearchableDestinationCountry = {
   name: string;
   slug: string;
+  isoCode: string | null;
   latitude: number;
   longitude: number;
   searchTerms: string[];
@@ -903,12 +906,13 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
       .from("cities")
       .select(
         `
+          id,
           country_id,
           slug,
           name,
           latitude,
           longitude,
-          countries!cities_country_id_fkey(id, name)
+          countries!cities_country_id_fkey(id, name, iso_code)
         `
       )
       .order("name", { ascending: true })
@@ -932,6 +936,7 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
       {
         name: string;
         slug: string;
+        isoCode: string | null;
         latitude: number | null;
         longitude: number | null;
         cityNames: string[];
@@ -942,6 +947,10 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
     for (const row of rows) {
       const country = readCountryRelation(row.countries);
       const countryName = country?.name?.trim() ?? "";
+      const countryIsoCode =
+        typeof country?.iso_code === "string" && country.iso_code.trim().length > 0
+          ? country.iso_code.trim().toUpperCase()
+          : null;
 
       if (!countryName) {
         continue;
@@ -954,6 +963,10 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
       if (existing) {
         existing.cityNames.push(row.name);
         existing.citySlugs.push(row.slug);
+
+        if (existing.isoCode === null && countryIsoCode !== null) {
+          existing.isoCode = countryIsoCode;
+        }
 
         if (existing.latitude === null && typeof row.latitude === "number") {
           existing.latitude = row.latitude;
@@ -969,6 +982,7 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
       grouped.set(countrySlug, {
         name: countryName,
         slug: countrySlug,
+        isoCode: countryIsoCode,
         latitude: staticCountry?.latitude ?? row.latitude,
         longitude: staticCountry?.longitude ?? row.longitude,
         cityNames: [row.name],
@@ -984,6 +998,7 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
       .map((country) => ({
         name: country.name,
         slug: country.slug,
+        isoCode: country.isoCode,
         latitude: country.latitude,
         longitude: country.longitude,
         searchTerms: collectUniqueTerms(
@@ -996,6 +1011,136 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error(`Published destination countries setup failed: ${message}`);
+    return [];
+  }
+}
+
+export async function getCountriesWithPublishableDestinations(): Promise<SearchableDestinationCountry[]> {
+  try {
+    const supabase = createServerSupabaseClient();
+
+    let query = supabase
+      .from("cities")
+      .select(
+        `
+          id,
+          country_id,
+          slug,
+          name,
+          latitude,
+          longitude,
+          countries!cities_country_id_fkey(id, name, iso_code)
+        `
+      )
+      .order("name", { ascending: true })
+      .order("slug", { ascending: true });
+
+    query = applyCatalogPublicationFilters(query);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(`Supabase publishable destination countries query failed: ${error.message}`);
+      return [];
+    }
+
+    const rows = (data ?? []) as SearchableCityCountryRow[];
+    const countryLookup = new Map(
+      AVAILABLE_DESTINATION_COUNTRIES.map((country) => [country.slug, country])
+    );
+    const grouped = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        slug: string;
+        isoCode: string | null;
+        rows: SearchableCityCountryRow[];
+      }
+    >();
+
+    for (const row of rows) {
+      const country = readCountryRelation(row.countries);
+      const countryName = country?.name?.trim() ?? "";
+      const countryIsoCode =
+        typeof country?.iso_code === "string" && country.iso_code.trim().length > 0
+          ? country.iso_code.trim().toUpperCase()
+          : null;
+
+      if (!countryName || !isNonEmptyString(row.country_id)) {
+        continue;
+      }
+
+      const countrySlug = countryNameToSlug(countryName);
+      const existing = grouped.get(countrySlug);
+
+      if (existing) {
+        existing.rows.push(row);
+
+        if (existing.isoCode === null && countryIsoCode !== null) {
+          existing.isoCode = countryIsoCode;
+        }
+
+        continue;
+      }
+
+      grouped.set(countrySlug, {
+        id: row.country_id,
+        name: countryName,
+        slug: countrySlug,
+        isoCode: countryIsoCode,
+        rows: [row],
+      });
+    }
+
+    const publishableCountries = await Promise.all(
+      Array.from(grouped.values()).map(async (countryGroup) => {
+        const publishableCityIds = await getPublishableCityIdsForCountry(countryGroup.id);
+
+        if (publishableCityIds.size === 0) {
+          return null;
+        }
+
+        const publishableRows = countryGroup.rows.filter((row) => publishableCityIds.has(row.id));
+        const staticCountry = countryLookup.get(countryGroup.slug);
+
+        const coordinateSource =
+          publishableRows.find(
+            (row) => typeof row.latitude === "number" && typeof row.longitude === "number"
+          ) ??
+          countryGroup.rows.find(
+            (row) => typeof row.latitude === "number" && typeof row.longitude === "number"
+          ) ??
+          null;
+
+        const latitude = staticCountry?.latitude ?? coordinateSource?.latitude ?? null;
+        const longitude = staticCountry?.longitude ?? coordinateSource?.longitude ?? null;
+
+        if (typeof latitude !== "number" || typeof longitude !== "number") {
+          return null;
+        }
+
+        return {
+          name: countryGroup.name,
+          slug: countryGroup.slug,
+          isoCode: countryGroup.isoCode,
+          latitude,
+          longitude,
+          searchTerms: collectUniqueTerms(
+            [countryGroup.name, countryGroup.slug],
+            publishableRows.map((row) => row.name),
+            publishableRows.map((row) => row.slug)
+          ),
+        } satisfies SearchableDestinationCountry;
+      })
+    );
+
+    return publishableCountries
+      .filter((country): country is SearchableDestinationCountry => Boolean(country))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Publishable destination countries setup failed: ${message}`);
     return [];
   }
 }

@@ -1,6 +1,7 @@
 export {
   CATALOG_SORT_VALUES,
   COUNTRY_DESTINATIONS_PAGE_SIZE,
+  getCountriesWithPublishableDestinations,
   getCountryBySlug,
   getCountryCatalogData,
   getCountryDestinations,

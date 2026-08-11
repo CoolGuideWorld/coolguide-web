@@ -5,6 +5,8 @@ import { Canvas, useFrame, useLoader, useThree, type ThreeEvent } from "@react-t
 import { useRouter } from "next/navigation";
 import {
   forwardRef,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   Suspense,
   useEffect,
   useImperativeHandle,
@@ -112,6 +114,7 @@ export type ImmersiveGlobeExperienceHandle = {
 };
 
 type ImmersiveGlobeExperienceProps = {
+  publishedCountries?: AvailableCountry[];
   activeCountry?: AvailableCountry | null;
   onFocusStateChange?: (isFocusingCountry: boolean) => void;
 };
@@ -120,26 +123,71 @@ const COUNTRY_LABEL_OFFSET_BY_SLUG: Record<string, [number, number, number]> = {
   france: [0, 0, 0],
 };
 
+const FRENCH_REGION_DISPLAY_NAMES =
+  typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
+    ? new Intl.DisplayNames(["fr"], { type: "region" })
+    : null;
+
+function getLocalizedCountryLabel(country: AvailableCountry): string {
+  const isoCode =
+    typeof country.isoCode === "string" ? country.isoCode.trim().toUpperCase() : "";
+
+  if (isoCode.length !== 2 || FRENCH_REGION_DISPLAY_NAMES === null) {
+    return country.name;
+  }
+
+  const localized = FRENCH_REGION_DISPLAY_NAMES.of(isoCode);
+
+  if (typeof localized === "string" && localized.trim().length > 0) {
+    return localized;
+  }
+
+  return country.name;
+}
+
 function CountryLabel({
   country,
   position,
   isFocused,
+  onClick,
 }: {
   country: AvailableCountry;
   position: THREE.Vector3;
   isFocused: boolean;
+  onClick?: (event: ReactMouseEvent<HTMLSpanElement> | ReactKeyboardEvent<HTMLSpanElement>) => void;
 }) {
   return (
     <Html
       position={position}
       center
       transform={false}
-      style={{ pointerEvents: "none" }}
+      style={{ pointerEvents: onClick ? "auto" : "none" }}
     >
       <span
         className={`${styles.countryLabel} ${isFocused ? styles.countryLabelFocused : ""}`.trim()}
+        role={onClick ? "button" : undefined}
+        tabIndex={onClick ? 0 : -1}
+        onClick={
+          onClick
+            ? (event) => {
+                event.stopPropagation();
+                onClick(event);
+              }
+            : undefined
+        }
+        onKeyDown={
+          onClick
+            ? (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onClick();
+                }
+              }
+            : undefined
+        }
       >
-        {country.name}
+        {getLocalizedCountryLabel(country)}
       </span>
     </Html>
   );
@@ -401,6 +449,12 @@ function CountryDiscoverySignal({
   isNavigating,
   isMobile,
   focusPulseVersion,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerCancel,
+  onPointerOver,
+  onPointerOut,
 }: {
   country: AvailableCountry;
   countryVector: THREE.Vector3;
@@ -409,6 +463,12 @@ function CountryDiscoverySignal({
   isNavigating: boolean;
   isMobile: boolean;
   focusPulseVersion: number;
+  onPointerDown?: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerMove?: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerUp?: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerCancel?: () => void;
+  onPointerOver?: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: (event: ThreeEvent<PointerEvent>) => void;
 }) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const haloMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -663,6 +723,19 @@ function CountryDiscoverySignal({
           depthWrite={false}
         />
       </points>
+
+      <mesh
+        position={[0, 0.012, 0]}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onPointerOver={onPointerOver}
+        onPointerOut={onPointerOut}
+      >
+        <sphereGeometry args={[isMobile ? 0.03 : 0.034, 18, 18]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
     </group>
   );
 }
@@ -672,11 +745,12 @@ const GlobeScene = forwardRef<
   {
     texturePath: string;
     isMobile: boolean;
+    publishedCountries: AvailableCountry[];
     activeCountry: AvailableCountry;
     onFocusStateChange?: (isFocusingCountry: boolean) => void;
   }
 >(function GlobeScene(
-  { texturePath, isMobile, activeCountry, onFocusStateChange },
+  { texturePath, isMobile, publishedCountries, activeCountry, onFocusStateChange },
   ref
 ) {
   const router = useRouter();
@@ -757,6 +831,14 @@ const GlobeScene = forwardRef<
   const labelAnchorPoint = useMemo(
     () => labelPoint.clone().add(labelPointOffset),
     [labelPoint, labelPointOffset]
+  );
+  const publishedCountrySignals = useMemo(
+    () =>
+      publishedCountries.map((country) => ({
+        country,
+        direction: latLonToVector3(country.latitude, country.longitude, 1).normalize(),
+      })),
+    [publishedCountries]
   );
 
   const markInteraction = () => {
@@ -864,7 +946,7 @@ const GlobeScene = forwardRef<
     setHovered(isHovering);
   };
 
-  const triggerCountryNavigation = () => {
+  const triggerCountryNavigation = (country: AvailableCountry) => {
     if (navigatingRef.current) {
       return;
     }
@@ -873,14 +955,11 @@ const GlobeScene = forwardRef<
     autoRotationFactorRef.current = 0;
     focusAnimationRef.current = null;
     focusPulseRef.current = null;
+    setFocusLabelCountry(country);
     setIsFocusAnimating(false);
     setZooming(false);
     onFocusStateChange?.(false);
-    router.push(
-      activeCountry.slug === "france"
-        ? "/france"
-        : `/destinations/${activeCountry.slug}`
-    );
+    router.push(`/destinations/${country.slug}`);
   };
 
   const handleOrbitStart = () => {
@@ -949,7 +1028,7 @@ const GlobeScene = forwardRef<
     controlsMovedSinceCountryDownRef.current = false;
   };
 
-  const handleCountryPointerUp = (event: ThreeEvent<PointerEvent>) => {
+  const handleCountryPointerUp = (event: ThreeEvent<PointerEvent>, country: AvailableCountry) => {
     if (!countryPointerDownRef.current || isFocusAnimating) {
       return;
     }
@@ -970,7 +1049,7 @@ const GlobeScene = forwardRef<
     }
 
     event.stopPropagation();
-    triggerCountryNavigation();
+    triggerCountryNavigation(country);
   };
 
   useFrame((state, delta) => {
@@ -1065,8 +1144,6 @@ const GlobeScene = forwardRef<
     }
   });
 
-  const showLabel = hovered || isFocusAnimating || Boolean(focusLabelCountry);
-  const labelCountry = focusLabelCountry ?? activeCountry;
   const isLabelFocused = isFocusAnimating || Boolean(focusLabelCountry);
 
   return (
@@ -1166,39 +1243,46 @@ const GlobeScene = forwardRef<
           />
         </mesh>
 
-        <CountryDiscoverySignal
-          country={activeCountry}
-          countryVector={activeCountryDirection}
-          isHovered={hovered}
-          isFocused={isFocusAnimating || Boolean(focusLabelCountry)}
-          isNavigating={navigatingRef.current}
-          isMobile={isMobile}
-          focusPulseVersion={focusPulseVersion}
-        />
+        {publishedCountrySignals.map(({ country, direction }) => {
+          const isActiveSignal = country.slug === activeCountry.slug;
+          const labelPoint = direction.clone().multiplyScalar(GLOBE_RADIUS * 1.21);
+          const labelOffsetConfig = COUNTRY_LABEL_OFFSET_BY_SLUG[country.slug];
+          const labelOffset = labelOffsetConfig
+            ? new THREE.Vector3(labelOffsetConfig[0], labelOffsetConfig[1], labelOffsetConfig[2])
+            : new THREE.Vector3(0, THREE.MathUtils.clamp(country.latitude / 90, -1, 1) * 0.014, 0);
+          const labelAnchorPoint = labelPoint.add(labelOffset);
 
-        <mesh
-          position={activeCountryPoint.clone().multiplyScalar(1.02)}
-          onPointerOver={(event) => handleHover(event, true)}
-          onPointerOut={(event) => {
-            handleHover(event, false);
-            resetCountryPointer();
-          }}
-          onPointerDown={handleCountryPointerDown}
-          onPointerMove={handleCountryPointerMove}
-          onPointerUp={handleCountryPointerUp}
-          onPointerCancel={resetCountryPointer}
-        >
-          <sphereGeometry args={[0.22, 24, 24]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        </mesh>
+          return (
+            <group key={country.slug}>
+              <CountryDiscoverySignal
+                country={country}
+                countryVector={direction}
+                isHovered={isActiveSignal ? hovered : false}
+                isFocused={isActiveSignal ? isFocusAnimating || Boolean(focusLabelCountry) : false}
+                isNavigating={isActiveSignal ? navigatingRef.current : false}
+                isMobile={isMobile}
+                focusPulseVersion={focusPulseVersion}
+                onPointerDown={handleCountryPointerDown}
+                onPointerMove={handleCountryPointerMove}
+                onPointerUp={(event) => handleCountryPointerUp(event, country)}
+                onPointerCancel={resetCountryPointer}
+                onPointerOver={(event) => handleHover(event, true)}
+                onPointerOut={(event) => {
+                  handleHover(event, false);
+                  resetCountryPointer();
+                }}
+              />
 
-        {showLabel ? (
-          <CountryLabel
-            country={labelCountry}
-            position={labelAnchorPoint}
-            isFocused={isLabelFocused}
-          />
-        ) : null}
+              <CountryLabel
+                country={country}
+                position={labelAnchorPoint}
+                isFocused={isActiveSignal ? isLabelFocused : false}
+                onClick={() => triggerCountryNavigation(country)}
+              />
+            </group>
+          );
+        })}
+
       </group>
     </>
   );
@@ -1228,7 +1312,7 @@ const ImmersiveGlobeExperience = forwardRef<
   ImmersiveGlobeExperienceHandle,
   ImmersiveGlobeExperienceProps
 >(function ImmersiveGlobeExperience(
-  { activeCountry, onFocusStateChange },
+  { publishedCountries, activeCountry, onFocusStateChange },
   ref
 ) {
   const [viewportWidth, setViewportWidth] = useState(1280);
@@ -1240,6 +1324,10 @@ const ImmersiveGlobeExperience = forwardRef<
   const texturePath = isMobile ? EARTH_TEXTURE_MOBILE : EARTH_TEXTURE_DESKTOP;
   const defaultCountry = AVAILABLE_DESTINATION_COUNTRIES[0];
   const resolvedActiveCountry = activeCountry ?? defaultCountry;
+  const resolvedPublishedCountries =
+    publishedCountries && publishedCountries.length > 0
+      ? publishedCountries
+      : [resolvedActiveCountry];
 
   useImperativeHandle(ref, () => ({
     focusCountry: (country) => {
@@ -1348,6 +1436,7 @@ const ImmersiveGlobeExperience = forwardRef<
                 ref={sceneRef}
                 texturePath={texturePath}
                 isMobile={isMobile}
+                publishedCountries={resolvedPublishedCountries}
                 activeCountry={resolvedActiveCountry}
                 onFocusStateChange={onFocusStateChange}
               />

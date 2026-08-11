@@ -30,6 +30,11 @@ type PoiImageSupabaseRow = {
   image_url: string | null;
 };
 
+type PoiTextSupabaseRow = {
+  poi_id: string;
+  title: string | null;
+};
+
 type AudioSupabaseRow = {
   poi_id: string | null;
 };
@@ -107,6 +112,7 @@ export async function getDestinationHighlights(
   }
 
   const { destinationId, languageId } = context;
+  const languageCode = context.languageIsoCode;
 
   try {
     const { data: destinationHighlightRows, error: destinationHighlightsError } = await supabase
@@ -189,6 +195,37 @@ export async function getDestinationHighlights(
       }
     }
 
+    const { data: poiTextRows, error: poiTextsError } = await supabase
+      .from("poi_texts")
+      .select("poi_id,title")
+      .in("poi_id", uniquePoiIds)
+      .eq("language_code", languageCode)
+      .eq("is_current", true)
+      .eq("status", "active")
+      .eq("text_type", "popup")
+      .eq("mode", "none")
+      .order("poi_id", { ascending: true })
+      .order("version", { ascending: false });
+
+    if (poiTextsError) {
+      console.error(
+        `Supabase poi_texts query failed for destination_id "${destinationId}" and language_code "${languageCode}": ${poiTextsError.message}`
+      );
+      return [];
+    }
+
+    const localizedTitleByPoiId = new Map<string, string>();
+
+    for (const row of (poiTextRows ?? []) as PoiTextSupabaseRow[]) {
+      if (!isNonEmptyString(row.poi_id) || !isNonEmptyString(row.title)) {
+        continue;
+      }
+
+      if (!localizedTitleByPoiId.has(row.poi_id)) {
+        localizedTitleByPoiId.set(row.poi_id, row.title.trim());
+      }
+    }
+
     const { data: poiImageRows, error: poiImagesError } = await supabase
       .from("poi_images")
       .select("poi_id,image_url")
@@ -251,8 +288,10 @@ export async function getDestinationHighlights(
         continue;
       }
 
+      const localizedTitle = localizedTitleByPoiId.get(highlight.poi_id) ?? null;
+
       mappedHighlights.push({
-        name: poi.name,
+        name: firstNonEmptyString(localizedTitle, poi.name) ?? poi.name,
         category,
         duration: formatVisitDuration(highlight.duration_minutes ?? 0),
         imageSrc,

@@ -6,11 +6,13 @@ type DestinationSupabaseRow = {
 
 type LanguageSupabaseRow = {
   id: string;
+  iso_code: string;
 };
 
 export type DestinationContext = {
   destinationId: string;
   languageId: string;
+  languageIsoCode: string;
   cityId: string;
 };
 
@@ -39,7 +41,7 @@ export async function getDestinationContext(
 
     const { data: language, error: languageError } = await supabase
       .from("languages")
-      .select("id")
+      .select("id,iso_code")
       .eq("iso_code", isoCode)
       .maybeSingle<LanguageSupabaseRow>();
 
@@ -57,6 +59,7 @@ export async function getDestinationContext(
     return {
       destinationId: destination.id,
       languageId: language.id,
+      languageIsoCode: language.iso_code,
       cityId,
     };
   } catch {
