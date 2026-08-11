@@ -181,7 +181,7 @@ function CountryLabel({
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   event.stopPropagation();
-                  onClick();
+                  onClick(event);
                 }
               }
             : undefined
