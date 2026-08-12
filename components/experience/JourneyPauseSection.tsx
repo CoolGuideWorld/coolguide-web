@@ -8,6 +8,7 @@ export default function JourneyPauseSection() {
           src="/hero/hero-06-bridge.jpg"
           alt=""
           fill
+          sizes="100vw"
           className="journeyPauseImage"
         />
       </div>

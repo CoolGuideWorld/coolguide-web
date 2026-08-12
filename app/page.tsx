@@ -73,6 +73,7 @@ export default function Home() {
                 src={slide.image}
                 alt=""
                 fill
+                sizes="100vw"
                 priority={index === 0}
                 className="heroImage"
                 style={{ animationDelay: `${index * 5}s` }}
@@ -104,6 +105,7 @@ export default function Home() {
             src="/hero/hero-06-bridge.jpg"
             alt=""
             fill
+            sizes="100vw"
             className="journeyPauseImage"
           />
         </div>

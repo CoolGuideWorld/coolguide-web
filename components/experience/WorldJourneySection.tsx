@@ -57,6 +57,7 @@ export default function WorldJourneySection() {
             src={item.image}
             alt={item.place}
             fill
+            sizes="(max-width: 900px) calc(100vw - 2rem), calc(100vw - 6rem)"
             className="worldImage"
           />
 
