@@ -1162,6 +1162,7 @@ export async function getCountryBySlug(countrySlug: string): Promise<{
   id: string;
   name: string;
   slug: string;
+  isoCode: string | null;
 } | null> {
   const normalizedSlug = normalizeSlug(countrySlug);
 
@@ -1172,7 +1173,7 @@ export async function getCountryBySlug(countrySlug: string): Promise<{
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from("countries")
-    .select("id, name")
+    .select("id, name, iso_code")
     .order("name", { ascending: true });
 
   if (error) {
@@ -1192,6 +1193,7 @@ export async function getCountryBySlug(countrySlug: string): Promise<{
     id: match.id,
     name: match.name,
     slug: countryNameToSlug(match.name),
+    isoCode: firstNonEmptyString(match.iso_code)?.toUpperCase() ?? null,
   };
 }
 
