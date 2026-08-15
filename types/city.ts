@@ -44,6 +44,11 @@ export type CityFaqItem = {
   answer: string;
 };
 
+export type CityInsightItem = {
+  title: string;
+  content: string;
+};
+
 export type CityCTAData = {
   title: string;
   text: string;
@@ -67,6 +72,7 @@ export type CityPageData = {
   stats: CityStatItem[];
   badges: CityBadgeItem[];
   highlights: CityHighlightItem[];
+  insights?: CityInsightItem[];
   nearbyDestinations: CityNearbyDestinationItem[];
   practical: CityPracticalItem[];
   itineraries: CityItineraryItem[];

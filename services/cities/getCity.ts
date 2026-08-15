@@ -16,6 +16,7 @@ import { getCatalogFallbackImagesByCityId } from "@/services/destinations/catalo
 import { getDestinationContext } from "@/services/destinations/getDestinationContext";
 import { getDestinationFaq } from "@/services/destinations/getDestinationFaq";
 import { getDestinationHighlights } from "@/services/destinations/getDestinationHighlights";
+import { getDestinationInsights } from "@/services/destinations/getDestinationInsights";
 import { getDestinationItineraries } from "@/services/destinations/getDestinationItineraries";
 import { getDestinationPractical } from "@/services/destinations/getDestinationPractical";
 
@@ -440,6 +441,7 @@ function buildUniversalCityData(
   fallbackCatalogHeroImageSrc: string | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
+  destinationInsights: CityPageData["insights"],
   destinationFaq: CityPageData["faq"],
   destinationItineraries: CityPageData["itineraries"],
   destinationPractical: CityPageData["practical"],
@@ -472,6 +474,10 @@ function buildUniversalCityData(
     stats: mapComputedStatsToItems(computedStats),
     badges: supabaseBadges,
     highlights: supabaseHighlights,
+    insights:
+      destinationInsights && destinationInsights.length > 0
+        ? destinationInsights
+        : [],
     nearbyDestinations,
     practical:
       destinationPractical.length > 0
@@ -502,6 +508,7 @@ function mergeWithLocalCityData(
   fallbackCatalogHeroImageSrc: string | null,
   supabaseBadges: CityBadgeItem[],
   supabaseHighlights: CityHighlightItem[],
+  destinationInsights: CityPageData["insights"],
   destinationFaq: CityPageData["faq"],
   destinationItineraries: CityPageData["itineraries"],
   destinationPractical: CityPageData["practical"],
@@ -548,6 +555,11 @@ function mergeWithLocalCityData(
     badges: supabaseBadges,
 
     highlights: supabaseHighlights,
+
+    insights:
+      destinationInsights && destinationInsights.length > 0
+        ? destinationInsights
+        : localCityData.insights ?? [],
 
     practical:
       destinationPractical.length > 0
@@ -645,6 +657,11 @@ export async function getCity(
     );
 
     const destinationFaq = await getDestinationFaq(
+      supabase,
+      destinationContext
+    );
+
+    const destinationInsights = await getDestinationInsights(
       supabase,
       destinationContext
     );
@@ -1048,6 +1065,7 @@ export async function getCity(
         fallbackCatalogHeroImageSrc,
         supabaseBadges,
         resolvedHighlights,
+        destinationInsights,
         destinationFaq,
         destinationItineraries,
         destinationPractical,
@@ -1063,6 +1081,7 @@ export async function getCity(
       fallbackCatalogHeroImageSrc,
       supabaseBadges,
       resolvedHighlights,
+      destinationInsights,
       destinationFaq,
       destinationItineraries,
       destinationPractical,

@@ -4,6 +4,7 @@ import CityHero from "@/components/cities/CityHero";
 import CityStats from "@/components/cities/CityStats";
 import CityBadges from "@/components/cities/CityBadges";
 import CityHighlights from "@/components/cities/CityHighlights";
+import DestinationInsights from "@/components/cities/DestinationInsights";
 import LocalGuidesSection from "@/components/cities/LocalGuidesSection";
 import DestinationCircuit from "@/components/circuits/DestinationCircuit";
 import CityNearbyDestinations from "@/components/cities/CityNearbyDestinations";
@@ -63,6 +64,9 @@ export default function CityDestinationPage({
               title="Les incontournables"
               highlights={cityData.highlights}
             />
+          ) : null}
+          {Array.isArray(cityData.insights) && cityData.insights.length > 0 ? (
+            <DestinationInsights cityName={cityData.hero.name} items={cityData.insights} />
           ) : null}
           <LocalGuidesSection cityName={cityData.hero.name} />
           <DestinationCircuit contexts={destinationCircuitContexts} />

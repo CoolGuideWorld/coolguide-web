@@ -77,3 +77,9 @@
   flex-wrap: wrap;
   gap: 1rem;
 }
+
+@media (max-width: 800px) {
+  .timelineList {
+    grid-auto-columns: minmax(0, 180px);
+  }
+}
