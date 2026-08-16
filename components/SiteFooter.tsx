@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { STUDIO_URL, socialLinks } from "./siteLinks";
+import { STUDIO_PATH, socialLinks } from "./siteLinks";
 
 export default function SiteFooter() {
   return (
@@ -25,9 +25,7 @@ export default function SiteFooter() {
             </p>
             <Link href="/le-monde-coolguide">Le Monde CoolGuide</Link>
             <Link href="/contact">Contact</Link>
-            <a href={STUDIO_URL} target="_blank" rel="noreferrer">
-              Accès Studio
-            </a>
+            <Link href={STUDIO_PATH}>CoolGuide Studio</Link>
           </div>
 
           <div style={{ display: "grid", gap: "0.6rem" }}>

@@ -1,38 +1,52 @@
-
+﻿
 > coolguide-web@0.1.0 build
 > next build
 
-▲ Next.js 16.2.10 (Turbopack)
+Ôû▓ Next.js 16.2.10 (Turbopack)
 - Environments: .env.local
 
   Creating an optimized production build ...
-✓ Compiled successfully in 9.6s
+Ô£ô Compiled successfully in 8.7s
   Running TypeScript ...
-  Finished TypeScript in 10.7s ...
+  Finished TypeScript in 9.7s ...
   Collecting page data using 7 workers ...
-  Generating static pages using 7 workers (0/14) ...
-  Generating static pages using 7 workers (3/14) 
-  Generating static pages using 7 workers (6/14) 
-  Generating static pages using 7 workers (10/14) 
-✓ Generating static pages using 7 workers (14/14) in 825ms
+  Generating static pages using 7 workers (0/23) ...
+  Generating static pages using 7 workers (5/23) 
+  Generating static pages using 7 workers (11/23) 
+  Generating static pages using 7 workers (17/23) 
+Ô£ô Generating static pages using 7 workers (23/23) in 3.0s
   Finalizing page optimization ...
 
 Route (app)                                     Revalidate  Expire
-┌ ○ /
-├ ○ /_not-found
-├ ƒ /[slug]
-├ ○ /cgu
-├ ○ /cgv
-├ ○ /confidentialite
-├ ○ /contact
-├ ○ /destinations
-├ ○ /destinations/france
-├ ○ /le-monde-coolguide
-├ ○ /le-monde-coolguide/gardiens-du-patrimoine
-├ ○ /nimes                                              1h      1y
-└ ○ /partenaires
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /[slug]
+Ôö£ Ôùï /cgu
+Ôö£ Ôùï /cgv
+Ôö£ ãÆ /circuits/[slug]
+Ôö£ Ôùï /circuits/france                                    1h      1y
+Ôö£ Ôùï /confidentialite
+Ôö£ Ôùï /contact
+Ôö£ ãÆ /countries/[country]
+Ôö£ Ôùï /delete-account
+Ôö£ Ôùï /destinations
+Ôö£ ãÆ /destinations/[country]
+Ôö£ Ôùï /experience                                         1h      1y
+Ôö£ Ôùï /france
+Ôö£ Ôùï /le-monde-coolguide
+Ôö£ Ôùï /le-monde-coolguide/gardiens-du-patrimoine
+Ôö£ Ôùï /legal-notice
+Ôö£ Ôùï /partenaires
+Ôö£ Ôùï /privacy-policy
+Ôö£ Ôùï /robots.txt
+Ôö£ Ôùï /sitemap.xml
+Ôö£ ãÆ /studio
+Ôö£ ãÆ /studio/login
+Ôöö Ôùï /terms-of-use
 
 
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
 

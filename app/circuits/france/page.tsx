@@ -6,7 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { getCountryCircuits } from "@/services/circuits/getCountryCircuits";
 import pageStyles from "./page.module.css";
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 const COUNTRY_SLUG = "france";
 const HERO_IMAGE = "/heroes/france-circuits-hero-v2.webp";
@@ -27,12 +27,37 @@ function isUsableHeroImageUrl(value: string | null | undefined): value is string
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const pageUrl = "https://www.coolguideworld.com/circuits/france";
+  const imageUrl = "https://www.coolguideworld.com/heroes/france-circuits-hero-v2.webp";
+  const title = "Les plus beaux circuits de France";
+  const description =
+    "Découvrez les plus beaux circuits, road trips et itinéraires culturels de France avec CoolGuide.";
+
   return {
-    title: "Les plus beaux circuits de France",
-    description:
-      "Découvrez les plus beaux circuits, road trips et itinéraires culturels de France avec CoolGuide.",
+    title,
+    description,
     alternates: {
       canonical: "/circuits/france",
+    },
+    openGraph: {
+      type: "website",
+      locale: "fr_FR",
+      url: pageUrl,
+      siteName: "CoolGuide World",
+      title,
+      description,
+      images: [
+        {
+          url: imageUrl,
+          alt: "Paysages de France pour inspirer votre prochain circuit",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
     },
   };
 }
@@ -92,7 +117,9 @@ export default async function FranceCircuitsPage() {
             <div className={pageStyles.circuitsGrid}>
               {featuredCircuits.map((circuit) => {
                 const heroImageUrl = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
-                  ? circuit.heroImage.imageUrl
+                  ? circuit.heroImage.updatedAt
+                    ? `${circuit.heroImage.imageUrl}?v=${encodeURIComponent(circuit.heroImage.updatedAt)}`
+                    : circuit.heroImage.imageUrl
                   : CIRCUIT_FALLBACK_IMAGE;
                 const heroImageAlt = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
                   ? circuit.heroImage.altText || circuit.title
@@ -145,7 +172,9 @@ export default async function FranceCircuitsPage() {
               <div className={pageStyles.circuitsGrid}>
                 {circuits.map((circuit) => {
                   const heroImageUrl = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
-                    ? circuit.heroImage.imageUrl
+                    ? circuit.heroImage.updatedAt
+                      ? `${circuit.heroImage.imageUrl}?v=${encodeURIComponent(circuit.heroImage.updatedAt)}`
+                      : circuit.heroImage.imageUrl
                     : CIRCUIT_FALLBACK_IMAGE;
                   const heroImageAlt = isUsableHeroImageUrl(circuit.heroImage?.imageUrl)
                     ? circuit.heroImage.altText || circuit.title

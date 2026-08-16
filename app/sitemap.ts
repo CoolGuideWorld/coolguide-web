@@ -12,6 +12,7 @@ const STATIC_PATHS = [
   "/experience",
   "/contact",
   "/destinations",
+  "/circuits/france",
   "/le-monde-coolguide",
   "/le-monde-coolguide/gardiens-du-patrimoine",
 ] as const;

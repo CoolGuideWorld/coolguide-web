@@ -1,4 +1,4 @@
-export const STUDIO_URL = "https://studio.coolguideworld.com";
+export const STUDIO_PATH = "/studio";
 
 export type HeaderLink = {
   href: string;
@@ -39,7 +39,7 @@ export const footerLinks = [
   { href: "/confidentialite", label: "Confidentialité" },
   { href: "/cgu", label: "CGU" },
   { href: "/cgv", label: "CGV" },
-  { href: STUDIO_URL, label: "Accès Studio" },
+  { href: STUDIO_PATH, label: "CoolGuide Studio" },
 ];
 
 export const socialLinks = [

@@ -33,6 +33,7 @@ export type CircuitHeroImage = {
   altText: string;
   displayMode: string;
   focalPosition: string;
+  updatedAt?: string | null;
 };
 
 export type Circuit = {
