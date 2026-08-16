@@ -42,6 +42,14 @@ type ActiveCityRow = {
 type DestinationRow = {
   id: string;
   city_id: string;
+  cities?:
+    | {
+        slug?: string | null;
+      }
+    | Array<{
+        slug?: string | null;
+      }>
+    | null;
 };
 
 type DestinationContentRow = {
@@ -155,6 +163,28 @@ export type SearchableDestinationCountry = {
   latitude: number;
   longitude: number;
   searchTerms: string[];
+};
+
+export const CATALOG_PUBLICATION_REASON_CODES = [
+  "destination_content_missing",
+  "practical_missing",
+  "itinerary_missing",
+  "highlights_missing",
+  "highlight_poi_missing",
+  "highlight_poi_invalid",
+  "highlight_category_missing",
+  "highlight_image_missing",
+] as const;
+
+export type CatalogPublicationReasonCode =
+  (typeof CATALOG_PUBLICATION_REASON_CODES)[number];
+
+export type DestinationPublicationDiagnostic = {
+  cityId: string;
+  citySlug: string | null;
+  destinationId: string;
+  publishable: boolean;
+  reasons: CatalogPublicationReasonCode[];
 };
 
 function readRelationName(relation: RelationRow | RelationRow[] | null): string | null {
@@ -443,9 +473,13 @@ export async function getCatalogFallbackImagesByCityId(
   return fallbackByCityId;
 }
 
-async function getPublishableCityIdsForCountry(
-  countryId: string
-): Promise<Set<string>> {
+async function computeCatalogPublicationForCountry(
+  countryId: string,
+  withDiagnostics = false
+): Promise<{
+  publishedCityIds: Set<string>;
+  diagnostics: DestinationPublicationDiagnostic[];
+}> {
   const supabase = createServerSupabaseClient();
 
   const { data: activeCityRows, error: activeCitiesError } = await supabase
@@ -458,16 +492,30 @@ async function getPublishableCityIdsForCountry(
     console.error(
       `Supabase active cities query failed for country_id "${countryId}": ${activeCitiesError.message}`
     );
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const activeCities = (activeCityRows ?? []) as ActiveCityRow[];
+  const activeCitySlugById = new Map<string, string>();
+
+  for (const city of activeCities) {
+    if (isNonEmptyString(city.id) && isNonEmptyString(city.slug)) {
+      activeCitySlugById.set(city.id, city.slug);
+    }
+  }
+
   const cityIds = activeCities
     .map((city) => city.id)
     .filter((cityId): cityId is string => isNonEmptyString(cityId));
 
   if (cityIds.length === 0) {
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const { data: destinationRows, error: destinationsError } = await supabase
@@ -476,7 +524,7 @@ async function getPublishableCityIdsForCountry(
       `
         id,
         city_id,
-        cities!inner(country_id,status)
+        cities!inner(country_id,status,slug)
       `
     )
     .eq("cities.country_id", countryId)
@@ -486,13 +534,19 @@ async function getPublishableCityIdsForCountry(
     console.error(
       `Supabase destinations query failed for country_id "${countryId}": ${destinationsError.message}`
     );
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const destinations = (destinationRows ?? []) as DestinationRow[];
 
   if (destinations.length === 0) {
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const destinationIds = destinations
@@ -500,14 +554,24 @@ async function getPublishableCityIdsForCountry(
     .filter((destinationId): destinationId is string => isNonEmptyString(destinationId));
 
   if (destinationIds.length === 0) {
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const cityIdByDestinationId = new Map<string, string>();
+  const citySlugByDestinationId = new Map<string, string>();
 
   for (const destination of destinations) {
     if (isNonEmptyString(destination.id) && isNonEmptyString(destination.city_id)) {
       cityIdByDestinationId.set(destination.id, destination.city_id);
+
+      const cityRelation = readSingleRelation(destination.cities ?? null);
+
+      if (isNonEmptyString(cityRelation?.slug)) {
+        citySlugByDestinationId.set(destination.id, cityRelation.slug);
+      }
     }
   }
 
@@ -521,13 +585,19 @@ async function getPublishableCityIdsForCountry(
     console.error(
       `Supabase language lookup failed for country_id "${countryId}": ${languageError.message}`
     );
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const languageId = getLanguageIdByIsoCodeRows((languageRows ?? []) as Array<{ id: string }>);
 
   if (!languageId) {
-    return new Set();
+    return {
+      publishedCityIds: new Set(),
+      diagnostics: [],
+    };
   }
 
   const destinationContentRows: DestinationContentRow[] = [];
@@ -543,7 +613,10 @@ async function getPublishableCityIdsForCountry(
       console.error(
         `Supabase destination contents query failed for country_id "${countryId}": ${error.message}`
       );
-      return new Set();
+      return {
+        publishedCityIds: new Set(),
+        diagnostics: [],
+      };
     }
 
     destinationContentRows.push(...((data ?? []) as DestinationContentRow[]));
@@ -567,7 +640,10 @@ async function getPublishableCityIdsForCountry(
       console.error(
         `Supabase destination practical items query failed for country_id "${countryId}": ${error.message}`
       );
-      return new Set();
+      return {
+        publishedCityIds: new Set(),
+        diagnostics: [],
+      };
     }
 
     practicalItems.push(...((data ?? []) as DestinationPracticalItemRow[]));
@@ -599,7 +675,10 @@ async function getPublishableCityIdsForCountry(
         console.error(
           `Supabase destination practical contents query failed for country_id "${countryId}": ${error.message}`
         );
-        return new Set();
+        return {
+          publishedCityIds: new Set(),
+          diagnostics: [],
+        };
       }
 
       practicalContentRows.push(...((data ?? []) as DestinationPracticalItemContentRow[]));
@@ -629,7 +708,10 @@ async function getPublishableCityIdsForCountry(
       console.error(
         `Supabase destination itineraries query failed for country_id "${countryId}": ${error.message}`
       );
-      return new Set();
+      return {
+        publishedCityIds: new Set(),
+        diagnostics: [],
+      };
     }
 
     itineraries.push(...((data ?? []) as DestinationItineraryRow[]));
@@ -661,7 +743,10 @@ async function getPublishableCityIdsForCountry(
         console.error(
           `Supabase destination itinerary contents query failed for country_id "${countryId}": ${error.message}`
         );
-        return new Set();
+        return {
+          publishedCityIds: new Set(),
+          diagnostics: [],
+        };
       }
 
       itineraryContentRows.push(...((data ?? []) as DestinationItineraryContentRow[]));
@@ -693,7 +778,10 @@ async function getPublishableCityIdsForCountry(
       console.error(
         `Supabase destination highlights query failed for country_id "${countryId}": ${error.message}`
       );
-      return new Set();
+      return {
+        publishedCityIds: new Set(),
+        diagnostics: [],
+      };
     }
 
     highlights.push(...((data ?? []) as DestinationHighlightRow[]));
@@ -735,7 +823,10 @@ async function getPublishableCityIdsForCountry(
         console.error(
           `Supabase destination highlight contents query failed for country_id "${countryId}": ${error.message}`
         );
-        return new Set();
+        return {
+          publishedCityIds: new Set(),
+          diagnostics: [],
+        };
       }
 
       for (const row of (data ?? []) as DestinationHighlightContentRow[]) {
@@ -763,7 +854,10 @@ async function getPublishableCityIdsForCountry(
 
       if (error) {
         console.error(`Supabase poi query failed for country_id "${countryId}": ${error.message}`);
-        return new Set();
+        return {
+          publishedCityIds: new Set(),
+          diagnostics: [],
+        };
       }
 
       for (const poi of (data ?? []) as PoiRow[]) {
@@ -788,7 +882,10 @@ async function getPublishableCityIdsForCountry(
         console.error(
           `Supabase poi images query failed for country_id "${countryId}": ${error.message}`
         );
-        return new Set();
+        return {
+          publishedCityIds: new Set(),
+          diagnostics: [],
+        };
       }
 
       for (const row of (data ?? []) as PoiImageRow[]) {
@@ -804,40 +901,86 @@ async function getPublishableCityIdsForCountry(
   }
 
   const destinationsWithCompleteHighlights = new Set<string>();
+  const diagnosticsByDestinationId = new Map<string, DestinationPublicationDiagnostic>();
 
   for (const destinationId of destinationIds) {
     const destinationHighlights = highlightsByDestinationId.get(destinationId) ?? [];
+    const cityId = cityIdByDestinationId.get(destinationId) ?? "";
+    const citySlug =
+      citySlugByDestinationId.get(destinationId) ?? activeCitySlugById.get(cityId) ?? null;
 
-    if (destinationHighlights.length === 0) {
-      continue;
+    const reasons = new Set<CatalogPublicationReasonCode>();
+
+    if (!destinationsWithContent.has(destinationId)) {
+      reasons.add("destination_content_missing");
     }
 
-    const allHighlightsComplete = destinationHighlights.every((highlight) => {
+    if (!destinationsWithPractical.has(destinationId)) {
+      reasons.add("practical_missing");
+    }
+
+    if (!destinationsWithItineraries.has(destinationId)) {
+      reasons.add("itinerary_missing");
+    }
+
+    if (destinationHighlights.length === 0) {
+      reasons.add("highlights_missing");
+    }
+
+    let allHighlightsComplete = destinationHighlights.length > 0;
+
+    for (const highlight of destinationHighlights) {
       if (!isNonEmptyString(highlight.poi_id)) {
-        return false;
+        allHighlightsComplete = false;
+        reasons.add("highlight_poi_missing");
+        continue;
       }
 
       const poi = poiById.get(highlight.poi_id);
 
       if (!poi || !isNonEmptyString(poi.name)) {
-        return false;
+        allHighlightsComplete = false;
+        reasons.add("highlight_poi_invalid");
       }
 
       const content = contentByHighlightId.get(highlight.id) ?? null;
-      const poiCategoryRelation = readSingleRelation(poi.category);
+      const poiCategoryRelation = readSingleRelation(poi?.category ?? null);
       const categoryFromPoi = isNonEmptyString(poiCategoryRelation?.name)
         ? poiCategoryRelation.name
         : null;
       const category = isNonEmptyString(content?.category_label)
         ? content.category_label.trim()
         : categoryFromPoi;
+
+      if (!isNonEmptyString(category)) {
+        allHighlightsComplete = false;
+        reasons.add("highlight_category_missing");
+      }
+
       const imageUrl = firstImageByPoiId.get(highlight.poi_id) ?? null;
 
-      return isNonEmptyString(category) && isNonEmptyString(imageUrl);
-    });
+      if (!isNonEmptyString(imageUrl)) {
+        allHighlightsComplete = false;
+        reasons.add("highlight_image_missing");
+      }
+    }
 
     if (allHighlightsComplete) {
       destinationsWithCompleteHighlights.add(destinationId);
+    }
+
+    if (!destinationsWithCompleteHighlights.has(destinationId) && reasons.size === 0) {
+      reasons.add("highlights_missing");
+    }
+
+    if (withDiagnostics && isNonEmptyString(cityId)) {
+      diagnosticsByDestinationId.set(destinationId, {
+        cityId,
+        citySlug,
+        destinationId,
+        publishable: reasons.size === 0,
+        reasons: Array.from(reasons),
+      });
     }
   }
 
@@ -867,7 +1010,47 @@ async function getPublishableCityIdsForCountry(
     }
   }
 
-  return publishedCityIds;
+  const diagnostics = withDiagnostics
+    ? destinationIds
+        .map((destinationId) => diagnosticsByDestinationId.get(destinationId) ?? null)
+        .filter((item): item is DestinationPublicationDiagnostic => Boolean(item))
+        .sort((left, right) => {
+          const leftSlug = left.citySlug ?? "";
+          const rightSlug = right.citySlug ?? "";
+          return leftSlug.localeCompare(rightSlug, "fr", { sensitivity: "base" });
+        })
+    : [];
+
+  return {
+    publishedCityIds,
+    diagnostics,
+  };
+}
+
+async function getPublishableCityIdsForCountry(
+  countryId: string
+): Promise<Set<string>> {
+  const result = await computeCatalogPublicationForCountry(countryId, false);
+  return result.publishedCityIds;
+}
+
+export async function getDestinationPublicationDiagnosticsForCountry(
+  countryId: string
+): Promise<DestinationPublicationDiagnostic[]> {
+  const result = await computeCatalogPublicationForCountry(countryId, true);
+  return result.diagnostics;
+}
+
+export async function getDestinationPublicationDiagnosticsForCountrySlug(
+  countrySlug: string
+): Promise<DestinationPublicationDiagnostic[]> {
+  const country = await getCountryBySlug(countrySlug);
+
+  if (!country) {
+    return [];
+  }
+
+  return getDestinationPublicationDiagnosticsForCountry(country.id);
 }
 
 function collectUniqueTerms(...groups: Array<Array<string | null | undefined>>): string[] {

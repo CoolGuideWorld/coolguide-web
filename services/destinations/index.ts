@@ -1,5 +1,8 @@
 export {
   CATALOG_SORT_VALUES,
+  CATALOG_PUBLICATION_REASON_CODES,
+  getDestinationPublicationDiagnosticsForCountry,
+  getDestinationPublicationDiagnosticsForCountrySlug,
   COUNTRY_DESTINATIONS_PAGE_SIZE,
   getCountriesWithPublishableDestinations,
   getCountryBySlug,
@@ -9,9 +12,11 @@ export {
   getPublishedAdministrativeAreas,
   parseCatalogPage,
   parseCatalogSort,
+  type CatalogPublicationReasonCode,
   type CatalogSortValue,
   type CountryCatalogData,
   type CountryDestinationCard,
   type CountryDestinationsResult,
+  type DestinationPublicationDiagnostic,
   type SearchableDestinationCountry,
 } from "./catalog";

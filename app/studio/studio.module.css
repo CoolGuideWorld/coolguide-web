@@ -234,7 +234,7 @@
 .metricGrid {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .metricCard {
@@ -257,6 +257,569 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: #0f172a;
+}
+
+.metricCardPositive {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.metricNote {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.metricCardCompact {
+  padding: 0.65rem 0.72rem;
+  gap: 0.14rem;
+}
+
+.dashboardStack {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.dashboardHeader {
+  gap: 0.22rem;
+}
+
+.dashboardDescription {
+  font-size: 0.89rem;
+}
+
+.dashboardPanel {
+  padding: 0.72rem;
+  gap: 0.52rem;
+}
+
+.dashboardMetricGrid {
+  gap: 0.56rem;
+}
+
+.networkBlock {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.networkHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.networkShareLabelReady,
+.networkShareLabelTodo {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.networkShareLabelReady {
+  color: #166534;
+}
+
+.networkShareLabelTodo {
+  color: #9a3412;
+}
+
+.networkBar {
+  width: 100%;
+  min-height: 11px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  border: 1px solid #dbe2ea;
+  overflow: hidden;
+  display: flex;
+}
+
+.networkBarReady {
+  background: #22c55e;
+  min-width: 0;
+}
+
+.networkBarTodo {
+  background: #f59e0b;
+  min-width: 0;
+}
+
+.networkCounters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.networkCountReady,
+.networkCountTodo {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.networkCountReady {
+  color: #166534;
+}
+
+.networkCountTodo {
+  color: #9a3412;
+}
+
+.networkUnavailable {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.93rem;
+}
+
+.dashboardSecondaryGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.35fr) minmax(0, 0.95fr);
+}
+
+.dashboardTertiaryGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.circuitsSummaryPanel {
+  grid-column: 1 / span 1;
+  align-content: start;
+}
+
+.circuitsSummaryHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.circuitsSummaryTitleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.circuitsSummaryTitleLink:hover,
+.circuitsSummaryTitleLink:focus-visible {
+  text-decoration: underline;
+}
+
+.circuitsSummaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.circuitsSummaryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-top: 1px solid #edf2f7;
+  padding: 0.38rem 0;
+}
+
+.circuitsSummaryItem:first-child {
+  border-top: 0;
+}
+
+.circuitsSummaryLabelWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.circuitsSummaryDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.circuitsSummaryDotPublished {
+  background: #22c55e;
+}
+
+.circuitsSummaryDotReview {
+  background: #f59e0b;
+}
+
+.circuitsSummaryDotReady {
+  background: #60a5fa;
+}
+
+.circuitsSummaryDotRejected {
+  background: #94a3b8;
+}
+
+.circuitsSummaryValue {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.circuitsSummaryNote {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.toProcessPanel {
+  align-content: start;
+}
+
+.toProcessHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.toProcessCount {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.toProcessList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.toProcessItem {
+  border-top: 1px solid #edf2f7;
+  padding: 0.34rem 0;
+  display: grid;
+  grid-template-columns: minmax(88px, 108px) minmax(0, 1fr);
+  align-items: start;
+  gap: 0.55rem;
+}
+
+.toProcessItem:first-child {
+  border-top: 0;
+}
+
+.toProcessCityName {
+  margin: 0;
+  font-size: 0.87rem;
+  font-weight: 650;
+  color: #0f172a;
+  line-height: 1.28;
+}
+
+.toProcessBadges {
+  display: flex;
+  gap: 0.32rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toProcessBadge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  padding: 0.1rem 0.42rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #9a3412;
+  background: #fff7ed;
+  line-height: 1.2;
+}
+
+.toProcessUnavailable {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+.toProcessEmpty {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 10px;
+  padding: 0.58rem 0.62rem;
+}
+
+.qualityPanel {
+  align-content: start;
+}
+
+.poiQualityHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.poiQualityPopulation {
+  margin: 0;
+  font-size: 0.81rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.poiQualityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.poiQualityItem {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.poiQualityRowButton {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0.16rem 0.2rem;
+  text-align: left;
+  display: grid;
+  gap: 0.18rem;
+  cursor: pointer;
+}
+
+.poiQualityRowButton:hover,
+.poiQualityRowButton:focus-visible {
+  border-color: #dbe2ea;
+  background: #f8fafc;
+}
+
+.poiQualityTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.poiQualityRightInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.poiQualityMetricLabel {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.poiQualityMetricValue {
+  margin: 0;
+  font-size: 0.83rem;
+  color: #166534;
+  font-weight: 700;
+}
+
+.poiQualityChevron {
+  color: #64748b;
+  font-size: 0.93rem;
+  line-height: 1;
+}
+
+.poiQualityBar {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.poiQualityBarFill {
+  height: 100%;
+  background: #22c55e;
+  min-width: 0;
+}
+
+.poiQualityMissing {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #b45309;
+}
+
+.poiDrawerBackdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.34);
+  z-index: 140;
+}
+
+.poiDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(92vw, 480px);
+  background: #ffffff;
+  border-left: 1px solid #dbe2ea;
+  box-shadow: -20px 0 38px rgba(15, 23, 42, 0.16);
+  z-index: 150;
+  display: grid;
+  align-content: start;
+  gap: 0.72rem;
+  padding: 0.92rem 0.92rem 1rem;
+  overflow-y: auto;
+}
+
+.poiDrawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.poiDrawerTitle {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.poiDrawerCloseButton {
+  min-height: 32px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.22rem 0.52rem;
+  cursor: pointer;
+}
+
+.poiDrawerCloseButton:hover,
+.poiDrawerCloseButton:focus-visible {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.poiDrawerMeta {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.poiDrawerSearchInput {
+  min-height: 35px;
+  border: 1px solid #d5ddeb;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.88rem;
+  padding: 0.48rem 0.66rem;
+}
+
+.poiDrawerSearchInput::placeholder {
+  color: #64748b;
+}
+
+.poiDrawerCityList,
+.poiDrawerPoiList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.poiDrawerCityButton {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid #edf2f7;
+  background: transparent;
+  padding: 0.54rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  cursor: pointer;
+}
+
+.poiDrawerCityButton:hover,
+.poiDrawerCityButton:focus-visible {
+  background: #f8fafc;
+}
+
+.poiDrawerCityName {
+  font-size: 0.88rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.poiDrawerCityCount {
+  font-size: 0.84rem;
+  color: #9a3412;
+  font-weight: 700;
+}
+
+.poiDrawerBackButton {
+  justify-self: start;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.poiDrawerBackButton:hover,
+.poiDrawerBackButton:focus-visible {
+  background: #f8fafc;
+}
+
+.poiDrawerPoiItem {
+  border-top: 1px solid #edf2f7;
+  padding: 0.54rem 0;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.poiDrawerEmpty,
+.poiDrawerUnavailable,
+.poiDrawerSuccess {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.poiDrawerEmpty,
+.poiDrawerUnavailable {
+  color: #64748b;
+}
+
+.poiDrawerSuccess {
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 10px;
+  padding: 0.56rem 0.62rem;
 }
 
 .placeholderBadge {
@@ -747,11 +1310,35 @@
 
 @media (max-width: 1200px) {
   .metricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboardSecondaryGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardTertiaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .circuitsSummaryPanel {
+    grid-column: 1 / span 1;
+  }
+
+  .qualityPanel {
+    grid-column: 1 / -1;
+  }
+
+  .toProcessItem {
+    grid-template-columns: minmax(82px, 96px) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 900px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .studioShell {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -794,7 +1381,7 @@
   }
 
   .contentArea {
-    padding: 0.9rem;
+    padding: 0.82rem;
   }
 
   .circuitsWorkbench {
@@ -804,11 +1391,43 @@
   .circuitsList {
     max-height: 42vh;
   }
+
+  .dashboardSecondaryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboardTertiaryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qualityPanel {
+    grid-column: auto;
+  }
+
+  .toProcessItem {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+    padding: 0.38rem 0;
+  }
 }
 
 @media (max-width: 640px) {
   .metricGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .poiDrawer {
+    width: 100vw;
+    border-left: 0;
+    border-top: 1px solid #dbe2ea;
+    box-shadow: none;
+  }
+
+  .networkHeaderRow,
+  .networkCounters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.28rem;
   }
 
   .circuitsDetailGrid {
