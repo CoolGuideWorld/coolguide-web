@@ -386,8 +386,109 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.circuitsSummaryPanel {
+.geoCoveragePanel {
   grid-column: 1 / span 1;
+  align-content: start;
+}
+
+.geoCoverageHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.geoCoverageUnavailable {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.geoCoverageList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.geoCoverageItem {
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.36rem;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.geoCoverageItem:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.geoCoverageTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.geoCoverageCountryName {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.geoCoverageStatsWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.44rem;
+}
+
+.geoCoverageRatio {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.geoCoveragePercent {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #166534;
+}
+
+.geoCoverageBar {
+  width: 100%;
+  min-width: 0;
+  height: 5px;
+  border-radius: 999px;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+}
+
+.geoCoverageBarReady {
+  min-width: 0;
+  background: #22c55e;
+}
+
+.geoCoverageBarTodo {
+  min-width: 0;
+  background: #f59e0b;
+}
+
+.geoCoverageTodoLabel {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.circuitsSummaryPanel {
+  grid-column: 2 / span 1;
   align-content: start;
 }
 
@@ -658,6 +759,255 @@
   margin: 0;
   font-size: 0.76rem;
   color: #b45309;
+}
+
+.brainCoverageStack {
+  display: grid;
+  gap: 0.62rem;
+}
+
+.brainToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.brainSearchInput {
+  min-height: 35px;
+  min-width: min(360px, 100%);
+  border: 1px solid #d5ddeb;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.88rem;
+  padding: 0.48rem 0.66rem;
+}
+
+.brainSearchInput::placeholder {
+  color: #64748b;
+}
+
+.brainSortWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.brainSortLabel {
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.brainSortSelect {
+  min-height: 32px;
+  border: 1px solid #d5ddeb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.84rem;
+  padding: 0.26rem 0.5rem;
+}
+
+.brainFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.brainFilterButton {
+  border: 1px solid #dbe2ea;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.54rem;
+  cursor: pointer;
+}
+
+.brainFilterButton:hover,
+.brainFilterButton:focus-visible {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.brainFilterButtonActive {
+  border-color: #93c5fd;
+  color: #1e3a8a;
+  background: #eff6ff;
+}
+
+.brainTableWrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.brainTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.brainTable th {
+  text-align: left;
+  font-size: 0.77rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  padding: 0.34rem 0.32rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.brainTable td {
+  padding: 0.4rem 0.32rem;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 0.85rem;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.brainRowButton {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 0.08rem;
+  cursor: pointer;
+}
+
+.brainRowName {
+  font-size: 0.86rem;
+  color: #0f172a;
+  font-weight: 620;
+  line-height: 1.25;
+}
+
+.brainRowSlug {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.brainCoverageCell {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.brainCoverageRatio {
+  font-size: 0.8rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.brainCoverageTrack {
+  width: 92px;
+  height: 5px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #edf2f7;
+  overflow: hidden;
+}
+
+.brainCoverageFill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  background: #22c55e;
+}
+
+.brainStatusComplete {
+  color: #166534;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.brainStatusPartial {
+  color: #9a3412;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.brainStatusEmpty {
+  color: #334155;
+  border-color: #dbe2ea;
+  background: #f8fafc;
+}
+
+.brainEmptyCell {
+  color: #64748b;
+  text-align: center;
+  padding: 0.8rem 0.35rem;
+}
+
+.brainDefinitionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.brainDefinitionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.62rem;
+  border-top: 1px solid #edf2f7;
+  padding: 0.44rem 0;
+}
+
+.brainDefinitionDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.brainDefinitionDotPresent {
+  background: #22c55e;
+}
+
+.brainDefinitionDotMissing {
+  background: #94a3b8;
+}
+
+.brainDefinitionTextWrap {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.05rem;
+}
+
+.brainDefinitionLabel {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.brainDefinitionSlug {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.73rem;
+}
+
+.brainDefinitionStatePresent,
+.brainDefinitionStateMissing {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.brainDefinitionStatePresent {
+  color: #166534;
+}
+
+.brainDefinitionStateMissing {
+  color: #64748b;
 }
 
 .poiDrawerBackdrop {
@@ -1321,8 +1671,13 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .geoCoveragePanel,
   .circuitsSummaryPanel {
-    grid-column: 1 / span 1;
+    grid-column: auto;
+  }
+
+  .circuitsSummaryPanel {
+    grid-column: auto;
   }
 
   .qualityPanel {
@@ -1409,6 +1764,15 @@
     gap: 0.3rem;
     padding: 0.38rem 0;
   }
+
+  .brainSearchInput {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .brainToolbar {
+    align-items: stretch;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1436,5 +1800,46 @@
 
   .technicalGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brainTable {
+    min-width: 0;
+  }
+
+  .brainTable thead {
+    display: none;
+  }
+
+  .brainTable tbody {
+    display: grid;
+    gap: 0.46rem;
+  }
+
+  .brainTable tr {
+    display: grid;
+    gap: 0.26rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.5rem;
+    background: #ffffff;
+  }
+
+  .brainTable td {
+    border-bottom: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .brainCoverageTrack {
+    width: 84px;
+  }
+
+  .brainEmptyCell {
+    display: block;
+    text-align: left;
+    padding: 0;
   }
 }

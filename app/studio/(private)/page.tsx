@@ -25,7 +25,23 @@ type StudioDashboardKpis = {
 
 type DiagnosticsResult = {
   diagnostics: DestinationPublicationDiagnostic[] | null;
+  countries: PublicationCountryDiagnostics[] | null;
   error: string | null;
+};
+
+type PublicationCountryDiagnostics = {
+  countryName: string;
+  countrySlug: string;
+  diagnostics: DestinationPublicationDiagnostic[];
+};
+
+type GeographicCoverageRow = {
+  countryName: string;
+  countrySlug: string;
+  total: number;
+  ready: number;
+  toProcess: number;
+  readinessPercent: number;
 };
 
 type PoiQualityMetric = {
@@ -253,6 +269,7 @@ async function readPublicationDiagnostics(): Promise<DiagnosticsResult> {
     if (countries.length === 0) {
       return {
         diagnostics: [],
+        countries: [],
         error: null,
       };
     }
@@ -271,16 +288,67 @@ async function readPublicationDiagnostics(): Promise<DiagnosticsResult> {
         return leftSlug.localeCompare(rightSlug, "fr", { sensitivity: "base" });
       });
 
+    const countryDiagnostics = countries.map((country, index) => {
+      const currentDiagnostics = diagnosticsByCountry[index] ?? [];
+
+      return {
+        countryName: country.name,
+        countrySlug: country.slug,
+        diagnostics: currentDiagnostics,
+      } satisfies PublicationCountryDiagnostics;
+    });
+
     return {
       diagnostics,
+      countries: countryDiagnostics,
       error: null,
     };
   } catch (error) {
     return {
       diagnostics: null,
+      countries: null,
       error: error instanceof Error ? error.message : "unexpected_ready_destinations_error",
     };
   }
+}
+
+function buildGeographicCoverageRows(
+  countryDiagnostics: PublicationCountryDiagnostics[] | null,
+  error: string | null
+): GeographicCoverageRow[] | null {
+  if (error || !countryDiagnostics) {
+    return null;
+  }
+
+  return countryDiagnostics
+    .map((country) => {
+      const total = country.diagnostics.length;
+      const ready = country.diagnostics.filter((item) => item.publishable).length;
+      const toProcess = Math.max(0, total - ready);
+      const readinessPercent = total > 0 ? Math.round((ready / total) * 100) : 0;
+
+      return {
+        countryName: country.countryName,
+        countrySlug: country.countrySlug,
+        total,
+        ready,
+        toProcess,
+        readinessPercent,
+      } satisfies GeographicCoverageRow;
+    })
+    .sort((left, right) => {
+      if (right.toProcess !== left.toProcess) {
+        return right.toProcess - left.toProcess;
+      }
+
+      if (left.readinessPercent !== right.readinessPercent) {
+        return left.readinessPercent - right.readinessPercent;
+      }
+
+      return left.countryName.localeCompare(right.countryName, "fr", {
+        sensitivity: "base",
+      });
+    });
 }
 
 async function readCanonicalPoiPopulation(): Promise<{
@@ -889,6 +957,10 @@ function formatKpiNote(error: string | null): string | undefined {
 
 export default async function StudioHomePage() {
   const { kpis, diagnostics, poiQuality, circuits } = await loadStudioDashboardData();
+  const geographicCoverage = buildGeographicCoverageRows(
+    diagnostics.countries,
+    diagnostics.error
+  );
   const hasNetworkData =
     typeof kpis.destinations.value === "number" &&
     typeof kpis.readyDestinations.value === "number" &&
@@ -1054,7 +1126,65 @@ export default async function StudioHomePage() {
         </article>
       </section>
 
-      <section className={styles.dashboardTertiaryGrid} aria-label="Suivi circuits">
+      <section className={styles.dashboardTertiaryGrid} aria-label="Couverture et circuits">
+        <article
+          className={`${styles.panel} ${styles.dashboardPanel} ${styles.geoCoveragePanel}`}
+          aria-label="Couverture géographique"
+        >
+          <header className={styles.geoCoverageHeader}>
+            <h2 className={styles.panelTitle}>Couverture géographique</h2>
+          </header>
+
+          {geographicCoverage === null ? (
+            <p className={styles.geoCoverageUnavailable}>Indisponible</p>
+          ) : geographicCoverage.length === 0 ? (
+            <p className={styles.geoCoverageUnavailable}>Indisponible</p>
+          ) : (
+            <ul className={styles.geoCoverageList}>
+              {geographicCoverage.map((country) => {
+                const todoPercent = Math.max(0, 100 - country.readinessPercent);
+
+                return (
+                  <li key={country.countrySlug} className={styles.geoCoverageItem}>
+                    <div className={styles.geoCoverageTopRow}>
+                      <p className={styles.geoCoverageCountryName}>{country.countryName}</p>
+                      <div className={styles.geoCoverageStatsWrap}>
+                        <p className={styles.geoCoverageRatio}>
+                          {numberFormatter.format(country.ready)} / {numberFormatter.format(country.total)}
+                        </p>
+                        <p className={styles.geoCoveragePercent}>{country.readinessPercent} %</p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={styles.geoCoverageBar}
+                      role="img"
+                      aria-label={`Couverture ${country.countryName}: ${country.readinessPercent}% prêtes, ${todoPercent}% à traiter`}
+                    >
+                      <span
+                        className={styles.geoCoverageBarReady}
+                        style={{ width: `${country.readinessPercent}%` }}
+                      />
+                      {todoPercent > 0 ? (
+                        <span
+                          className={styles.geoCoverageBarTodo}
+                          style={{ width: `${todoPercent}%` }}
+                        />
+                      ) : null}
+                    </div>
+
+                    {country.toProcess > 0 ? (
+                      <p className={styles.geoCoverageTodoLabel}>
+                        {numberFormatter.format(country.toProcess)} à traiter
+                      </p>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </article>
+
         <article className={`${styles.panel} ${styles.dashboardPanel} ${styles.circuitsSummaryPanel}`} aria-label="Circuits">
           <header className={styles.circuitsSummaryHeader}>
             <h2 className={styles.panelTitle}>
