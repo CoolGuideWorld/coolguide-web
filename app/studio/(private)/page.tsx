@@ -1,6 +1,8 @@
 import MetricCard from "@/components/studio/MetricCard";
 import StudioPoiQualityDrilldown from "@/components/studio/StudioPoiQualityDrilldown";
 import { createServerAuthSupabaseClient } from "@/lib/supabase/auth-server";
+import { readBrainCoverageKpis } from "@/lib/studio/brainCoverage";
+import { readPoiQualityData, type PoiQualityData } from "@/lib/studio/poiQuality";
 import Link from "next/link";
 import {
   getDestinationPublicationDiagnosticsForCountrySlug,
@@ -44,36 +46,6 @@ type GeographicCoverageRow = {
   readinessPercent: number;
 };
 
-type PoiQualityMetric = {
-  key: "text_fr" | "images" | "audio_pieton";
-  label: "Texte FR" | "Images" | "Audio piéton";
-  covered: number | null;
-  total: number | null;
-  percent: number | null;
-  missing: number | null;
-  error: string | null;
-  cities: PoiQualityMetricCity[];
-  citiesCount: number | null;
-  cityMissingTotal: number | null;
-};
-
-type PoiQualityMetricCityPoi = {
-  id: string;
-  name: string;
-};
-
-type PoiQualityMetricCity = {
-  cityId: string;
-  cityName: string;
-  missingCount: number;
-  pois: PoiQualityMetricCityPoi[];
-};
-
-type PoiQualityData = {
-  population: CounterResult;
-  metrics: PoiQualityMetric[];
-};
-
 type CircuitProposalStatusRow = {
   id: string;
   status: string;
@@ -85,13 +57,6 @@ type CircuitsDashboardData = {
   readyToPublish: CounterResult;
   rejected: CounterResult;
   unknownStatuses: string[];
-};
-
-type CanonicalPoiRow = {
-  id: string;
-  name: string;
-  cityId: string;
-  cityName: string;
 };
 
 const REASON_LABELS: Record<CatalogPublicationReasonCode, string> = {
@@ -111,123 +76,6 @@ const PAGE_SIZE = 1000;
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
-}
-
-function buildPoiQualityMetric(
-  key: PoiQualityMetric["key"],
-  label: PoiQualityMetric["label"],
-  total: number | null,
-  covered: number | null,
-  error: string | null,
-  cities: PoiQualityMetricCity[] = []
-): PoiQualityMetric {
-  if (typeof total !== "number" || typeof covered !== "number" || error) {
-    return {
-      key,
-      label,
-      covered: null,
-      total,
-      percent: null,
-      missing: null,
-      error: error ?? "metric_unavailable",
-      cities,
-      citiesCount: null,
-      cityMissingTotal: null,
-    };
-  }
-
-  const normalizedCovered = Math.max(0, Math.min(covered, total));
-  const missing = Math.max(0, total - normalizedCovered);
-  const percent = total > 0 ? Math.round((normalizedCovered / total) * 100) : 0;
-
-  return {
-    key,
-    label,
-    covered: normalizedCovered,
-    total,
-    percent,
-    missing,
-    error: null,
-    cities,
-    citiesCount: cities.length,
-    cityMissingTotal: cities.reduce((sum, city) => sum + city.missingCount, 0),
-  };
-}
-
-function readSingleRelation<T>(relation: T | T[] | null): T | null {
-  if (!relation) {
-    return null;
-  }
-
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null;
-  }
-
-  return relation;
-}
-
-function buildMissingCities(
-  canonicalPoiRows: CanonicalPoiRow[],
-  coveredPoiIds: Set<string>
-): PoiQualityMetricCity[] {
-  const cityBuckets = new Map<
-    string,
-    {
-      cityName: string;
-      pois: PoiQualityMetricCityPoi[];
-    }
-  >();
-
-  for (const poi of canonicalPoiRows) {
-    if (coveredPoiIds.has(poi.id)) {
-      continue;
-    }
-
-    const existing = cityBuckets.get(poi.cityId);
-
-    if (existing) {
-      existing.pois.push({
-        id: poi.id,
-        name: poi.name,
-      });
-      continue;
-    }
-
-    cityBuckets.set(poi.cityId, {
-      cityName: poi.cityName,
-      pois: [
-        {
-          id: poi.id,
-          name: poi.name,
-        },
-      ],
-    });
-  }
-
-  const cities = Array.from(cityBuckets.entries())
-    .map(([cityId, bucket]) => {
-      const pois = [...bucket.pois].sort((left, right) =>
-        left.name.localeCompare(right.name, "fr", { sensitivity: "base" })
-      );
-
-      return {
-        cityId,
-        cityName: bucket.cityName,
-        missingCount: pois.length,
-        pois,
-      } satisfies PoiQualityMetricCity;
-    })
-    .sort((left, right) => {
-      if (right.missingCount !== left.missingCount) {
-        return right.missingCount - left.missingCount;
-      }
-
-      return left.cityName.localeCompare(right.cityName, "fr", {
-        sensitivity: "base",
-      });
-    });
-
-  return cities;
 }
 
 function normalizeStatus(value: string | null | undefined): string {
@@ -349,342 +197,6 @@ function buildGeographicCoverageRows(
         sensitivity: "base",
       });
     });
-}
-
-async function readCanonicalPoiPopulation(): Promise<{
-  rows: CanonicalPoiRow[] | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = await createServerAuthSupabaseClient();
-    const poiRows: CanonicalPoiRow[] = [];
-    let from = 0;
-
-    while (true) {
-      const to = from + PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from("poi")
-        .select("id,name,city_id,cities!inner(name,status)")
-        .eq("status", "active")
-        .eq("is_active", true)
-        .not("city_id", "is", null)
-        .eq("cities.status", "active")
-        .range(from, to);
-
-      if (error) {
-        return {
-          rows: null,
-          error: error.message,
-        };
-      }
-
-      const rows = (data ?? []) as Array<{
-        id: string | null;
-        name: string | null;
-        city_id: string | null;
-        cities:
-          | {
-              name: string | null;
-              status: string | null;
-            }
-          | Array<{
-              name: string | null;
-              status: string | null;
-            }>
-          | null;
-      }>;
-
-      for (const row of rows) {
-        const city = readSingleRelation(row.cities);
-
-        if (
-          isNonEmptyString(row.id) &&
-          isNonEmptyString(row.city_id) &&
-          isNonEmptyString(city?.name)
-        ) {
-          poiRows.push({
-            id: row.id,
-            name: isNonEmptyString(row.name) ? row.name.trim() : "POI sans nom",
-            cityId: row.city_id,
-            cityName: city.name.trim(),
-          });
-        }
-      }
-
-      if (rows.length < PAGE_SIZE) {
-        break;
-      }
-
-      from += PAGE_SIZE;
-    }
-
-    const deduplicated = Array.from(
-      new Map(poiRows.map((row) => [row.id, row])).values()
-    );
-
-    return {
-      rows: deduplicated,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      rows: null,
-      error: error instanceof Error ? error.message : "unexpected_poi_population_error",
-    };
-  }
-}
-
-async function readCoveredPoiIdsForTextFr(): Promise<{
-  ids: Set<string> | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = await createServerAuthSupabaseClient();
-    const coveredIds = new Set<string>();
-    let from = 0;
-
-    while (true) {
-      const to = from + PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from("poi_texts")
-        .select("poi_id,short_description,content")
-        .eq("status", "active")
-        .eq("is_current", true)
-        .eq("language_code", "fr")
-        .range(from, to);
-
-      if (error) {
-        return {
-          ids: null,
-          error: error.message,
-        };
-      }
-
-      const rows = (data ?? []) as Array<{
-        poi_id: string | null;
-        short_description: string | null;
-        content: string | null;
-      }>;
-
-      for (const row of rows) {
-        if (
-          isNonEmptyString(row.poi_id) &&
-          isNonEmptyString(row.short_description) &&
-          isNonEmptyString(row.content)
-        ) {
-          coveredIds.add(row.poi_id);
-        }
-      }
-
-      if (rows.length < PAGE_SIZE) {
-        break;
-      }
-
-      from += PAGE_SIZE;
-    }
-
-    return {
-      ids: coveredIds,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      ids: null,
-      error: error instanceof Error ? error.message : "unexpected_poi_text_quality_error",
-    };
-  }
-}
-
-async function readCoveredPoiIdsForImages(): Promise<{
-  ids: Set<string> | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = await createServerAuthSupabaseClient();
-    const coveredIds = new Set<string>();
-    let from = 0;
-
-    while (true) {
-      const to = from + PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from("poi_images")
-        .select("poi_id,image_url,storage_path")
-        .eq("status", "active")
-        .range(from, to);
-
-      if (error) {
-        return {
-          ids: null,
-          error: error.message,
-        };
-      }
-
-      const rows = (data ?? []) as Array<{
-        poi_id: string | null;
-        image_url: string | null;
-        storage_path: string | null;
-      }>;
-
-      for (const row of rows) {
-        if (
-          isNonEmptyString(row.poi_id) &&
-          (isNonEmptyString(row.image_url) || isNonEmptyString(row.storage_path))
-        ) {
-          coveredIds.add(row.poi_id);
-        }
-      }
-
-      if (rows.length < PAGE_SIZE) {
-        break;
-      }
-
-      from += PAGE_SIZE;
-    }
-
-    return {
-      ids: coveredIds,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      ids: null,
-      error: error instanceof Error ? error.message : "unexpected_poi_image_quality_error",
-    };
-  }
-}
-
-async function readCoveredPoiIdsForPedestrianAudioFr(): Promise<{
-  ids: Set<string> | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = await createServerAuthSupabaseClient();
-    const coveredIds = new Set<string>();
-    let from = 0;
-
-    while (true) {
-      const to = from + PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from("audios")
-        .select("poi_id,audio_url,storage_path")
-        .eq("status", "active")
-        .eq("mode", "pieton")
-        .eq("language_id", "fr")
-        .range(from, to);
-
-      if (error) {
-        return {
-          ids: null,
-          error: error.message,
-        };
-      }
-
-      const rows = (data ?? []) as Array<{
-        poi_id: string | null;
-        audio_url: string | null;
-        storage_path: string | null;
-      }>;
-
-      for (const row of rows) {
-        if (
-          isNonEmptyString(row.poi_id) &&
-          (isNonEmptyString(row.audio_url) || isNonEmptyString(row.storage_path))
-        ) {
-          coveredIds.add(row.poi_id);
-        }
-      }
-
-      if (rows.length < PAGE_SIZE) {
-        break;
-      }
-
-      from += PAGE_SIZE;
-    }
-
-    return {
-      ids: coveredIds,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      ids: null,
-      error: error instanceof Error ? error.message : "unexpected_poi_audio_quality_error",
-    };
-  }
-}
-
-async function readPoiQualityData(): Promise<PoiQualityData> {
-  const population = await readCanonicalPoiPopulation();
-
-  if (!population.rows) {
-    return {
-      population: {
-        value: null,
-        error: population.error,
-      },
-      metrics: [
-        buildPoiQualityMetric("text_fr", "Texte FR", null, null, population.error),
-        buildPoiQualityMetric("images", "Images", null, null, population.error),
-        buildPoiQualityMetric("audio_pieton", "Audio piéton", null, null, population.error),
-      ],
-    };
-  }
-
-  const total = population.rows.length;
-  const canonicalPoiIds = new Set(population.rows.map((row) => row.id));
-
-  const [textCoverage, imageCoverage, audioCoverage] = await Promise.all([
-    readCoveredPoiIdsForTextFr(),
-    readCoveredPoiIdsForImages(),
-    readCoveredPoiIdsForPedestrianAudioFr(),
-  ]);
-
-  const textCovered = textCoverage.ids
-    ? new Set(Array.from(textCoverage.ids).filter((id) => canonicalPoiIds.has(id)))
-    : null;
-  const imageCovered = imageCoverage.ids
-    ? new Set(Array.from(imageCoverage.ids).filter((id) => canonicalPoiIds.has(id)))
-    : null;
-  const audioCovered = audioCoverage.ids
-    ? new Set(Array.from(audioCoverage.ids).filter((id) => canonicalPoiIds.has(id)))
-    : null;
-
-  const textCities = textCovered ? buildMissingCities(population.rows, textCovered) : [];
-  const imageCities = imageCovered ? buildMissingCities(population.rows, imageCovered) : [];
-  const audioCities = audioCovered ? buildMissingCities(population.rows, audioCovered) : [];
-
-  return {
-    population: {
-      value: total,
-      error: population.error,
-    },
-    metrics: [
-      buildPoiQualityMetric(
-        "text_fr",
-        "Texte FR",
-        total,
-        textCovered ? textCovered.size : null,
-        textCoverage.error,
-        textCities
-      ),
-      buildPoiQualityMetric(
-        "images",
-        "Images",
-        total,
-        imageCovered ? imageCovered.size : null,
-        imageCoverage.error,
-        imageCities
-      ),
-      buildPoiQualityMetric(
-        "audio_pieton",
-        "Audio piéton",
-        total,
-        audioCovered ? audioCovered.size : null,
-        audioCoverage.error,
-        audioCities
-      ),
-    ],
-  };
 }
 
 async function readCircuitProposalStatuses(): Promise<{
@@ -855,14 +367,16 @@ async function loadStudioDashboardData(): Promise<{
   diagnostics: DiagnosticsResult;
   poiQuality: PoiQualityData;
   circuits: CircuitsDashboardData;
+  brain: Awaited<ReturnType<typeof readBrainCoverageKpis>>;
 }> {
-  const [destinations, publicationDiagnostics, poi, audios, poiQuality, circuits] = await Promise.all([
+  const [destinations, publicationDiagnostics, poi, audios, poiQuality, circuits, brain] = await Promise.all([
     readTableCount("destinations"),
     readPublicationDiagnostics(),
     readTableCount("poi"),
     readTableCount("audios"),
     readPoiQualityData(),
     readCircuitsDashboardData(),
+    readBrainCoverageKpis(),
   ]);
 
   const publishableCount = publicationDiagnostics.diagnostics
@@ -897,6 +411,7 @@ async function loadStudioDashboardData(): Promise<{
       diagnostics: publicationDiagnostics,
       poiQuality,
       circuits,
+      brain,
     };
   }
 
@@ -919,6 +434,7 @@ async function loadStudioDashboardData(): Promise<{
       diagnostics: publicationDiagnostics,
       poiQuality,
       circuits,
+      brain,
     };
   }
 
@@ -936,6 +452,7 @@ async function loadStudioDashboardData(): Promise<{
     diagnostics: publicationDiagnostics,
     poiQuality,
     circuits,
+    brain,
   };
 }
 
@@ -956,11 +473,18 @@ function formatKpiNote(error: string | null): string | undefined {
 }
 
 export default async function StudioHomePage() {
-  const { kpis, diagnostics, poiQuality, circuits } = await loadStudioDashboardData();
+  const { kpis, diagnostics, poiQuality, circuits, brain } = await loadStudioDashboardData();
   const geographicCoverage = buildGeographicCoverageRows(
     diagnostics.countries,
     diagnostics.error
   );
+  const brainKpis = brain.kpis;
+  const brainCompletePercent =
+    brainKpis && brainKpis.known > 0
+      ? Math.round((brainKpis.complete / brainKpis.known) * 100)
+      : brainKpis && brainKpis.known === 0
+        ? 0
+        : null;
   const hasNetworkData =
     typeof kpis.destinations.value === "number" &&
     typeof kpis.readyDestinations.value === "number" &&
@@ -1038,7 +562,11 @@ export default async function StudioHomePage() {
 
       <section className={styles.dashboardSecondaryGrid} aria-label="Suivi réseau">
         <article className={`${styles.panel} ${styles.dashboardPanel}`} aria-label="État du réseau">
-          <h2 className={styles.panelTitle}>État du réseau</h2>
+          <header className={styles.dashboardSectionHeader}>
+            <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>
+              État du réseau
+            </h2>
+          </header>
 
           {hasNetworkData &&
           readinessPercent !== null &&
@@ -1081,9 +609,9 @@ export default async function StudioHomePage() {
         </article>
 
         <article className={`${styles.panel} ${styles.dashboardPanel} ${styles.toProcessPanel}`} aria-label="À traiter">
-          <header className={styles.toProcessHeader}>
-            <h2 className={styles.panelTitle}>À traiter</h2>
-            <p className={styles.toProcessCount}>{toProcessLabel}</p>
+          <header className={`${styles.dashboardSectionHeader} ${styles.toProcessHeader}`.trim()}>
+            <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>À traiter</h2>
+            <p className={`${styles.toProcessCount} ${styles.dashboardSectionMeta}`.trim()}>{toProcessLabel}</p>
           </header>
 
           {nonPublishableDestinations === null ? (
@@ -1126,13 +654,15 @@ export default async function StudioHomePage() {
         </article>
       </section>
 
-      <section className={styles.dashboardTertiaryGrid} aria-label="Couverture et circuits">
+      <section className={styles.dashboardTertiaryGrid} aria-label="Couverture, circuits et Brain">
         <article
           className={`${styles.panel} ${styles.dashboardPanel} ${styles.geoCoveragePanel}`}
           aria-label="Couverture géographique"
         >
-          <header className={styles.geoCoverageHeader}>
-            <h2 className={styles.panelTitle}>Couverture géographique</h2>
+          <header className={`${styles.dashboardSectionHeader} ${styles.geoCoverageHeader}`.trim()}>
+            <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>
+              Couverture géographique
+            </h2>
           </header>
 
           {geographicCoverage === null ? (
@@ -1186,8 +716,8 @@ export default async function StudioHomePage() {
         </article>
 
         <article className={`${styles.panel} ${styles.dashboardPanel} ${styles.circuitsSummaryPanel}`} aria-label="Circuits">
-          <header className={styles.circuitsSummaryHeader}>
-            <h2 className={styles.panelTitle}>
+          <header className={`${styles.dashboardSectionHeader} ${styles.circuitsSummaryHeader}`.trim()}>
+            <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>
               <Link href="/studio/circuits" className={styles.circuitsSummaryTitleLink}>
                 Circuits
               </Link>
@@ -1244,6 +774,65 @@ export default async function StudioHomePage() {
               Statuts non mappés: {circuits.unknownStatuses.join(", ")}
             </p>
           ) : null}
+        </article>
+
+        <article className={`${styles.panel} ${styles.dashboardPanel} ${styles.brainSummaryPanel}`} aria-label="Brain">
+          <header className={`${styles.dashboardSectionHeader} ${styles.brainSummaryHeader}`.trim()}>
+            <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>
+              <Link href="/studio/brain" className={styles.brainSummaryTitleLink}>
+                Brain
+              </Link>
+            </h2>
+          </header>
+
+          {brainKpis ? (
+            <>
+              <ul className={styles.brainSummaryList}>
+                <li className={styles.brainSummaryItem}>
+                  <span className={styles.brainSummaryLabel}>Connues</span>
+                  <span className={`${styles.brainSummaryValue} ${styles.brainSummaryValueKnown}`.trim()}>
+                    {formatKpiValue(brainKpis.known)}
+                  </span>
+                </li>
+                <li className={styles.brainSummaryItem}>
+                  <span className={styles.brainSummaryLabel}>Complètes</span>
+                  <span className={`${styles.brainSummaryValue} ${styles.brainSummaryValueComplete}`.trim()}>
+                    {formatKpiValue(brainKpis.complete)}
+                  </span>
+                </li>
+                <li className={styles.brainSummaryItem}>
+                  <span className={styles.brainSummaryLabel}>Partielles</span>
+                  <span className={`${styles.brainSummaryValue} ${styles.brainSummaryValuePartial}`.trim()}>
+                    {formatKpiValue(brainKpis.partial)}
+                  </span>
+                </li>
+                <li className={styles.brainSummaryItem}>
+                  <span className={styles.brainSummaryLabel}>Vides</span>
+                  <span className={`${styles.brainSummaryValue} ${styles.brainSummaryValueEmpty}`.trim()}>
+                    {formatKpiValue(brainKpis.empty)}
+                  </span>
+                </li>
+              </ul>
+
+              <div className={styles.brainSummaryProgressBlock}>
+                <div
+                  className={styles.brainSummaryProgressTrack}
+                  role="img"
+                  aria-label={`Brain: ${brainCompletePercent ?? 0}% complètes`}
+                >
+                  <span
+                    className={styles.brainSummaryProgressFill}
+                    style={{ width: `${brainCompletePercent ?? 0}%` }}
+                  />
+                </div>
+                <p className={styles.brainSummaryProgressLabel}>
+                  {formatKpiValue(brainCompletePercent, " %")} complètes
+                </p>
+              </div>
+            </>
+          ) : (
+            <p className={styles.brainSummaryUnavailable}>Indisponible</p>
+          )}
         </article>
       </section>
     </div>

@@ -293,6 +293,35 @@
   gap: 0.52rem;
 }
 
+.dashboardSectionHeader {
+  align-self: start;
+  margin: -0.72rem -0.72rem 0;
+  min-height: 2.1rem;
+  padding: 0.42rem 0.72rem;
+  border-radius: 14px 14px 0 0;
+  background: #eff6ff;
+  border-bottom: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dashboardSectionTitle {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  line-height: 1.2;
+}
+
+.dashboardSectionMeta {
+  color: #1d4ed8;
+  font-size: 0.79rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
 .dashboardMetricGrid {
   gap: 0.56rem;
 }
@@ -392,10 +421,7 @@
 }
 
 .geoCoverageHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
+  align-items: center;
 }
 
 .geoCoverageUnavailable {
@@ -493,10 +519,7 @@
 }
 
 .circuitsSummaryHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
+  align-items: center;
 }
 
 .circuitsSummaryTitleLink {
@@ -574,22 +597,120 @@
   color: #64748b;
 }
 
+.brainSummaryPanel {
+  align-content: start;
+}
+
+.brainSummaryHeader {
+  align-items: center;
+}
+
+.brainSummaryTitleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brainSummaryTitleLink:hover,
+.brainSummaryTitleLink:focus-visible {
+  text-decoration: underline;
+}
+
+.brainSummaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.brainSummaryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-top: 1px solid #edf2f7;
+  padding: 0.38rem 0;
+}
+
+.brainSummaryItem:first-child {
+  border-top: 0;
+}
+
+.brainSummaryLabel {
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.brainSummaryValue {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.brainSummaryValueKnown {
+  color: #2563eb;
+}
+
+.brainSummaryValueComplete {
+  color: #166534;
+}
+
+.brainSummaryValuePartial {
+  color: #c2410c;
+}
+
+.brainSummaryValueEmpty {
+  color: #64748b;
+}
+
+.brainSummaryProgressBlock {
+  display: grid;
+  gap: 0.34rem;
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.46rem;
+}
+
+.brainSummaryProgressTrack {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.brainSummaryProgressFill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  background: #22c55e;
+}
+
+.brainSummaryProgressLabel {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #166534;
+  font-weight: 700;
+}
+
+.brainSummaryUnavailable {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 .toProcessPanel {
   align-content: start;
 }
 
 .toProcessHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.7rem;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .toProcessCount {
   margin: 0;
-  font-size: 0.86rem;
-  color: #475569;
+  font-size: 0.79rem;
+  color: #1d4ed8;
   font-weight: 600;
 }
 
@@ -663,17 +784,13 @@
 }
 
 .poiQualityHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.55rem;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .poiQualityPopulation {
   margin: 0;
-  font-size: 0.81rem;
-  color: #475569;
+  font-size: 0.79rem;
+  color: #1d4ed8;
   font-weight: 600;
 }
 
@@ -1008,6 +1125,292 @@
 
 .brainDefinitionStateMissing {
   color: #64748b;
+}
+
+.poiV1KpiGrid {
+  display: grid;
+  gap: 0.56rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.poiV1KpiCard {
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.6rem 0.65rem;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.poiV1KpiButton {
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.poiV1KpiButton:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.poiV1KpiButton:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+.poiV1KpiCardActive {
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.poiV1KpiInfo {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+}
+
+.poiV1KpiComplete {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.poiV1KpiWarning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.poiV1KpiLabel {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.poiV1KpiValue {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.poiV1Toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 280px);
+  gap: 0.55rem;
+}
+
+.poiV1SearchInput,
+.poiV1CitySelect {
+  min-height: 36px;
+  border: 1px solid #d5ddeb;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.87rem;
+  padding: 0.46rem 0.62rem;
+}
+
+.poiV1SearchInput::placeholder {
+  color: #64748b;
+}
+
+.poiV1Filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.poiV1FilterButton {
+  border: 1px solid #dbe2ea;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+.poiV1FilterButton:hover,
+.poiV1FilterButton:focus-visible {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.poiV1FilterButtonActive {
+  border-color: #93c5fd;
+  color: #1e3a8a;
+  background: #eff6ff;
+}
+
+.poiV1TableWrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.poiV1Table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.poiV1Table th {
+  text-align: left;
+  font-size: 0.77rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  padding: 0.34rem 0.32rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.poiV1Table td {
+  padding: 0.42rem 0.32rem;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 0.84rem;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.poiV1Row {
+  cursor: pointer;
+}
+
+.poiV1Row:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: -2px;
+}
+
+.poiV1PoiCell {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.poiV1PoiName {
+  font-size: 0.86rem;
+  font-weight: 620;
+}
+
+.poiV1PoiSlug {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.poiV1CoveragePill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.12rem 0.44rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.poiV1CoverageOk {
+  color: #166534;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.poiV1CoverageMissing {
+  color: #9a3412;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.poiV1CoverageOkText {
+  color: #166534;
+}
+
+.poiV1CoverageMissingText {
+  color: #9a3412;
+}
+
+.poiV1QualityValue {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.poiV1QualityGood {
+  color: #166534;
+}
+
+.poiV1QualityWarnLight {
+  color: #1d4ed8;
+}
+
+.poiV1QualityWarn {
+  color: #c2410c;
+}
+
+.poiV1QualityCritical {
+  color: #991b1b;
+}
+
+.poiV1EmptyCell {
+  color: #64748b;
+  text-align: center;
+  padding: 0.8rem 0.35rem;
+}
+
+.poiV1DrawerGrid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.poiV1DrawerGrid div {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.52rem 0.56rem;
+  background: #f8fafc;
+}
+
+.poiV1DrawerGrid dt {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.poiV1DrawerGrid dd {
+  margin: 0.26rem 0 0;
+  font-size: 0.86rem;
+  color: #0f172a;
+}
+
+.poiV1DrawerChecklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.poiV1DrawerChecklist li {
+  border-top: 1px solid #edf2f7;
+  padding: 0.46rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 0.86rem;
+  color: #0f172a;
+}
+
+.poiV1DrawerChecklist li:first-child {
+  border-top: 0;
+}
+
+.poiV1QualityDrawer {
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .poiDrawerBackdrop {
@@ -1672,6 +2075,7 @@
   }
 
   .geoCoveragePanel,
+  .brainSummaryPanel,
   .circuitsSummaryPanel {
     grid-column: auto;
   }
@@ -1686,6 +2090,10 @@
 
   .toProcessItem {
     grid-template-columns: minmax(82px, 96px) minmax(0, 1fr);
+  }
+
+  .poiV1KpiGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1773,6 +2181,14 @@
   .brainToolbar {
     align-items: stretch;
   }
+
+  .poiV1Toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .poiV1KpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -1841,5 +2257,57 @@
     display: block;
     text-align: left;
     padding: 0;
+  }
+
+  .poiV1KpiGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .poiV1Table {
+    min-width: 0;
+  }
+
+  .poiV1Table thead {
+    display: none;
+  }
+
+  .poiV1Table tbody {
+    display: grid;
+    gap: 0.46rem;
+  }
+
+  .poiV1Table tr {
+    display: grid;
+    gap: 0.3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.56rem;
+    background: #ffffff;
+  }
+
+  .poiV1Table td {
+    border-bottom: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+  }
+
+  .poiV1Table td::before {
+    content: attr(data-label);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .poiV1PoiCell {
+    justify-items: end;
+  }
+
+  .poiV1DrawerGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

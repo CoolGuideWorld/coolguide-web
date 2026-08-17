@@ -117,9 +117,9 @@ export default function StudioPoiQualityDrilldown({
 
   return (
     <>
-      <header className={styles.poiQualityHeader}>
-        <h2 className={styles.panelTitle}>Qualité POI</h2>
-        <p className={styles.poiQualityPopulation}>
+      <header className={`${styles.dashboardSectionHeader} ${styles.poiQualityHeader}`.trim()}>
+        <h2 className={`${styles.panelTitle} ${styles.dashboardSectionTitle}`.trim()}>Qualité POI</h2>
+        <p className={`${styles.poiQualityPopulation} ${styles.dashboardSectionMeta}`.trim()}>
           {typeof population === "number"
             ? `${numberFormatter.format(population)} POI suivis`
             : populationError
