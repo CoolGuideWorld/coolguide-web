@@ -522,6 +522,23 @@ export async function publishCircuitProposalAction(
     };
   }
 
+  let parentMissionId: string | null = null;
+
+  const { data: proposalMissionData, error: proposalMissionError } = await supabase
+    .from("circuit_proposals")
+    .select("mission_id")
+    .eq("id", proposalId)
+    .maybeSingle();
+
+  if (proposalMissionError) {
+    console.error("[Studio Publish] Failed to load mission_id for brain restart webhook", {
+      proposalId,
+      message: proposalMissionError.message,
+    });
+  } else {
+    parentMissionId = readRequiredString(asRecord(proposalMissionData), "mission_id");
+  }
+
   const webhookUrl = process.env.N8N_CIRCUIT_HERO_WEBHOOK_URL?.trim() ?? "";
 
   if (!webhookUrl) {
@@ -579,6 +596,76 @@ export async function publishCircuitProposalAction(
     } catch (webhookError) {
       console.error("[Studio Publish] Hero webhook request failed", {
         circuitId,
+        message: webhookError instanceof Error ? webhookError.message : "unknown",
+      });
+    }
+  }
+
+  const brainRestartWebhookUrl = process.env.N8N_BRAIN_RESTART_WEBHOOK_URL?.trim() ?? "";
+
+  if (brainRestartWebhookUrl && parentMissionId) {
+    try {
+      if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+        const response = await fetch(brainRestartWebhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            parent_mission_id: parentMissionId,
+            circuit_id: publishPayload.circuit_id,
+            circuit_slug: publishPayload.circuit_slug,
+            proposal_id: publishPayload.proposal_id,
+          }),
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (!response.ok) {
+          console.error("[Studio Publish] Brain restart webhook failed", {
+            proposalId,
+            missionId: parentMissionId,
+            circuitId: publishPayload.circuit_id,
+            status: response.status,
+          });
+        }
+      } else {
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+          abortController.abort();
+        }, 5000);
+
+        try {
+          const response = await fetch(brainRestartWebhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              parent_mission_id: parentMissionId,
+              circuit_id: publishPayload.circuit_id,
+              circuit_slug: publishPayload.circuit_slug,
+              proposal_id: publishPayload.proposal_id,
+            }),
+            signal: abortController.signal,
+          });
+
+          if (!response.ok) {
+            console.error("[Studio Publish] Brain restart webhook failed", {
+              proposalId,
+              missionId: parentMissionId,
+              circuitId: publishPayload.circuit_id,
+              status: response.status,
+            });
+          }
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      }
+    } catch (webhookError) {
+      console.error("[Studio Publish] Brain restart webhook request failed", {
+        proposalId,
+        missionId: parentMissionId,
+        circuitId: publishPayload.circuit_id,
         message: webhookError instanceof Error ? webhookError.message : "unknown",
       });
     }
