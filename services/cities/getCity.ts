@@ -427,10 +427,11 @@ function resolveHeroImage(
 
 function buildCityCta(cityName: string): CityPageData["cta"] {
   return {
-    title: "CoolGuide dans votre poche",
-    text: `Retrouvez les lieux, les histoires audio et les parcours de ${cityName} dans l'application, au rythme de votre visite.`,
-    linkLabel: "Découvrir CoolGuide",
-    linkHref: "/experience",
+    title: "DEVENEZ TESTEUR COOLGUIDE",
+    text: `Vous habitez a ${cityName} ou vous connaissez bien la ville ? Testez CoolGuide sur iPhone et aidez-nous a ameliorer l'experience locale.`,
+    linkLabel: "Tester CoolGuide sur iPhone",
+    linkHref: "https://testflight.apple.com/join/N7EGZakr",
+    linkNote: "Version beta gratuite via TestFlight",
   };
 }
 

@@ -279,6 +279,7 @@ html {
   text-decoration: none;
   font-size: 0.95rem;
   border: 1px solid rgba(0, 160, 93, 0.18);
+  cursor: pointer;
 }
 
 .siteHeader:not(.isSolid) .siteNavButton {
@@ -1314,6 +1315,14 @@ html {
     line-height: 1.14;
   }
 
+  .conclusionTitle {
+    font-size: clamp(1.25rem, 6vw, 1.55rem);
+  }
+
+  .conclusionText {
+    font-size: 0.95rem;
+  }
+
   .storeButtons {
     gap: 0.8rem;
   }
@@ -1323,6 +1332,20 @@ html {
     min-width: 100%;
     padding: 0.95rem 1.2rem;
     font-size: 1rem;
+  }
+
+  .downloadDialog {
+    width: min(94vw, 34rem);
+    margin-top: 8vh;
+    border-radius: 20px;
+  }
+
+  .downloadDialogHeader {
+    align-items: flex-start;
+  }
+
+  .downloadDialogCta {
+    width: 100%;
   }
 
   .siteFooter {
@@ -2125,6 +2148,134 @@ html {
   font-weight: 300;
   line-height: 1.08;
   letter-spacing: -0.04em;
+}
+
+.conclusionTitle {
+  margin: 0;
+  color: #10243d;
+  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.conclusionText {
+  margin: 0.7rem auto 0;
+  max-width: 42rem;
+  color: #4d433a;
+  font-size: clamp(0.98rem, 1.2vw, 1.06rem);
+  line-height: 1.6;
+}
+
+.conclusionMeta {
+  margin: 0.85rem 0 0;
+  color: #6b5f55;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.downloadDialogLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+
+.downloadDialogBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(16, 36, 61, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.downloadDialog {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 38rem);
+  margin: min(12vh, 6rem) auto 0;
+  padding: clamp(1.2rem, 2.2vw, 1.6rem);
+  border-radius: 24px;
+  border: 1px solid rgba(31, 26, 23, 0.1);
+  background: linear-gradient(180deg, #fffaf2 0%, #f8f0e4 100%);
+  box-shadow: 0 22px 60px rgba(16, 36, 61, 0.22);
+  display: grid;
+  gap: 0.8rem;
+}
+
+.downloadDialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.downloadDialogEyebrow {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.42rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 160, 93, 0.24);
+  background: rgba(0, 160, 93, 0.08);
+  color: #007546;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.downloadDialogClose {
+  border: 0;
+  background: transparent;
+  color: #4d433a;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.downloadDialogTitle {
+  margin: 0;
+  color: #10243d;
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.downloadDialogText {
+  margin: 0;
+  color: #4d433a;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.downloadDialogCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.95rem 1.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 160, 93, 0.18);
+  background: #00A05D;
+  color: #f8f3ea;
+  text-decoration: none;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.downloadDialogMeta {
+  margin: -0.2rem 0 0;
+  color: #6b5f55;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.downloadDialogClose:focus-visible,
+.downloadDialogCta:focus-visible {
+  outline: 2px solid rgba(31, 26, 23, 0.55);
+  outline-offset: 3px;
 }
 
 .storeButtons {

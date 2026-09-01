@@ -54,6 +54,7 @@ export type CityCTAData = {
   text: string;
   linkLabel: string;
   linkHref: string;
+  linkNote?: string;
 };
 
 export type CityNearbyDestinationItem = {

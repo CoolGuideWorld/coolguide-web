@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FocusEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   coolGuideWorldDropdownConfig,
   coolGuideWorldLinks,
@@ -17,16 +16,12 @@ type SiteHeaderProps = {
 };
 
 export default function SiteHeader({ initialSolid = false, compact = false }: SiteHeaderProps) {
-  const pathname = usePathname();
   const solidByDefault = initialSolid || compact;
   const [isHeaderSolid, setIsHeaderSolid] = useState(solidByDefault);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<"world" | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const closeDialogButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,12 +35,12 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
   }, [solidByDefault]);
 
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    document.body.style.overflow = isMenuOpen || isDownloadDialogOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMenuOpen]);
+  }, [isDownloadDialogOpen, isMenuOpen]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -86,6 +81,7 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
       if (event.key === "Escape") {
         setIsMenuOpen(false);
         setOpenDesktopMenu(null);
+        setIsDownloadDialogOpen(false);
       }
     };
 
@@ -95,13 +91,26 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
   }, []);
 
   useEffect(() => {
-    setIsMenuOpen(false);
-    setOpenDesktopMenu(null);
-  }, [pathname]);
+    if (!isDownloadDialogOpen) {
+      return;
+    }
+
+    closeDialogButtonRef.current?.focus();
+  }, [isDownloadDialogOpen]);
 
   const handleNavClick = () => {
     setIsMenuOpen(false);
     setOpenDesktopMenu(null);
+  };
+
+  const openDownloadDialog = () => {
+    setIsMenuOpen(false);
+    setOpenDesktopMenu(null);
+    setIsDownloadDialogOpen(true);
+  };
+
+  const closeDownloadDialog = () => {
+    setIsDownloadDialogOpen(false);
   };
 
   const toggleDesktopMenu = (menu: "world") => {
@@ -163,9 +172,67 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
         </div>
       </nav>
 
-      <Link href="/#download" className="mobileMenuButton" onClick={handleNavClick}>
+      <button
+        type="button"
+        className="mobileMenuButton"
+        aria-haspopup="dialog"
+        aria-expanded={isDownloadDialogOpen}
+        aria-controls="download-recruitment-dialog"
+        onClick={openDownloadDialog}
+      >
         Télécharger
-      </Link>
+      </button>
+    </div>
+  );
+
+  const downloadDialog = (
+    <div className="downloadDialogLayer" role="presentation">
+      <button
+        type="button"
+        className="downloadDialogBackdrop"
+        aria-label="Fermer la fenetre de recrutement TestFlight"
+        onClick={closeDownloadDialog}
+      />
+      <div
+        id="download-recruitment-dialog"
+        className="downloadDialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="download-recruitment-title"
+        aria-describedby="download-recruitment-description"
+      >
+        <div className="downloadDialogHeader">
+          <p className="downloadDialogEyebrow">Beta iPhone via TestFlight</p>
+          <button
+            ref={closeDialogButtonRef}
+            type="button"
+            className="downloadDialogClose"
+            aria-label="Fermer la fenetre de recrutement TestFlight"
+            onClick={closeDownloadDialog}
+          >
+            Fermer
+          </button>
+        </div>
+        <h2 id="download-recruitment-title" className="downloadDialogTitle">
+          DEVENEZ TESTEUR COOLGUIDE
+        </h2>
+        <p id="download-recruitment-description" className="downloadDialogText">
+          Vous habitez dans une ville deja presente sur CoolGuide ou vous la connaissez bien ?
+        </p>
+        <p className="downloadDialogText">
+          Testez l&apos;application sur iPhone et aidez-nous a ameliorer l&apos;experience, les contenus et les decouvertes locales.
+        </p>
+        <a
+          href="https://testflight.apple.com/join/N7EGZakr"
+          className="downloadDialogCta"
+          target="_blank"
+          rel="noreferrer noopener"
+          aria-label="Tester CoolGuide sur iPhone avec TestFlight, ouverture dans un nouvel onglet"
+        >
+          Tester CoolGuide sur iPhone
+        </a>
+        <p className="downloadDialogMeta">Version beta gratuite via TestFlight</p>
+      </div>
     </div>
   );
 
@@ -259,9 +326,16 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
             </div>
           </div>
 
-          <Link href="/#download" className="siteNavButton" onClick={handleNavClick}>
+          <button
+            type="button"
+            className="siteNavButton"
+            aria-haspopup="dialog"
+            aria-expanded={isDownloadDialogOpen}
+            aria-controls="download-recruitment-dialog"
+            onClick={openDownloadDialog}
+          >
             Télécharger
-          </Link>
+          </button>
         </nav>
 
         <button
@@ -278,7 +352,10 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
         </button>
       </div>
 
-      {isMounted ? createPortal(mobileMenuPanel, document.body) : null}
+      {typeof document !== "undefined" ? createPortal(mobileMenuPanel, document.body) : null}
+      {typeof document !== "undefined" && isDownloadDialogOpen
+        ? createPortal(downloadDialog, document.body)
+        : null}
     </header>
   );
 }
