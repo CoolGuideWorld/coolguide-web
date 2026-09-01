@@ -1,10 +1,8 @@
-import StudioPlaceholderPage from "@/components/studio/StudioPlaceholderPage";
+import StudioProductionPage from "@/components/studio/StudioProductionPage";
+import { readStudioProductionSnapshot } from "@/lib/studio/production";
 
-export default function StudioProductionPage() {
-  return (
-    <StudioPlaceholderPage
-      title="Production"
-      description="Préparation des flux textes, images et audios pour l'équipe éditoriale."
-    />
-  );
+export default async function StudioProductionRoutePage() {
+  const snapshot = await readStudioProductionSnapshot();
+
+  return <StudioProductionPage snapshot={snapshot} />;
 }

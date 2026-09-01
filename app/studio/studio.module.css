@@ -1714,6 +1714,46 @@
   background: #fef2f2;
 }
 
+.productionStatusWarn {
+  color: #9a3412;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.productionStatusMuted {
+  color: #334155;
+  border-color: #dbe2ea;
+  background: #f8fafc;
+}
+
+.productionPremiumCell {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.productionAnomalyBlock {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  border-radius: 10px;
+  padding: 0.58rem 0.62rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.productionAnomalyTitle {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.productionAnomalyText {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .circuitsDetailGrid {
   margin: 0;
   display: grid;
