@@ -21,3 +21,27 @@ export {
   type DestinationPublicationDiagnostic,
   type SearchableDestinationCountry,
 } from "./catalog";
+
+export {
+  readStudioDestinationNetworkData,
+  type StudioDestinationNetworkData,
+  type StudioDestinationNetworkMarker,
+} from "./getDestinationNetworkMap";
+
+export {
+  findCitiesNearRoute,
+  type RouteNearbyCityCandidate,
+  type RouteNearbyCityRelation,
+  type RouteNearbyCityResult,
+  type RoutePolylineCoordinate,
+} from "./findCitiesNearRoute";
+
+export {
+  fetchCitiesAcrossOsrmRoutes,
+  fetchOsrmAlternativeRoutes,
+  findCitiesAcrossRoutes,
+  type OsrmRouteAlternativeResponse,
+  type OsrmRouteSummary,
+  type RouteMergedCityResult,
+  type RouteNearbyCityHit,
+} from "./findCitiesAcrossRoutes";

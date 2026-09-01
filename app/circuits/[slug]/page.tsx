@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CircuitPage from "@/components/circuits/CircuitPage";

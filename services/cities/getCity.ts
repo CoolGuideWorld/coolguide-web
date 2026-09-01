@@ -8,6 +8,7 @@ import type {
   CityPageData,
 } from "@/types/city";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { haversineDistanceKm } from "@/services/geo/distance";
 import {
   getDestinationContentForCity,
   type DestinationContentSupabaseRow,
@@ -202,25 +203,6 @@ function parseRecommendedCitySlugs(
   }
 
   return Array.from(uniqueSlugs);
-}
-
-function haversineDistanceKm(
-  originLatitude: number,
-  originLongitude: number,
-  destinationLatitude: number,
-  destinationLongitude: number
-): number {
-  const earthRadiusKm = 6371;
-  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
-  const deltaLatitude = toRadians(destinationLatitude - originLatitude);
-  const deltaLongitude = toRadians(destinationLongitude - originLongitude);
-  const a =
-    Math.sin(deltaLatitude / 2) ** 2 +
-    Math.cos(toRadians(originLatitude)) *
-      Math.cos(toRadians(destinationLatitude)) *
-      Math.sin(deltaLongitude / 2) ** 2;
-
-  return 2 * earthRadiusKm * Math.asin(Math.sqrt(a));
 }
 
 function formatNearbyDistance(
