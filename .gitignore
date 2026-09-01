@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local build/test artifacts
+tmp/
+build-log*.txt
+build-check*.txt
+.build-check*.txt
+git-diff-stat.txt
