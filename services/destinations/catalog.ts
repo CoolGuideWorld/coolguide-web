@@ -1328,6 +1328,66 @@ export async function getCountriesWithPublishableDestinations(): Promise<Searcha
   }
 }
 
+export async function getGlobalPublishableCityCount(): Promise<number> {
+  try {
+    const supabase = createServerSupabaseClient();
+
+    let query = supabase
+      .from("cities")
+      .select(
+        `
+          country_id,
+          countries!cities_country_id_fkey(name)
+        `
+      )
+      .order("country_id", { ascending: true });
+
+    query = applyCatalogPublicationFilters(query);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(`Supabase global publishable city count query failed: ${error.message}`);
+      return 0;
+    }
+
+    const rows = (data ?? []) as SearchableCityCountryRow[];
+    const uniqueCountryIds = new Set<string>();
+
+    for (const row of rows) {
+      if (!isNonEmptyString(row.country_id)) {
+        continue;
+      }
+
+      const country = readCountryRelation(row.countries);
+      const countryName = country?.name?.trim() ?? "";
+
+      if (!countryName) {
+        continue;
+      }
+
+      uniqueCountryIds.add(row.country_id);
+    }
+
+    if (uniqueCountryIds.size === 0) {
+      return 0;
+    }
+
+    const publishableCounts = await Promise.all(
+      Array.from(uniqueCountryIds).map(async (countryId) => {
+        const publishableCityIds = await getPublishableCityIdsForCountry(countryId);
+        return publishableCityIds.size;
+      })
+    );
+
+    return publishableCounts.reduce((sum, count) => sum + count, 0);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Global publishable city count setup failed: ${message}`);
+    return 0;
+  }
+}
+
 export function parseCatalogSort(value: string): CatalogSortValue {
   if (CATALOG_SORT_VALUES.includes(value as CatalogSortValue)) {
     return value as CatalogSortValue;

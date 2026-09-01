@@ -40,6 +40,8 @@ export default async function ExperiencePage() {
           <ExperienceLanguagesStats
             availableAudioCount={stats.availableAudioCount}
             availablePoiCount={stats.availablePoiCount}
+            cityCount={stats.cityCount}
+            premiumAudioCount={stats.premiumAudioCount}
           />
         </div>
 

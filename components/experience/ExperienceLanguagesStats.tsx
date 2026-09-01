@@ -3,6 +3,8 @@ import Image from "next/image";
 type ExperienceLanguagesStatsProps = {
   availableAudioCount: number | null;
   availablePoiCount: number | null;
+  cityCount: number | null;
+  premiumAudioCount: number | null;
 };
 
 const EXPERIENCE_LANGUAGES = [
@@ -18,7 +20,11 @@ const EXPERIENCE_LANGUAGES = [
 export default function ExperienceLanguagesStats({
   availableAudioCount,
   availablePoiCount,
+  cityCount,
+  premiumAudioCount,
 }: ExperienceLanguagesStatsProps) {
+  const formattedCityCount = cityCount !== null ? cityCount.toLocaleString("fr-FR") : "De nombreux";
+
   const formattedAudioCount =
     availableAudioCount !== null
       ? availableAudioCount.toLocaleString("fr-FR")
@@ -29,10 +35,17 @@ export default function ExperienceLanguagesStats({
       ? availablePoiCount.toLocaleString("fr-FR")
       : "De nombreux";
 
+  const formattedPremiumAudioCount =
+    premiumAudioCount !== null
+      ? premiumAudioCount.toLocaleString("fr-FR")
+      : "De nombreux";
+
   const stats = [
     { value: "7", label: "Langues disponibles" },
-    { value: formattedAudioCount, label: "Audios disponibles" },
+    { value: formattedCityCount, label: "Villes disponibles" },
     { value: formattedPoiCount, label: "Points d'intérêt" },
+    { value: formattedAudioCount, label: "Audios disponibles" },
+    { value: formattedPremiumAudioCount, label: "Audios Premium" },
     { value: "2", label: "Modes de découverte" },
     { value: "GPS", label: "Déclenchement automatique" },
   ];
