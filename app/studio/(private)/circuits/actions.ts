@@ -102,6 +102,11 @@ function parsePublishPayload(value: unknown): PublishExistingCircuitProposalPayl
   };
 }
 
+function isAmbiguousExistingCircuitResolution(value: unknown): boolean {
+  const record = asRecord(value);
+  return record.ambiguous === true;
+}
+
 function readRequiredString(record: Record<string, unknown>, key: string): string | null {
   const value = record[key];
 
@@ -474,7 +479,7 @@ export async function publishCircuitProposalAction(
   await requireStudioAdmin();
 
   const proposalId = toSafeString(formData.get("proposalId"));
-  const existingCircuitId = toSafeString(formData.get("existingCircuitId"));
+  const existingCircuitIdRaw = toSafeString(formData.get("existingCircuitId"));
 
   if (!proposalId || !isUuid(proposalId)) {
     return {
@@ -483,7 +488,7 @@ export async function publishCircuitProposalAction(
     };
   }
 
-  if (!existingCircuitId || !isUuid(existingCircuitId)) {
+  if (existingCircuitIdRaw && !isUuid(existingCircuitIdRaw)) {
     return {
       error: "Circuit existant introuvable.",
       success: "",
@@ -491,12 +496,70 @@ export async function publishCircuitProposalAction(
   }
 
   const supabase = await createServerAuthSupabaseClient();
-  const { data, error } = await supabase.rpc("publish_existing_circuit_proposal", {
-    p_proposal_id: proposalId,
-    p_existing_circuit_id: existingCircuitId,
-  });
+  const { data: currentProposal, error: currentProposalError } = await supabase
+    .from("circuit_proposals")
+    .select("id,status,editorial_draft")
+    .eq("id", proposalId)
+    .eq("status", "approved")
+    .maybeSingle();
+
+  if (currentProposalError) {
+    console.error(
+      `[studio] circuit_proposals publication precheck failed: ${currentProposalError.message}`
+    );
+    return {
+      error: "Impossible de préparer la publication pour le moment.",
+      success: "",
+    };
+  }
+
+  if (!currentProposal || !parseStoredDraft(asRecord(currentProposal).editorial_draft)) {
+    return {
+      error: "Cette proposition n'est plus approuvée ou son brouillon éditorial est manquant.",
+      success: "",
+    };
+  }
+
+  const { data: existingCircuitResolutionData, error: existingCircuitResolutionError } =
+    await supabase.rpc("resolve_existing_circuit_for_proposal", {
+      p_proposal_id: proposalId,
+    });
+
+  if (existingCircuitResolutionError) {
+    console.error(
+      `[studio] resolve_existing_circuit_for_proposal failed during publish precheck (proposal=${proposalId}): ${existingCircuitResolutionError.message}`
+    );
+  } else if (isAmbiguousExistingCircuitResolution(existingCircuitResolutionData)) {
+    return {
+      error: "Publication impossible. La résolution du circuit existant est ambiguë.",
+      success: "",
+    };
+  }
+
+  const existingCircuitId = existingCircuitIdRaw.length > 0 ? existingCircuitIdRaw : null;
+  const publishRpcName = existingCircuitId
+    ? "publish_existing_circuit_proposal"
+    : "publish_new_circuit_proposal";
+
+  const { data, error } = existingCircuitId
+    ? await supabase.rpc("publish_existing_circuit_proposal", {
+        p_proposal_id: proposalId,
+        p_existing_circuit_id: existingCircuitId,
+      })
+    : await supabase.rpc("publish_new_circuit_proposal", {
+        p_proposal_id: proposalId,
+      });
 
   if (error) {
+    console.error("CIRCUIT_PUBLISH_RPC_ERROR", {
+      rpc: publishRpcName,
+      proposalId,
+      existingCircuitId: existingCircuitId ?? null,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
     console.error(
       `[studio] publish_existing_circuit_proposal failed (proposal=${proposalId}, circuit=${existingCircuitId}): ${error.message}`
     );

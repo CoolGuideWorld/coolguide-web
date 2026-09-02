@@ -221,7 +221,6 @@ function toProposalItem(
   const canPublish =
     status === "approved" &&
     editorialDraft !== null &&
-    existingCircuitResolution.existingCircuitId !== null &&
     !existingCircuitResolution.ambiguous;
 
   return {
@@ -472,7 +471,6 @@ export default async function StudioCircuitsPage() {
       canPublish:
         proposalStatus === "approved" &&
         editorialDraft !== null &&
-        resolution.existingCircuitId !== null &&
         !resolution.ambiguous,
     });
 
