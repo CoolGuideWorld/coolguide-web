@@ -325,6 +325,73 @@ export async function decideCircuitProposalAction(
     };
   }
 
+  if (decision === "approved") {
+    const editorialWebhookUrl = process.env.N8N_CIRCUIT_EDITORIAL_WEBHOOK_URL?.trim() ?? "";
+
+    if (!editorialWebhookUrl) {
+      console.warn(
+        "[Studio Decision] Editorial webhook URL is missing; skipping post-approval dispatch.",
+        {
+          proposalId,
+        }
+      );
+    } else {
+      try {
+        if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+          const response = await fetch(editorialWebhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              proposal_id: proposalId,
+            }),
+            signal: AbortSignal.timeout(5000),
+          });
+
+          if (!response.ok) {
+            console.error("[Studio Decision] Editorial webhook failed", {
+              proposalId,
+              status: response.status,
+            });
+          }
+        } else {
+          const abortController = new AbortController();
+          const timeoutId = setTimeout(() => {
+            abortController.abort();
+          }, 5000);
+
+          try {
+            const response = await fetch(editorialWebhookUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                proposal_id: proposalId,
+              }),
+              signal: abortController.signal,
+            });
+
+            if (!response.ok) {
+              console.error("[Studio Decision] Editorial webhook failed", {
+                proposalId,
+                status: response.status,
+              });
+            }
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        }
+      } catch (webhookError) {
+        console.error("[Studio Decision] Editorial webhook request failed", {
+          proposalId,
+          message: webhookError instanceof Error ? webhookError.message : "unknown",
+        });
+      }
+    }
+  }
+
   revalidatePath("/studio/circuits");
 
   return {
