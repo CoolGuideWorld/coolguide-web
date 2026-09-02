@@ -543,10 +543,16 @@ export async function publishCircuitProposalAction(
   _prevState: CircuitPublishState,
   formData: FormData
 ): Promise<CircuitPublishState> {
-  await requireStudioAdmin();
-
   const proposalId = toSafeString(formData.get("proposalId"));
   const existingCircuitIdRaw = toSafeString(formData.get("existingCircuitId"));
+
+  console.log("CIRCUIT_PUBLISH_BEFORE_AUTH", {
+    proposalId,
+    existingCircuitIdRaw,
+    timestamp: new Date().toISOString(),
+  });
+
+  await requireStudioAdmin();
 
   console.error("CIRCUIT_PUBLISH_ACTION_ENTER", {
     proposalId,
