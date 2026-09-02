@@ -481,6 +481,11 @@ export async function publishCircuitProposalAction(
   const proposalId = toSafeString(formData.get("proposalId"));
   const existingCircuitIdRaw = toSafeString(formData.get("existingCircuitId"));
 
+  console.error("CIRCUIT_PUBLISH_ACTION_ENTER", {
+    proposalId,
+    existingCircuitId: existingCircuitIdRaw || null,
+  });
+
   if (!proposalId || !isUuid(proposalId)) {
     return {
       error: "Proposition introuvable.",
