@@ -671,6 +671,14 @@ export async function publishCircuitProposalAction(
 
   const brainRestartWebhookUrl = process.env.N8N_BRAIN_RESTART_WEBHOOK_URL?.trim() ?? "";
 
+  console.error("BRAIN_RESTART_PRECHECK", {
+    proposalId,
+    parentMissionId,
+    circuitId: publishPayload.circuit_id,
+    circuitSlug: publishPayload.circuit_slug,
+    hasWebhookUrl: Boolean(brainRestartWebhookUrl),
+  });
+
   if (brainRestartWebhookUrl && parentMissionId) {
     try {
       if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
@@ -686,6 +694,15 @@ export async function publishCircuitProposalAction(
             proposal_id: publishPayload.proposal_id,
           }),
           signal: AbortSignal.timeout(5000),
+        });
+
+        console.error("BRAIN_RESTART_RESPONSE", {
+          proposalId,
+          parentMissionId,
+          circuitId: publishPayload.circuit_id,
+          circuitSlug: publishPayload.circuit_slug,
+          status: response.status,
+          ok: response.ok,
         });
 
         if (!response.ok) {
@@ -715,6 +732,15 @@ export async function publishCircuitProposalAction(
               proposal_id: publishPayload.proposal_id,
             }),
             signal: abortController.signal,
+          });
+
+          console.error("BRAIN_RESTART_RESPONSE", {
+            proposalId,
+            parentMissionId,
+            circuitId: publishPayload.circuit_id,
+            circuitSlug: publishPayload.circuit_slug,
+            status: response.status,
+            ok: response.ok,
           });
 
           if (!response.ok) {
