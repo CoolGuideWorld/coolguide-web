@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type FocusEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FocusEvent,
+  type FormEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,11 +23,22 @@ type SiteHeaderProps = {
 };
 
 export default function SiteHeader({ initialSolid = false, compact = false }: SiteHeaderProps) {
+  type AndroidSubmissionState = "idle" | "submitting" | "success" | "alreadyRegistered" | "error";
+
   const solidByDefault = initialSolid || compact;
+  const hasHydrated = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false
+  );
   const [isHeaderSolid, setIsHeaderSolid] = useState(solidByDefault);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<"world" | null>(null);
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [downloadDialogView, setDownloadDialogView] = useState<"choice" | "android">("choice");
+  const [androidEmail, setAndroidEmail] = useState("");
+  const [androidSubmissionState, setAndroidSubmissionState] = useState<AndroidSubmissionState>("idle");
+  const [androidStatusMessage, setAndroidStatusMessage] = useState("");
   const closeDialogButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -106,11 +124,79 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
   const openDownloadDialog = () => {
     setIsMenuOpen(false);
     setOpenDesktopMenu(null);
+    setDownloadDialogView("choice");
+    setAndroidEmail("");
+    setAndroidSubmissionState("idle");
+    setAndroidStatusMessage("");
     setIsDownloadDialogOpen(true);
   };
 
   const closeDownloadDialog = () => {
     setIsDownloadDialogOpen(false);
+    setDownloadDialogView("choice");
+    setAndroidEmail("");
+    setAndroidSubmissionState("idle");
+    setAndroidStatusMessage("");
+  };
+
+  const showAndroidDownloadView = () => {
+    setDownloadDialogView("android");
+    setAndroidSubmissionState("idle");
+    setAndroidStatusMessage("");
+  };
+
+  const showDownloadChoiceView = () => {
+    setDownloadDialogView("choice");
+    setAndroidSubmissionState("idle");
+    setAndroidStatusMessage("");
+  };
+
+  const handleAndroidAccessRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (androidSubmissionState === "submitting") {
+      return;
+    }
+
+    setAndroidSubmissionState("submitting");
+    setAndroidStatusMessage("");
+
+    try {
+      const response = await fetch("/api/beta-testers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: androidEmail }),
+      });
+
+      if (response.status === 201) {
+        setAndroidSubmissionState("success");
+        return;
+      }
+
+      if (response.status === 409) {
+        setAndroidSubmissionState("alreadyRegistered");
+        setAndroidStatusMessage("Cette adresse est deja inscrite au programme de test Android.");
+        return;
+      }
+
+      if (response.status === 400) {
+        setAndroidSubmissionState("error");
+        setAndroidStatusMessage("Veuillez saisir une adresse e-mail valide.");
+        return;
+      }
+
+      setAndroidSubmissionState("error");
+      setAndroidStatusMessage(
+        "Impossible d'enregistrer votre demande pour le moment. Veuillez reessayer."
+      );
+    } catch {
+      setAndroidSubmissionState("error");
+      setAndroidStatusMessage(
+        "Impossible d'enregistrer votre demande pour le moment. Veuillez reessayer."
+      );
+    }
   };
 
   const toggleDesktopMenu = (menu: "world") => {
@@ -199,10 +285,16 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
         role="dialog"
         aria-modal="true"
         aria-labelledby="download-recruitment-title"
-        aria-describedby="download-recruitment-description"
+        aria-describedby={
+          downloadDialogView === "android"
+            ? "download-recruitment-android-description"
+            : "download-recruitment-choice-description"
+        }
       >
         <div className="downloadDialogHeader">
-          <p className="downloadDialogEyebrow">Beta iPhone via TestFlight</p>
+          <p className="downloadDialogEyebrow">
+            {downloadDialogView === "android" ? "Beta Android" : "Beta CoolGuide"}
+          </p>
           <button
             ref={closeDialogButtonRef}
             type="button"
@@ -213,25 +305,112 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
             Fermer
           </button>
         </div>
-        <h2 id="download-recruitment-title" className="downloadDialogTitle">
-          DEVENEZ TESTEUR COOLGUIDE
-        </h2>
-        <p id="download-recruitment-description" className="downloadDialogText">
-          Vous habitez dans une ville deja presente sur CoolGuide ou vous la connaissez bien ?
-        </p>
-        <p className="downloadDialogText">
-          Testez l&apos;application sur iPhone et aidez-nous a ameliorer l&apos;experience, les contenus et les decouvertes locales.
-        </p>
-        <a
-          href="https://testflight.apple.com/join/N7EGZakr"
-          className="downloadDialogCta"
-          target="_blank"
-          rel="noreferrer noopener"
-          aria-label="Tester CoolGuide sur iPhone avec TestFlight, ouverture dans un nouvel onglet"
-        >
-          Tester CoolGuide sur iPhone
-        </a>
-        <p className="downloadDialogMeta">Version beta gratuite via TestFlight</p>
+        {downloadDialogView === "android" ? (
+          <>
+            <h2 id="download-recruitment-title" className="downloadDialogTitle">
+              REJOINDRE LE TEST ANDROID
+            </h2>
+            <p id="download-recruitment-android-description" className="downloadDialogText">
+              Google Play necessite que votre compte Google soit autorise avant de pouvoir installer la version beta de CoolGuide.
+            </p>
+            <p className="downloadDialogText">
+              Entrez l&apos;adresse Google utilisee sur votre telephone Android.
+            </p>
+            {androidSubmissionState === "success" ? (
+              <>
+                <p
+                  className="downloadDialogMeta downloadDialogStatus downloadDialogSuccessBanner"
+                  role="status"
+                  aria-live="polite"
+                >
+                  ✓ Votre demande est bien enregistree !
+                </p>
+                <p className="downloadDialogText">
+                  Nous allons maintenant autoriser votre adresse Google pour acceder a la version beta de CoolGuide.
+                </p>
+                <p className="downloadDialogText downloadDialogSuccessHighlight">
+                  Vous recevrez votre lien d&apos;installation Google Play par e-mail des que votre acces sera active.
+                </p>
+                <p className="downloadDialogText">
+                  Vous pouvez fermer cette fenetre.
+                </p>
+                <button type="button" className="downloadDialogCta" onClick={closeDownloadDialog}>
+                  Fermer
+                </button>
+              </>
+            ) : (
+              <form className="downloadDialogForm" onSubmit={handleAndroidAccessRequest} noValidate>
+                <div className="downloadDialogField">
+                  <label className="downloadDialogLabel" htmlFor="android-beta-email">
+                    Adresse Google
+                  </label>
+                  <input
+                    id="android-beta-email"
+                    className="downloadDialogInput"
+                    type="email"
+                    placeholder="votre.adresse@gmail.com"
+                    value={androidEmail}
+                    onChange={(event) => setAndroidEmail(event.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="downloadDialogCta"
+                  disabled={androidSubmissionState === "submitting"}
+                >
+                  {androidSubmissionState === "submitting" ? "Envoi en cours..." : "Demander mon acces"}
+                </button>
+              </form>
+            )}
+            {androidStatusMessage ? (
+              <p className="downloadDialogMeta downloadDialogStatus" role="status" aria-live="polite">
+                {androidStatusMessage}
+              </p>
+            ) : null}
+            {androidSubmissionState !== "success" ? (
+              <button type="button" className="downloadDialogBackButton" onClick={showDownloadChoiceView}>
+                ← Retour
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <h2 id="download-recruitment-title" className="downloadDialogTitle">
+              DEVENEZ TESTEUR COOLGUIDE
+            </h2>
+            <p id="download-recruitment-choice-description" className="downloadDialogText">
+              Vous habitez dans une ville deja presente sur CoolGuide ou vous la connaissez bien ?
+            </p>
+            <p className="downloadDialogText">
+              Testez l&apos;application et aidez-nous a ameliorer l&apos;experience, les contenus et les decouvertes locales.
+            </p>
+            <div className="downloadDialogChoices" aria-label="Choisir une plateforme beta">
+              <div className="downloadDialogChoice">
+                <a
+                  href="https://testflight.apple.com/join/N7EGZakr"
+                  className="downloadDialogCta"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label="Tester CoolGuide sur iPhone avec TestFlight, ouverture dans un nouvel onglet"
+                >
+                  Tester CoolGuide sur iPhone
+                </a>
+                <p className="downloadDialogMeta">Installation via TestFlight</p>
+              </div>
+              <div className="downloadDialogChoice">
+                <button
+                  type="button"
+                  className="downloadDialogSecondaryCta"
+                  onClick={showAndroidDownloadView}
+                >
+                  Tester CoolGuide sur Android
+                </button>
+                <p className="downloadDialogMeta">Acces beta sur invitation Google Play</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -352,8 +531,8 @@ export default function SiteHeader({ initialSolid = false, compact = false }: Si
         </button>
       </div>
 
-      {typeof document !== "undefined" ? createPortal(mobileMenuPanel, document.body) : null}
-      {typeof document !== "undefined" && isDownloadDialogOpen
+      {hasHydrated ? createPortal(mobileMenuPanel, document.body) : null}
+      {hasHydrated && isDownloadDialogOpen
         ? createPortal(downloadDialog, document.body)
         : null}
     </header>

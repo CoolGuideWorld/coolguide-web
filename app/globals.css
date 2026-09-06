@@ -2249,6 +2249,17 @@ html {
   line-height: 1.6;
 }
 
+.downloadDialogChoices {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.downloadDialogChoice {
+  display: grid;
+  gap: 0.4rem;
+}
+
 .downloadDialogCta {
   display: inline-flex;
   align-items: center;
@@ -2264,6 +2275,97 @@ html {
   text-decoration: none;
   font-size: 0.98rem;
   font-weight: 500;
+}
+
+.downloadDialogChoice .downloadDialogCta,
+.downloadDialogForm .downloadDialogCta {
+  width: 100%;
+}
+
+.downloadDialogSecondaryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  width: 100%;
+  padding: 0.95rem 1.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 160, 93, 0.22);
+  background: rgba(0, 160, 93, 0.06);
+  color: #007546;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.downloadDialogForm {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.downloadDialogField {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.downloadDialogLabel {
+  color: #4d433a;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.downloadDialogInput {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 26, 23, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  color: #10243d;
+  font: inherit;
+}
+
+.downloadDialogInput::placeholder {
+  color: #7f7367;
+}
+
+.downloadDialogInput:focus-visible,
+.downloadDialogSecondaryCta:focus-visible,
+.downloadDialogBackButton:focus-visible {
+  outline: 2px solid rgba(31, 26, 23, 0.55);
+  outline-offset: 3px;
+}
+
+.downloadDialogStatus {
+  margin-top: 0.1rem;
+}
+
+.downloadDialogSuccessBanner {
+  margin-top: 0.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 160, 93, 0.24);
+  background: rgba(0, 160, 93, 0.1);
+  color: #007546;
+  font-weight: 620;
+}
+
+.downloadDialogSuccessHighlight {
+  color: #10243d;
+  font-weight: 620;
+}
+
+.downloadDialogBackButton {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #007546;
+  font-size: 0.94rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .downloadDialogMeta {
