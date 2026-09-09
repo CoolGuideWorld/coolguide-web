@@ -15,6 +15,7 @@ import type {
 type StudioDestinationsMapClientProps = {
   markers: StudioDestinationNetworkMarker[];
   routeCandidateCities: StudioRouteCandidateCity[];
+  brainKnownCitySlugs: string[];
 };
 
 type RouteState = {
@@ -92,6 +93,16 @@ function RouteFitBounds({ geometry }: { geometry: Array<[number, number]> | null
       animate: false,
     });
   }, [geometry, map]);
+
+  return null;
+}
+
+function InvalidateSizeOnMount() {
+  const map = useMap();
+
+  useEffect(() => {
+    map.invalidateSize();
+  }, [map]);
 
   return null;
 }
@@ -174,6 +185,7 @@ async function fetchOsrmRoute(
 export default function StudioDestinationsMapClient({
   markers,
   routeCandidateCities,
+  brainKnownCitySlugs,
 }: StudioDestinationsMapClientProps) {
   const [originId, setOriginId] = useState("");
   const [destinationId, setDestinationId] = useState("");
@@ -207,6 +219,9 @@ export default function StudioDestinationsMapClient({
   const destinationCityIds = useMemo(() => {
     return new Set(markers.map((marker) => marker.cityId));
   }, [markers]);
+  const brainKnownCitySlugSet = useMemo(() => {
+    return new Set(brainKnownCitySlugs.map((slug) => slug.trim().toLowerCase()));
+  }, [brainKnownCitySlugs]);
 
   const canRequestRoute =
     Boolean(originMarker) &&
@@ -424,20 +439,21 @@ export default function StudioDestinationsMapClient({
 
       <div
         style={{
-          minHeight: "clamp(420px, 62vh, 640px)",
+          minHeight: "clamp(460px, 66vh, 700px)",
           borderRadius: 16,
           overflow: "hidden",
           border: "1px solid #dbe2ea",
         }}
       >
         <MapContainer
-          style={{ width: "100%", height: "100%", minHeight: "clamp(420px, 62vh, 640px)" }}
+          style={{ width: "100%", height: "100%", minHeight: "clamp(460px, 66vh, 700px)" }}
           center={[46.5, 2.5]}
           zoom={5}
           scrollWheelZoom
           zoomControl
           attributionControl
         >
+          <InvalidateSizeOnMount />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -517,14 +533,37 @@ export default function StudioDestinationsMapClient({
                   <th style={{ textAlign: "left", padding: "0.45rem", borderBottom: "1px solid #e2e8f0", color: "#334155" }}>
                     Destination CoolGuide
                   </th>
+                  <th style={{ textAlign: "left", padding: "0.45rem", borderBottom: "1px solid #e2e8f0", color: "#334155" }}>
+                    Connue du Brain
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {nearbyRouteCities.map((city) => {
                   const isCoolguideDestination = destinationCityIds.has(city.cityId);
+                  const isKnownByBrain = brainKnownCitySlugSet.has(city.slug.trim().toLowerCase());
+                  const isPriorityCandidate = !isCoolguideDestination && isKnownByBrain;
+                  const rowBackground = isPriorityCandidate
+                    ? "#fff7ed"
+                    : isCoolguideDestination && isKnownByBrain
+                      ? "#f0fdf4"
+                      : isCoolguideDestination && !isKnownByBrain
+                        ? "#f8fbff"
+                        : "#ffffff";
+                  const brainBadgeBackground = isPriorityCandidate
+                    ? "#fff7ed"
+                    : isKnownByBrain
+                      ? "#dcfce7"
+                      : "#e2e8f0";
+                  const brainBadgeColor = isPriorityCandidate
+                    ? "#9a3412"
+                    : isKnownByBrain
+                      ? "#166534"
+                      : "#334155";
+                  const brainBadgeLabel = isPriorityCandidate ? "Candidate" : isKnownByBrain ? "Oui" : "Non";
 
                   return (
-                  <tr key={city.cityId}>
+                  <tr key={city.cityId} style={{ background: rowBackground }}>
                     <td style={{ padding: "0.45rem", borderBottom: "1px solid #f1f5f9", color: "#0f172a" }}>{city.name}</td>
                     <td style={{ padding: "0.45rem", borderBottom: "1px solid #f1f5f9", color: "#0f172a" }}>
                       {routeDistanceFormatter.format(city.distanceToRouteKm)} km
@@ -542,6 +581,21 @@ export default function StudioDestinationsMapClient({
                         }}
                       >
                         {isCoolguideDestination ? "Oui" : "Non"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "0.45rem", borderBottom: "1px solid #f1f5f9", color: "#475569" }}>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          borderRadius: 999,
+                          padding: "0.1rem 0.45rem",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          background: brainBadgeBackground,
+                          color: brainBadgeColor,
+                        }}
+                      >
+                        {brainBadgeLabel}
                       </span>
                     </td>
                   </tr>

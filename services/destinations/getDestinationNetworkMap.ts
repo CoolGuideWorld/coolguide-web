@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerAuthSupabaseClient } from "@/lib/supabase/auth-server";
 import {
   getCountriesWithPublishableDestinations,
   getDestinationPublicationDiagnosticsForCountrySlug,
@@ -24,6 +25,10 @@ type PoiRow = {
   longitude: number | null;
 };
 
+type KnowledgeCityEntitySlugRow = {
+  slug: string | null;
+};
+
 export type StudioDestinationNetworkMarker = {
   cityId: string;
   citySlug: string;
@@ -46,6 +51,7 @@ export type StudioRouteCandidateCity = {
 export type StudioDestinationNetworkData = {
   markers: StudioDestinationNetworkMarker[];
   routeCandidateCities: StudioRouteCandidateCity[];
+  brainKnownCitySlugs: string[];
   representedCountries: Array<{
     name: string;
     slug: string;
@@ -54,6 +60,10 @@ export type StudioDestinationNetworkData = {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function normalizeSlug(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 function readSingleRelation<T>(relation: T | T[] | null): T | null {
@@ -111,6 +121,7 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
     return {
       markers: [],
       routeCandidateCities: [],
+      brainKnownCitySlugs: [],
       representedCountries: [],
     };
   }
@@ -138,6 +149,7 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
     return {
       markers: [],
       routeCandidateCities: [],
+      brainKnownCitySlugs: [],
       representedCountries: countries.map((country) => ({
         name: country.name,
         slug: country.slug,
@@ -170,6 +182,7 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
       return {
         markers: [],
         routeCandidateCities: [],
+        brainKnownCitySlugs: [],
         representedCountries: countries.map((country) => ({
           name: country.name,
           slug: country.slug,
@@ -204,6 +217,7 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
       return {
         markers: [],
         routeCandidateCities: [],
+        brainKnownCitySlugs: [],
         representedCountries: countries.map((country) => ({
           name: country.name,
           slug: country.slug,
@@ -292,6 +306,7 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
       return {
         markers,
         routeCandidateCities: [],
+        brainKnownCitySlugs: [],
         representedCountries: countries.map((country) => ({
           name: country.name,
           slug: country.slug,
@@ -328,9 +343,45 @@ export async function readStudioDestinationNetworkData(): Promise<StudioDestinat
     from += pageSize;
   }
 
+  const brainKnownCitySlugsSet = new Set<string>();
+  const brainSupabase = await createServerAuthSupabaseClient();
+  let brainFrom = 0;
+
+  while (true) {
+    const brainTo = brainFrom + pageSize - 1;
+    const { data, error } = await brainSupabase
+      .from("knowledge_entities")
+      .select("slug")
+      .in("entity_type", ["city", "destination"])
+      .order("slug", { ascending: true })
+      .range(brainFrom, brainTo);
+
+    if (error) {
+      console.error(`Studio network map brain cities query failed: ${error.message}`);
+      break;
+    }
+
+    const pageRows = (data ?? []) as KnowledgeCityEntitySlugRow[];
+
+    for (const row of pageRows) {
+      if (!isNonEmptyString(row.slug)) {
+        continue;
+      }
+
+      brainKnownCitySlugsSet.add(normalizeSlug(row.slug));
+    }
+
+    if (pageRows.length < pageSize) {
+      break;
+    }
+
+    brainFrom += pageSize;
+  }
+
   return {
     markers,
     routeCandidateCities,
+    brainKnownCitySlugs: Array.from(brainKnownCitySlugsSet),
     representedCountries: countries.map((country) => ({
       name: country.name,
       slug: country.slug,

@@ -3,7 +3,7 @@ import { readStudioDestinationNetworkData } from "@/services/destinations/getDes
 import styles from "@/app/studio/studio.module.css";
 
 export default async function StudioDestinationsPage() {
-  const { markers, routeCandidateCities } = await readStudioDestinationNetworkData();
+  const { markers, routeCandidateCities, brainKnownCitySlugs } = await readStudioDestinationNetworkData();
 
   return (
     <>
@@ -16,7 +16,11 @@ export default async function StudioDestinationsPage() {
 
       <section className={styles.panel} aria-label="Carte du réseau CoolGuide">
         <h2 className={styles.panelTitle}>Carte du réseau CoolGuide</h2>
-        <StudioDestinationsMapClient markers={markers} routeCandidateCities={routeCandidateCities} />
+        <StudioDestinationsMapClient
+          markers={markers}
+          routeCandidateCities={routeCandidateCities}
+          brainKnownCitySlugs={brainKnownCitySlugs}
+        />
       </section>
     </>
   );
