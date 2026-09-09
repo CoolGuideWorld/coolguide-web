@@ -44,7 +44,7 @@ export async function generateMetadata(
   }
 
   const supabase = createServerSupabaseClient();
-  const cityId = (cityData as { id?: string | null }).id ?? null;
+  const cityId = cityData.id ?? null;
 
   const destinationContext = cityId
     ? await getDestinationContext(supabase, cityId, "fr")

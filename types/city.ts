@@ -67,6 +67,8 @@ export type CityNearbyDestinationItem = {
 };
 
 export type CityPageData = {
+  id?: string;
+  destinationName?: string;
   hero: CityHeroData;
   shortDescription?: string | null;
   introduction?: string | null;

@@ -445,6 +445,8 @@ function buildUniversalCityData(
   const localItineraries: CityPageData["itineraries"] = [];
 
   return {
+    id: city.id,
+    destinationName: city.name,
     hero: {
       name: resolveHeroName(city.name, destinationContent),
       location: buildLocation(city),
@@ -514,6 +516,9 @@ function mergeWithLocalCityData(
 
   return {
     ...localCityData,
+
+    id: city.id,
+    destinationName: city.name,
 
     hero: {
       ...localCityData.hero,

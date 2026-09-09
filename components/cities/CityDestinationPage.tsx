@@ -1,5 +1,6 @@
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import Link from "next/link";
 import CityHero from "@/components/cities/CityHero";
 import CityStats from "@/components/cities/CityStats";
 import CityBadges from "@/components/cities/CityBadges";
@@ -40,6 +41,9 @@ export default function CityDestinationPage({
   cityData,
   destinationCircuitContexts = [],
 }: CityDestinationPageProps) {
+  const destinationName = cityData.destinationName ?? cityData.hero.name;
+  const hasPublishedCircuits = destinationCircuitContexts.length > 0;
+
   return (
     <div className={styles.page}>
       <SiteHeader initialSolid />
@@ -53,6 +57,21 @@ export default function CityDestinationPage({
               introduction={cityData.introduction}
             />
           ) : null}
+          <section className={styles.section} aria-labelledby="city-seo-discovery-title">
+            <div className={styles.introBlock}>
+              <h2 id="city-seo-discovery-title" className={styles.sectionTitle}>
+                {`Visiter ${destinationName} avec l’audioguide GPS CoolGuide`}
+              </h2>
+              <p className={styles.introParagraph}>
+                {`CoolGuide transforme votre visite de ${destinationName} en expérience de découverte grâce à un audioguide GPS qui révèle automatiquement les histoires des monuments, du patrimoine et des lieux remarquables qui vous entourent. Explorez librement la ville à votre rythme : CoolGuide s’adapte à votre parcours et vous accompagne au fil de vos découvertes.`}
+              </p>
+              {hasPublishedCircuits ? (
+                <p className={styles.introParagraph}>
+                  {`${destinationName} fait également partie de circuits touristiques CoolGuide qui permettent de poursuivre la découverte vers d’autres destinations et lieux remarquables.`} <Link className={styles.appLink} href="#destination-circuits">Voir les circuits associés</Link>.
+                </p>
+              ) : null}
+            </div>
+          </section>
           {cityData.stats.length > 0 ? (
             <CityStats title="En un coup d'oeil" stats={cityData.stats} />
           ) : null}
@@ -69,7 +88,11 @@ export default function CityDestinationPage({
             <DestinationInsights cityName={cityData.hero.name} items={cityData.insights} />
           ) : null}
           <LocalGuidesSection cityName={cityData.hero.name} />
-          <DestinationCircuit contexts={destinationCircuitContexts} />
+          {hasPublishedCircuits ? (
+            <section id="destination-circuits" aria-label="Circuits associes">
+              <DestinationCircuit contexts={destinationCircuitContexts} />
+            </section>
+          ) : null}
           <CityNearbyDestinations
             cityName={cityData.hero.name}
             destinations={cityData.nearbyDestinations}
