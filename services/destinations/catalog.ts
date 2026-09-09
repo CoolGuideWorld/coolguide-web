@@ -162,6 +162,10 @@ export type SearchableDestinationCountry = {
   isoCode: string | null;
   latitude: number;
   longitude: number;
+  cities: Array<{
+    name: string;
+    slug: string;
+  }>;
   searchTerms: string[];
 };
 
@@ -263,7 +267,11 @@ function applyCatalogPublicationFilters<T>(query: T, relationPrefix = ""): T {
   // Shared publication source for catalog list + administrative filters.
   const field = (column: string) => (relationPrefix ? `${relationPrefix}.${column}` : column);
 
-  return (query as any).eq(field("status"), "active");
+  type QueryWithEq<TReturn> = {
+    eq: (column: string, value: string) => TReturn;
+  };
+
+  return (query as QueryWithEq<T>).eq(field("status"), "active");
 }
 
 function readCatalogHeroImage(relation: ImageRow | ImageRow[] | null): ImageRow | null {
@@ -1081,36 +1089,76 @@ function collectUniqueTerms(...groups: Array<Array<string | null | undefined>>):
   return terms;
 }
 
+function buildSearchableCities(cityNames: string[], citySlugs: string[]) {
+  const seen = new Set<string>();
+  const cities: Array<{ name: string; slug: string }> = [];
+  const pairCount = Math.min(cityNames.length, citySlugs.length);
+
+  for (let index = 0; index < pairCount; index += 1) {
+    const name = cityNames[index]?.trim() ?? "";
+    const slug = citySlugs[index]?.trim() ?? "";
+
+    if (!name || !slug) {
+      continue;
+    }
+
+    const key = `${name}::${slug}`;
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    cities.push({ name, slug });
+  }
+
+  return cities;
+}
+
 export async function getPublishedDestinationCountries(): Promise<SearchableDestinationCountry[]> {
   try {
     const supabase = createServerSupabaseClient();
+    const rows: SearchableCityCountryRow[] = [];
+    const pageSize = 1000;
+    let from = 0;
 
-    let query = supabase
-      .from("cities")
-      .select(
-        `
-          id,
-          country_id,
-          slug,
-          name,
-          latitude,
-          longitude,
-          countries!cities_country_id_fkey(id, name, iso_code)
-        `
-      )
-      .order("name", { ascending: true })
-      .order("slug", { ascending: true });
+    while (true) {
+      let query = supabase
+        .from("cities")
+        .select(
+          `
+            id,
+            country_id,
+            slug,
+            name,
+            latitude,
+            longitude,
+            countries!cities_country_id_fkey(id, name, iso_code)
+          `
+        )
+        .order("name", { ascending: true })
+        .order("slug", { ascending: true })
+        .range(from, from + pageSize - 1);
 
-    query = applyCatalogPublicationFilters(query);
+      query = applyCatalogPublicationFilters(query);
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error(`Supabase published destination countries query failed: ${error.message}`);
-      return [];
+      if (error) {
+        console.error(`Supabase published destination countries query failed: ${error.message}`);
+        return [];
+      }
+
+      const pageRows = (data ?? []) as SearchableCityCountryRow[];
+      rows.push(...pageRows);
+
+      if (pageRows.length < pageSize) {
+        break;
+      }
+
+      from += pageSize;
     }
 
-    const rows = (data ?? []) as SearchableCityCountryRow[];
     const countryLookup = new Map(
       AVAILABLE_DESTINATION_COUNTRIES.map((country) => [country.slug, country])
     );
@@ -1184,6 +1232,7 @@ export async function getPublishedDestinationCountries(): Promise<SearchableDest
         isoCode: country.isoCode,
         latitude: country.latitude,
         longitude: country.longitude,
+        cities: buildSearchableCities(country.cityNames, country.citySlugs),
         searchTerms: collectUniqueTerms(
           [country.name, country.slug],
           country.cityNames,
@@ -1309,6 +1358,10 @@ export async function getCountriesWithPublishableDestinations(): Promise<Searcha
           isoCode: countryGroup.isoCode,
           latitude,
           longitude,
+          cities: buildSearchableCities(
+            publishableRows.map((row) => row.name),
+            publishableRows.map((row) => row.slug)
+          ),
           searchTerms: collectUniqueTerms(
             [countryGroup.name, countryGroup.slug],
             publishableRows.map((row) => row.name),

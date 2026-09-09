@@ -18,12 +18,28 @@ type DestinationsSearchClientProps = {
   publishedCountries: SearchableDestinationCountry[];
 };
 
-function findPublishedCountryByQuery(
+function findPublishedCityByNormalizedQuery(
   countries: SearchableDestinationCountry[],
-  query: string
-): SearchableDestinationCountry | null {
-  const normalizedQuery = normalizeCountryQuery(query);
+  normalizedQuery: string
+): SearchableDestinationCountry["cities"][number] | null {
+  for (const country of countries) {
+    for (const city of country.cities) {
+      if (
+        normalizeCountryQuery(city.name) === normalizedQuery ||
+        normalizeCountryQuery(city.slug) === normalizedQuery
+      ) {
+        return city;
+      }
+    }
+  }
 
+  return null;
+}
+
+function findPublishedCountryByNormalizedQuery(
+  countries: SearchableDestinationCountry[],
+  normalizedQuery: string
+): SearchableDestinationCountry | null {
   if (!normalizedQuery) {
     return null;
   }
@@ -53,7 +69,20 @@ export default function DestinationsSearchClient({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const matchedCountry = findPublishedCountryByQuery(countries, searchQuery);
+    const searchableCountries = countries.length > 0 ? countries : publishedCountries;
+    const normalizedQuery = normalizeCountryQuery(searchQuery);
+    const matchedCity = findPublishedCityByNormalizedQuery(searchableCountries, normalizedQuery);
+
+    if (matchedCity) {
+      setSearchError(null);
+      router.push(`/${matchedCity.slug}`);
+      return;
+    }
+
+    const matchedCountry = findPublishedCountryByNormalizedQuery(
+      searchableCountries,
+      normalizedQuery
+    );
 
     if (!matchedCountry) {
       setSearchError(SEARCH_ERROR_MESSAGE);
