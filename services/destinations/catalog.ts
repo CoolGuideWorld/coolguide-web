@@ -1042,6 +1042,46 @@ async function getPublishableCityIdsForCountry(
   return result.publishedCityIds;
 }
 
+export async function getAllPublishableCityIds(): Promise<string[]> {
+  try {
+    const supabase = createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from("cities")
+      .select("country_id")
+      .eq("status", "active")
+      .order("country_id", { ascending: true });
+
+    if (error) {
+      console.error(`Supabase active country list query failed: ${error.message}`);
+      return [];
+    }
+
+    const countryIds = new Set<string>();
+
+    for (const row of (data ?? []) as Array<{ country_id?: string | null }>) {
+      if (isNonEmptyString(row.country_id)) {
+        countryIds.add(row.country_id);
+      }
+    }
+
+    const publishableCityIds = new Set<string>();
+
+    for (const countryId of Array.from(countryIds)) {
+      const countryPublishableCityIds = await getPublishableCityIdsForCountry(countryId);
+
+      for (const cityId of countryPublishableCityIds) {
+        publishableCityIds.add(cityId);
+      }
+    }
+
+    return Array.from(publishableCityIds).sort((left, right) => left.localeCompare(right));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Global publishable city ID lookup failed: ${message}`);
+    return [];
+  }
+}
+
 export async function getDestinationPublicationDiagnosticsForCountry(
   countryId: string
 ): Promise<DestinationPublicationDiagnostic[]> {

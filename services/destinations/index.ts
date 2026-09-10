@@ -5,6 +5,7 @@ export {
   getDestinationPublicationDiagnosticsForCountrySlug,
   COUNTRY_DESTINATIONS_PAGE_SIZE,
   getCountriesWithPublishableDestinations,
+  getAllPublishableCityIds,
   getGlobalPublishableCityCount,
   getCountryBySlug,
   getCountryCatalogData,
