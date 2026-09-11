@@ -1,6 +1,7 @@
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import DownloadSection from "@/components/experience/DownloadSection";
+import ExperienceDestinationsMapSlot from "@/components/experience/ExperienceDestinationsMapSlot";
 import ExperienceFaqSection from "@/components/experience/ExperienceFaqSection";
 import ExperienceIntroSection from "@/components/experience/ExperienceIntroSection";
 import ExperienceLanguagesStats from "@/components/experience/ExperienceLanguagesStats";
@@ -8,12 +9,16 @@ import HowItWorksSection from "@/components/experience/HowItWorksSection";
 import LanguagesSection from "@/components/experience/LanguagesSection";
 import OnboardingJourneySection from "@/components/experience/OnboardingJourneySection";
 import TranslationSection from "@/components/experience/TranslationSection";
+import { getExperienceDestinationsMapPoints } from "@/services/destinations/getExperienceDestinationsMap";
 import { getExperienceStats } from "@/services/experience";
 
 export const revalidate = 3600;
 
 export default async function ExperiencePage() {
-  const stats = await getExperienceStats();
+  const [stats, destinations] = await Promise.all([
+    getExperienceStats(),
+    getExperienceDestinationsMapPoints(),
+  ]);
 
   return (
     <>
@@ -43,6 +48,10 @@ export default async function ExperiencePage() {
             cityCount={stats.cityCount}
             premiumAudioCount={stats.premiumAudioCount}
           />
+        </div>
+
+        <div className="experienceCreamBand">
+          <ExperienceDestinationsMapSlot destinations={destinations} />
         </div>
 
         <div className="experienceCreamBand">

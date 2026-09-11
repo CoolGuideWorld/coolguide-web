@@ -1,0 +1,16 @@
+.mapFrame {
+  min-height: 540px;
+  height: 540px;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #e4d8c5;
+  background: #f9f3ea;
+}
+
+@media (max-width: 768px) {
+  .mapFrame {
+    min-height: 400px;
+    height: 400px;
+  }
+}
